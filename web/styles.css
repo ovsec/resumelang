@@ -1,0 +1,219 @@
+:root {
+  --bg: #0e0f13;
+  --surface: #15171d;
+  --surface-2: #1c1f27;
+  --border: #262a33;
+  --text: #e6e8ee;
+  --muted: #8b909c;
+  --accent: #7c8cff;
+  --accent-soft: rgba(124, 140, 255, 0.15);
+  --ok: #4ade80;
+  --err: #f87171;
+  --radius: 10px;
+  --pane-split: 50%;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* Topbar */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  height: 52px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  font-size: 16px;
+  color: var(--accent);
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  border-radius: 8px;
+}
+.brand-name { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+
+.controls { display: flex; gap: 10px; align-items: center; }
+.control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 0 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  height: 32px;
+}
+.control .label { color: var(--muted); font-size: 12px; font-weight: 500; }
+.select {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  font: inherit;
+  padding: 0 8px;
+  height: 100%;
+  outline: none;
+  cursor: pointer;
+}
+.select option { background: var(--surface-2); color: var(--text); }
+
+.btn {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0 14px;
+  height: 32px;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn:hover { background: var(--border); }
+.btn-primary {
+  background: var(--accent);
+  color: #0a0b0f;
+  border-color: var(--accent);
+}
+.btn-primary:hover {
+  background: #95a3ff;
+  border-color: #95a3ff;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 12px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  padding: 0 8px;
+  min-width: 140px;
+  text-align: right;
+}
+.status.ok { color: var(--ok); }
+.status.err { color: var(--err); }
+
+/* Split layout */
+.split {
+  flex: 1;
+  display: grid;
+  grid-template-columns: var(--pane-split) 6px 1fr;
+  min-height: 0;
+}
+
+.pane {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.pane-label {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.editor-pane { background: var(--bg); }
+.editor-pane .CodeMirror {
+  height: 100%;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  background: var(--bg);
+}
+.editor-pane .CodeMirror-gutters {
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+}
+
+/* Scrollbars — dark editor */
+.editor-pane .CodeMirror-scroll { scrollbar-color: var(--border) transparent; scrollbar-width: thin; }
+.editor-pane .CodeMirror-scroll::-webkit-scrollbar { width: 10px; height: 10px; background: transparent; }
+.editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; border: 2px solid var(--bg); }
+.editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb:hover { background: #3a3f4d; }
+.editor-pane .CodeMirror-scroll::-webkit-scrollbar-corner { background: transparent; }
+.editor-pane .CodeMirror-vscrollbar, .editor-pane .CodeMirror-hscrollbar { outline: none; }
+.editor-pane .CodeMirror-vscrollbar::-webkit-scrollbar,
+.editor-pane .CodeMirror-hscrollbar::-webkit-scrollbar { width: 10px; height: 10px; background: transparent; }
+.editor-pane .CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
+.editor-pane .CodeMirror-hscrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; border: 2px solid var(--bg); }
+
+/* Light variant */
+body.cm-light .editor-pane .CodeMirror-scroll { scrollbar-color: #d0d0d0 transparent; }
+body.cm-light .editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb,
+body.cm-light .editor-pane .CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
+body.cm-light .editor-pane .CodeMirror-hscrollbar::-webkit-scrollbar-thumb { background: #d0d0d0; border-color: #fafafa; }
+
+.preview-pane { background: #fff; }
+.preview-pane .pane-label { color: #888; opacity: 0.5; }
+.preview-pane iframe { width: 100%; height: 100%; border: 0; flex: 1; }
+
+/* Splitter */
+.splitter {
+  background: var(--border);
+  cursor: col-resize;
+  position: relative;
+  transition: background 0.15s;
+}
+.splitter:hover, .splitter.dragging { background: var(--accent); }
+.splitter::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 30px;
+  background: var(--muted);
+  border-radius: 1px;
+  opacity: 0.5;
+}
+.splitter:hover::after, .splitter.dragging::after { opacity: 0; }
+
+body.dragging { cursor: col-resize; user-select: none; }
+body.dragging iframe { pointer-events: none; }
+
+/* Light editor (when resume theme is light) */
+body.cm-light .editor-pane,
+body.cm-light .editor-pane .CodeMirror,
+body.cm-light .editor-pane .CodeMirror-gutters {
+  background: #fafafa;
+  color: #1d1d1f;
+}
+body.cm-light .editor-pane .CodeMirror-gutters { border-right-color: #e5e5e5; }
+
+@media (max-width: 700px) {
+  .controls { gap: 6px; }
+  .status { display: none; }
+  .control { padding-left: 8px; }
+  .control .label { display: none; }
+  .split { grid-template-columns: 1fr; grid-template-rows: 1fr 6px 1fr; }
+  .splitter { cursor: row-resize; }
+  .splitter::after { width: 30px; height: 2px; }
+}

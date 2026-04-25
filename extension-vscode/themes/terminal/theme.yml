@@ -1,0 +1,30 @@
+spec: v1
+
+name: terminal
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#0a0a0a"
+    surface: "#111111"
+    surface_hover: "#1a1a1a"
+    border: "#222222"
+    text_primary: "#00ff00"
+    text_secondary: "#00aa00"
+    accent: "#00ff00"
+    accent_glow: "#00ff00"
+    success: "#00ff00"
+    warning: "#ffff00"
+    error: "#ff0000"
+  spacing:
+    section_gap: 20
+  typography:
+    heading_weight: 700
+    body_size: 14
+  radius:
+    base: 0

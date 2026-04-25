@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/tmp/rl build *)",
+      "Bash(go build *)",
+      "Bash(/tmp/rl themes *)",
+      "Bash(/tmp/rl serve *)",
+      "Bash(curl -fsS http://127.0.0.1:5501/web/editor.js)",
+      "Bash(curl -fsS http://127.0.0.1:5501/web/styles.css)",
+      "Bash(curl -fsS http://127.0.0.1:5501/)"
+    ]
+  }
+}

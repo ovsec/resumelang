@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>resumelang editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/web/vendor/codemirror.min.css">
+  <link rel="stylesheet" href="/web/vendor/cm-material-darker.min.css">
+  <link rel="stylesheet" href="/web/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◇</span>
+      <span class="brand-name">resumelang</span>
+    </div>
+    <div class="controls">
+      <div class="control">
+        <span class="label">Theme</span>
+        <select id="theme-select" class="select"></select>
+      </div>
+      <button id="btn-print" type="button" class="btn">Print / PDF</button>
+      <button id="btn-download" type="button" class="btn btn-primary">Download</button>
+      <span id="status" class="status"></span>
+    </div>
+  </header>
+  <main class="split" id="split">
+    <section class="pane editor-pane">
+      <div class="pane-label">resume.yml</div>
+      <textarea id="editor"></textarea>
+    </section>
+    <div class="splitter" id="splitter" aria-label="resize panes" role="separator"></div>
+    <section class="pane preview-pane">
+      <div class="pane-label">preview</div>
+      <iframe id="preview" title="resume preview"></iframe>
+    </section>
+  </main>
+  <script src="/web/vendor/codemirror.min.js"></script>
+  <script src="/web/vendor/yaml.min.js"></script>
+  <script src="/web/vendor/handlebars.min.js"></script>
+  <script src="/web/vendor/js-yaml.min.js"></script>
+  <script src="/web/editor.js"></script>
+</body>
+</html>

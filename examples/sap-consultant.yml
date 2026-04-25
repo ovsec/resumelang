@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=../schema/v1.json
+resumelang: v1
+
+meta:
+  theme: sap
+  language: en
+  page_size: a4
+  sections:
+    - summary
+    - experience
+    - certifications
+    - skills
+    - education
+    - languages
+
+person:
+  name: Ravi Kumar
+  title: Senior SAP S/4HANA Consultant
+  email: ravi.kumar@example.com
+  phone: +49 170 1234 5678
+  location: Walldorf, Germany
+  linkedin: ravikumar-sap
+  website: https://ravikumar.dev
+
+summary: |
+  SAP-certified consultant with 12 years of experience leading S/4HANA implementations
+  across FI, CO, and MM modules. Delivered 8 full-cycle greenfield projects and 14 brownfield
+  migrations for manufacturing, retail, and pharma clients across EMEA.
+
+experience:
+  - company: Deloitte Consulting GmbH
+    role: Lead SAP S/4HANA Consultant
+    location: Frankfurt, Germany
+    start: "2021"
+    end: ""
+    description: Lead module owner for FI/CO workstream on multi-country S/4HANA rollout for a Fortune 500 chemicals client.
+    highlights:
+      - Designed Universal Journal architecture spanning 23 country codes and 6 group currencies
+      - Led data migration from ECC 6.0 to S/4HANA 2022 with zero downtime cutover
+      - Configured Group Reporting (SAP S/4HANA for Group Reporting) replacing legacy BPC
+      - Mentored team of 6 junior consultants on Fiori app development
+    tags: [S/4HANA 2022, FI, CO, Group Reporting, Fiori, CDS Views, ABAP OO, BAdI]
+
+  - company: Capgemini
+    role: SAP FICO Consultant
+    location: Mumbai, India
+    start: "2017"
+    end: "2021"
+    description: Implemented FI and CO modules for retail and manufacturing clients in APAC region.
+    highlights:
+      - Configured New GL with parallel ledgers for IFRS and local GAAP reporting
+      - Built custom CO-PA reports with 40+ characteristics for sales analytics
+      - Authored 30+ functional specs for ABAP development team
+      - Delivered SAP Activate methodology training to 50+ consultants
+    tags: [ECC 6.0, S/4HANA 1909, FI, CO-PA, New GL, ASAP, Activate]
+
+  - company: Tata Consultancy Services
+    role: SAP ABAP Developer
+    location: Bangalore, India
+    start: "2013"
+    end: "2017"
+    description: Developed and maintained custom ABAP programs for global FMCG client.
+    highlights:
+      - Built 80+ ALV reports, BAPIs, and IDoc interfaces
+      - Optimized long-running batch jobs reducing runtime by 65%
+      - Implemented EDI integration with 12 trading partners via PI/PO
+    tags: [ABAP, ALV, BAPI, IDoc, RFC, SAP PI/PO, BDC]
+
+certifications:
+  - name: SAP Certified Application Associate — SAP S/4HANA for Financial Accounting
+    issuer: SAP SE
+    date: "2023"
+    id: "C_TS4FI_2023"
+  - name: SAP Certified Application Associate — Management Accounting (SAP S/4HANA)
+    issuer: SAP SE
+    date: "2022"
+    id: "C_TS4CO_2021"
+  - name: SAP Certified Development Associate — ABAP with SAP NetWeaver
+    issuer: SAP SE
+    date: "2018"
+    id: "C_TAW12_750"
+  - name: SAP Activate Project Manager
+    issuer: SAP SE
+    date: "2020"
+    id: "C_ACTIVATE13"
+
+skills:
+  - category: SAP Modules
+    skills: [FI, CO, MM, SD, FI-AA, CO-PA, FSCM, Group Reporting]
+  - category: S/4HANA
+    skills: [Universal Journal, New Asset Accounting, Material Ledger, Central Finance, Embedded Analytics]
+  - category: Technical
+    skills: [ABAP OO, CDS Views, Fiori, BTP, BAdI, BAPI, IDoc]
+  - category: Tools
+    skills: [SAP Solution Manager, Signavio, LSMW, Migration Cockpit, Eclipse ADT]
+  - category: Methodology
+    skills: [SAP Activate, ASAP, Agile/Scrum, SAFe]
+
+education:
+  - institution: Indian Institute of Technology Bombay
+    degree: M.Tech
+    field: Industrial Engineering
+    start: "2011"
+    end: "2013"
+    gpa: "8.9/10"
+  - institution: Anna University
+    degree: B.E.
+    field: Computer Science
+    start: "2007"
+    end: "2011"
+
+languages:
+  - name: English
+    proficiency: Fluent (C2)
+  - name: German
+    proficiency: Professional (B2)
+  - name: Hindi
+    proficiency: Native
+  - name: Tamil
+    proficiency: Native

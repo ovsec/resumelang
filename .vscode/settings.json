@@ -1,0 +1,11 @@
+{
+  "yaml.schemas": {
+    "./schema/v1.json": [
+      "examples/*.yml",
+      "examples/*.yaml",
+      "*.resume.yml",
+      "resume.yml"
+    ]
+  },
+  "yaml.schemaStore.enable": true
+}

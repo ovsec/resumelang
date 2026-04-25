@@ -1,0 +1,30 @@
+spec: v1
+
+name: material
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#fafafa"
+    surface: "#ffffff"
+    surface_hover: "#f5f5f5"
+    border: "#e0e0e0"
+    text_primary: "#212121"
+    text_secondary: "#757575"
+    accent: "#6200ee"
+    accent_glow: "#3700b3"
+    success: "#03dac6"
+    warning: "#ffb300"
+    error: "#b00020"
+  spacing:
+    section_gap: 24
+  typography:
+    heading_weight: 500
+  body_size: 14
+  radius:
+    base: 4

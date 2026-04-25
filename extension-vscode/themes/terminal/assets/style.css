@@ -1,0 +1,219 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background: var(--rl-background);
+  color: var(--rl-text-primary);
+  font-size: var(--rl-typography-body-size);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.header {
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rl-border);
+}
+
+.name {
+  font-size: 1.8rem;
+  font-weight: var(--rl-typography-heading-weight);
+  color: var(--rl-text-primary);
+  margin-bottom: 4px;
+}
+
+.name::before {
+  content: "> ";
+  color: var(--rl-accent);
+}
+
+.title {
+  color: var(--rl-accent);
+  font-size: 1rem;
+  margin-bottom: 16px;
+}
+
+.contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.8rem;
+}
+
+.contact-row a {
+  color: var(--rl-text-secondary);
+  text-decoration: none;
+}
+
+.contact-row a:hover {
+  color: var(--rl-accent);
+}
+
+.summary {
+  padding: 12px;
+  background: var(--rl-surface);
+  border-left: 2px solid var(--rl-accent);
+  margin-bottom: 24px;
+}
+
+.summary p {
+  color: var(--rl-text-secondary);
+}
+
+.section {
+  margin-bottom: 28px;
+}
+
+.section-title {
+  font-size: 0.9rem;
+  color: var(--rl-accent);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--rl-border);
+}
+
+.section-title::before {
+  content: "## ";
+}
+
+.job {
+  margin-bottom: 20px;
+  padding-left: 12px;
+  border-left: 1px solid var(--rl-border);
+}
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.job-role {
+  font-weight: var(--rl-typography-heading-weight);
+  color: var(--rl-text-primary);
+}
+
+.job-company {
+  color: var(--rl-accent);
+}
+
+.job-company::before {
+  content: "@ ";
+}
+
+.job-dates {
+  font-size: 0.75rem;
+  color: var(--rl-text-secondary);
+}
+
+.job-description {
+  color: var(--rl-text-secondary);
+  margin-bottom: 8px;
+}
+
+.job-highlights {
+  list-style: none;
+  padding-left: 16px;
+}
+
+.job-highlights li {
+  color: var(--rl-text-secondary);
+  margin-bottom: 4px;
+  position: relative;
+}
+
+.job-highlights li::before {
+  content: "- ";
+  color: var(--rl-accent);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tag {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  background: var(--rl-surface);
+  color: var(--rl-accent);
+  border: 1px solid var(--rl-border);
+}
+
+.education-item {
+  margin-bottom: 16px;
+}
+
+.edu-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.edu-institution {
+  font-weight: var(--rl-typography-heading-weight);
+}
+
+.edu-dates {
+  font-size: 0.75rem;
+  color: var(--rl-text-secondary);
+}
+
+.edu-degree {
+  color: var(--rl-text-secondary);
+}
+
+.skill-group {
+  margin-bottom: 12px;
+}
+
+.skill-category {
+  color: var(--rl-accent);
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.skill-category::after {
+  content: ":";
+}
+
+.skills-list {
+  color: var(--rl-text-secondary);
+  font-size: 0.85rem;
+}
+
+.project-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--rl-surface);
+}
+
+.project-name {
+  font-weight: var(--rl-typography-heading-weight);
+  color: var(--rl-text-primary);
+}
+
+.project-name a {
+  color: var(--rl-accent);
+  text-decoration: none;
+}
+
+.project-desc {
+  color: var(--rl-text-secondary);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+@media print {
+  body { background: white; color: black; }
+  .job { border-left-color: black; }
+}

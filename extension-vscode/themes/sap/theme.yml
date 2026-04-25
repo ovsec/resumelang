@@ -1,0 +1,30 @@
+spec: v1
+
+name: sap
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [twocol]
+  blocks: [bullets, tags, text, table]
+
+tokens:
+  colors:
+    background: "#f7f9fc"
+    surface: "#ffffff"
+    surface_hover: "#eef2f7"
+    border: "#d6dde6"
+    text_primary: "#0a2540"
+    text_secondary: "#4a5b73"
+    accent: "#0070f2"
+    accent_glow: "#0040b0"
+    success: "#107e3e"
+    warning: "#e9730c"
+    error: "#bb0000"
+  spacing:
+    section_gap: 28
+  typography:
+    heading_weight: 600
+    body_size: 14
+  radius:
+    base: 4

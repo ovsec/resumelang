@@ -1,0 +1,42 @@
+{
+  "name": "resumelang",
+  "displayName": "Resume Lang",
+  "description": "Resume DSL compiler with live preview - open resume.yml and preview rendered HTML",
+  "version": "0.1.0",
+  "publisher": "ovsec",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Other",
+    "Preview"
+  ],
+  "activationEvents": [
+    "onLanguage:yaml",
+    "onCommand:resumelang.preview"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "resumelang.preview",
+        "title": "Resume: Show Preview"
+      },
+      {
+        "command": "resumelang.theme",
+        "title": "Resume: Choose Theme"
+      }
+    ],
+    "configuration": {
+      "title": "Resume Lang",
+      "properties": {
+        "resumelang.theme": {
+          "type": "string",
+          "default": "minimal",
+          "enum": ["minimal", "bold", "developer", "aurora", "terminal", "material"],
+          "description": "Default theme for resume"
+        }
+      }
+    }
+  }
+}

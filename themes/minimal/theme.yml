@@ -1,0 +1,30 @@
+spec: v1
+
+name: minimal
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#ffffff"
+    surface: "#fafafa"
+    surface_hover: "#f5f5f5"
+    border: "#e5e5e5"
+    text_primary: "#1d1d1f"
+    text_secondary: "#86868b"
+    accent: "#0066cc"
+    accent_glow: "#004499"
+    success: "#34c759"
+    warning: "#ff9500"
+    error: "#ff3b30"
+  spacing:
+    section_gap: 32
+  typography:
+    heading_weight: 600
+    body_size: 15
+  radius:
+    base: 8

@@ -1,0 +1,68 @@
+spec: v1
+
+name: aurora
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [timeline, grid, cards]
+  blocks: [bullets, tags, metrics, text]
+
+  ui:
+    variant: [card, compact]
+    emphasis: [low, medium, high]
+
+features:
+  dark_mode: true
+  responsive: true
+  github_widget: true
+
+layout:
+  experience: timeline
+  skills: grid
+  projects: cards
+
+components:
+  experience:
+    default: timeline_item
+  projects:
+    default: card
+  skills:
+    default: pill_group
+
+  blocks:
+    bullets: bullet_list
+    tags: pill_group
+    metrics: stat_cards
+    text: paragraph
+
+tokens:
+  spacing:
+    section_gap: 32
+    item_gap: 16
+
+  typography:
+    heading_weight: 700
+    body_size: 15
+
+  radius:
+    base: 12
+
+  colors:
+    background: "#0d1117"
+    surface: "#161b22"
+    surface_hover: "#21262d"
+    border: "#30363d"
+    text_primary: "#e6edf3"
+    text_secondary: "#8b949e"
+    accent: "#58a6ff"
+    accent_glow: "#388bfd"
+    success: "#3fb950"
+    warning: "#d29922"
+    error: "#f85149"
+
+variants:
+  card:
+    padding: lg
+    shadow: md
+    border: true

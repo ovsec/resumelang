@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="{{meta.language}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{person.name}}{{#if person.title}} — {{person.title}}{{/if}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rl-background: {{tokens.colors_background}};
+      --rl-surface: {{tokens.colors_surface}};
+      --rl-surface-hover: {{tokens.colors_surface_hover}};
+      --rl-border: {{tokens.colors_border}};
+      --rl-text-primary: {{tokens.colors_text_primary}};
+      --rl-text-secondary: {{tokens.colors_text_secondary}};
+      --rl-accent: {{tokens.colors_accent}};
+      --rl-accent-glow: {{tokens.colors_accent_glow}};
+      --rl-success: {{tokens.colors_success}};
+      --rl-warning: {{tokens.colors_warning}};
+      --rl-error: {{tokens.colors_error}};
+      --rl-spacing-section-gap: {{tokens.spacing_section_gap}}px;
+      --rl-typography-heading-weight: {{tokens.typography_heading_weight}};
+      --rl-typography-body-size: {{tokens.typography_body_size}}px;
+      --rl-radius-base: {{tokens.radius_base}}px;
+    }
+
+    {{{themeCSS}}}
+  </style>
+</head>
+<body>
+  <div class="band"></div>
+  <main class="container">
+    <header class="masthead">
+      <div class="ident">
+        <h1 class="name">{{person.name}}</h1>
+        {{#if person.title}}<p class="role">{{person.title}}</p>{{/if}}
+      </div>
+      <ul class="contact">
+        {{#if person.email}}<li><span class="k">Email</span><a href="mailto:{{person.email}}">{{person.email}}</a></li>{{/if}}
+        {{#if person.phone}}<li><span class="k">Phone</span>{{person.phone}}</li>{{/if}}
+        {{#if person.location}}<li><span class="k">Location</span>{{person.location}}</li>{{/if}}
+        {{#if person.linkedin}}<li><span class="k">LinkedIn</span><a href="https://linkedin.com/in/{{person.linkedin}}" target="_blank">{{person.linkedin}}</a></li>{{/if}}
+        {{#if person.website}}<li><span class="k">Web</span><a href="{{person.website}}" target="_blank">{{person.website}}</a></li>{{/if}}
+      </ul>
+    </header>
+
+    {{#if summary}}
+    <section class="profile">
+      <h2>Professional Profile</h2>
+      <p>{{summary}}</p>
+    </section>
+    {{/if}}
+
+    <div class="grid">
+      <div class="col-main">
+        {{#if experience}}
+        <section class="block">
+          <h2>SAP Project Experience</h2>
+          {{#each experience}}
+          <article class="job">
+            <div class="job-head">
+              <div>
+                <h3>{{role}}</h3>
+                <p class="org">{{company}}{{#if location}} · {{location}}{{/if}}</p>
+              </div>
+              <span class="dates">{{start}} – {{#if end}}{{end}}{{else}}Present{{/if}}</span>
+            </div>
+            {{#if description}}<p class="brief">{{description}}</p>{{/if}}
+            {{#if highlights}}
+            <ul>
+              {{#each highlights}}<li>{{this}}</li>{{/each}}
+            </ul>
+            {{/if}}
+            {{#if tags}}
+            <p class="modules"><span class="k">Modules / Tech</span>{{join tags " · "}}</p>
+            {{/if}}
+          </article>
+          {{/each}}
+        </section>
+        {{/if}}
+
+        {{#if projects}}
+        <section class="block">
+          <h2>Implementation Projects</h2>
+          {{#each projects}}
+          <article class="proj">
+            <h3>{{#if url}}<a href="{{url}}" target="_blank">{{name}}</a>{{else}}{{name}}{{/if}}</h3>
+            {{#if description}}<p>{{description}}</p>{{/if}}
+            {{#if highlights}}
+            <ul>
+              {{#each highlights}}<li>{{this}}</li>{{/each}}
+            </ul>
+            {{/if}}
+            {{#if tags}}<p class="modules">{{join tags " · "}}</p>{{/if}}
+          </article>
+          {{/each}}
+        </section>
+        {{/if}}
+
+        {{#if education}}
+        <section class="block">
+          <h2>Education</h2>
+          {{#each education}}
+          <article class="edu">
+            <h3>{{degree}}{{#if field}} in {{field}}{{/if}}</h3>
+            <p class="org">{{institution}} · {{start}}–{{end}}{{#if gpa}} · GPA {{gpa}}{{/if}}</p>
+          </article>
+          {{/each}}
+        </section>
+        {{/if}}
+      </div>
+
+      <aside class="col-side">
+        {{#if certifications}}
+        <section class="block side">
+          <h2>SAP Certifications</h2>
+          <ul class="certs">
+            {{#each certifications}}
+            <li>
+              <span class="cert-name">{{name}}</span>
+              {{#if issuer}}<span class="cert-meta">{{issuer}}{{#if date}} · {{date}}{{/if}}</span>{{else if date}}<span class="cert-meta">{{date}}</span>{{/if}}
+              {{#if id}}<span class="cert-id">ID: {{id}}</span>{{/if}}
+            </li>
+            {{/each}}
+          </ul>
+        </section>
+        {{/if}}
+
+        {{#if skills}}
+        <section class="block side">
+          <h2>Skills &amp; Modules</h2>
+          {{#each skills}}
+          <div class="sk">
+            <div class="sk-cat">{{category}}</div>
+            <div class="sk-pills">
+              {{#each skills}}<span class="pill">{{this}}</span>{{/each}}
+            </div>
+          </div>
+          {{/each}}
+        </section>
+        {{/if}}
+
+        {{#if languages}}
+        <section class="block side">
+          <h2>Languages</h2>
+          <ul class="langs">
+            {{#each languages}}
+            <li><span class="lang-name">{{name}}</span>{{#if proficiency}}<span class="lang-prof">{{proficiency}}</span>{{/if}}</li>
+            {{/each}}
+          </ul>
+        </section>
+        {{/if}}
+
+        {{#if awards}}
+        <section class="block side">
+          <h2>Awards</h2>
+          <ul class="plain">
+            {{#each awards}}
+            <li><strong>{{title}}</strong>{{#if awarder}} — {{awarder}}{{/if}}{{#if date}} ({{date}}){{/if}}</li>
+            {{/each}}
+          </ul>
+        </section>
+        {{/if}}
+      </aside>
+    </div>
+
+    {{#each custom}}
+    <section class="block">
+      <h2>{{title}}</h2>
+      {{#each items}}
+      <article class="custom-item">
+        {{#if title}}<h3>{{title}}</h3>{{/if}}
+        {{#if subtitle}}<p class="org">{{subtitle}}{{#if date}} · {{date}}{{/if}}</p>{{else if date}}<p class="dates">{{date}}</p>{{/if}}
+        {{#if description}}<p>{{description}}</p>{{/if}}
+        {{#if highlights}}
+        <ul>{{#each highlights}}<li>{{this}}</li>{{/each}}</ul>
+        {{/if}}
+      </article>
+      {{/each}}
+    </section>
+    {{/each}}
+  </main>
+</body>
+</html>

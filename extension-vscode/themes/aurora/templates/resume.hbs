@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="{{meta.language}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{person.name}}{{#if person.title}} — {{person.title}}{{/if}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rl-background: {{tokens.colors_background}};
+      --rl-surface: {{tokens.colors_surface}};
+      --rl-surface-hover: {{tokens.colors_surface_hover}};
+      --rl-border: {{tokens.colors_border}};
+      --rl-text-primary: {{tokens.colors_text_primary}};
+      --rl-text-secondary: {{tokens.colors_text_secondary}};
+      --rl-accent: {{tokens.colors_accent}};
+      --rl-accent-glow: {{tokens.colors_accent_glow}};
+      --rl-success: {{tokens.colors_success}};
+      --rl-warning: {{tokens.colors_warning}};
+      --rl-error: {{tokens.colors_error}};
+      --rl-spacing-section-gap: {{tokens.spacing_section_gap}}px;
+      --rl-typography-heading-weight: {{tokens.typography_heading_weight}};
+      --rl-typography-body-size: {{tokens.typography_body_size}}px;
+      --rl-radius-base: {{tokens.radius_base}}px;
+    }
+
+    {{{themeCSS}}}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          {{#if person.avatar}}
+          <div class="avatar-wrapper">
+            <img src="{{person.avatar}}" alt="{{person.name}}" class="avatar">
+          </div>
+          {{/if}}
+          <h3 class="profile-name">{{person.name}}</h3>
+          <p class="profile-title">{{person.title}}</p>
+
+          {{#if person.email}}
+          <a href="mailto:{{person.email}}" class="contact-item">{{person.email}}</a>
+          {{/if}}
+          {{#if person.location}}
+          <span class="contact-item">{{person.location}}</span>
+          {{/if}}
+          {{#if person.website}}
+          <a href="{{person.website}}" target="_blank" class="contact-item">Website</a>
+          {{/if}}
+          {{#if person.github}}
+          <a href="https://github.com/{{person.github}}" target="_blank" class="contact-item">GitHub</a>
+          {{/if}}
+          {{#if person.linkedin}}
+          <a href="https://linkedin.com/in/{{person.linkedin}}" target="_blank" class="contact-item">LinkedIn</a>
+          {{/if}}
+        </div>
+
+        {{#if skills}}
+        <div class="sidebar-section">
+          <div class="sidebar-header"><h3>Skills</h3></div>
+          {{#each skills}}
+          <div class="skill-group">
+            <div class="skill-category">{{category}}</div>
+            <div class="skill-pills">
+              {{#each skills}}<span class="skill-pill">{{this}}</span>{{/each}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
+
+        {{#if languages}}
+        <div class="sidebar-section">
+          <div class="sidebar-header"><h3>Languages</h3></div>
+          {{#each languages}}
+          <div class="lang-item">
+            <span class="lang-name">{{name}}</span>
+            {{#if proficiency}}<span class="lang-level">{{proficiency}}</span>{{/if}}
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
+
+        {{#if certifications}}
+        <div class="sidebar-section">
+          <div class="sidebar-header"><h3>Certifications</h3></div>
+          <div class="cert-mini">
+            {{#each certifications}}
+            <div class="cert-chip">{{name}}</div>
+            {{/each}}
+          </div>
+        </div>
+        {{/if}}
+      </aside>
+
+      <div class="main">
+        <header class="hero">
+          <h1 class="hero-name">{{person.name}}</h1>
+          <p class="hero-title">{{person.title}}</p>
+          {{#if summary}}
+          <p class="summary-card">{{summary}}</p>
+          {{/if}}
+        </header>
+
+        {{#if experience}}
+        <section class="section" id="experience">
+          <div class="section-header"><h2>Experience</h2></div>
+          <div class="timeline">
+            {{#each experience}}
+            <article class="timeline-item">
+              <div class="job-header">
+                <div class="job-main">
+                  <span class="role-company">{{role}}</span>
+                  <span class="at"> @ {{company}}</span>
+                </div>
+                <span class="dates">{{start}} — {{#if end}}{{end}}{{else}}Present{{/if}}</span>
+              </div>
+              {{#if location}}<p class="location">{{location}}</p>{{/if}}
+              {{#if description}}<p class="description">{{description}}</p>{{/if}}
+              {{#if highlights}}
+              <ul class="highlights">
+                {{#each highlights}}<li>{{this}}</li>{{/each}}
+              </ul>
+              {{/if}}
+              {{#if tags}}
+              <div class="tags">
+                {{#each tags}}<span class="tag">{{this}}</span>{{/each}}
+              </div>
+              {{/if}}
+            </article>
+            {{/each}}
+          </div>
+        </section>
+        {{/if}}
+
+        {{#if projects}}
+        <section class="section" id="projects">
+          <div class="section-header"><h2>Projects</h2></div>
+          <div class="projects-grid">
+            {{#each projects}}
+            <article class="project-card">
+              {{#if url}}<a href="{{url}}" target="_blank" class="project-name">{{name}}</a>{{else}}<span class="project-name">{{name}}</span>{{/if}}
+              {{#if description}}<p class="project-description">{{description}}</p>{{/if}}
+              {{#if highlights}}
+              <ul class="highlights">
+                {{#each highlights}}<li>{{this}}</li>{{/each}}
+              </ul>
+              {{/if}}
+              {{#if tags}}
+              <div class="tags">
+                {{#each tags}}<span class="tag">{{this}}</span>{{/each}}
+              </div>
+              {{/if}}
+            </article>
+            {{/each}}
+          </div>
+        </section>
+        {{/if}}
+
+        {{#if education}}
+        <section class="section" id="education">
+          <div class="section-header"><h2>Education</h2></div>
+          {{#each education}}
+          <div class="edu-card">
+            <div class="edu-header">
+              <span class="edu-institution">{{institution}}</span>
+              <span class="edu-dates">{{start}}{{#if end}} — {{end}}{{/if}}</span>
+            </div>
+            <p class="edu-degree">{{degree}}{{#if field}} in {{field}}{{/if}}</p>
+          </div>
+          {{/each}}
+        </section>
+        {{/if}}
+
+        {{#if awards}}
+        <section class="section" id="awards">
+          <div class="section-header"><h2>Awards</h2></div>
+          {{#each awards}}
+          <div class="award-card">
+            <div>
+              <div class="award-title">{{title}}</div>
+              {{#if awarder}}<div class="award-meta">{{awarder}}{{#if date}} · {{date}}{{/if}}</div>{{/if}}
+            </div>
+          </div>
+          {{/each}}
+        </section>
+        {{/if}}
+      </div>
+    </div>
+  </main>
+</body>
+</html>
