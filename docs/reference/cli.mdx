@@ -1,0 +1,43 @@
+---
+title: "CLI reference"
+description: "Every command, flag, and exit code."
+icon: "terminal"
+---
+
+```text
+resumelang <command> [args] [flags]
+```
+
+See the [CLI guide](/cli) for prose and examples. This page is the terse
+reference.
+
+## Synopsis
+
+```text
+init [file]
+build [file] [--out DIR] [--formats LIST] [--theme NAME|PATH]
+validate [file]
+themes
+theme validate <dir>
+serve [--port N] [--addr H] [--root DIR]
+version
+```
+
+## Environment variables
+
+| Variable | Effect |
+| --- | --- |
+| `RL_GITHUB_CLIENT_ID` | Enable GitHub OAuth in `serve`. |
+| `RL_GITHUB_CLIENT_SECRET` | Required with `RL_GITHUB_CLIENT_ID`. |
+| `RL_LINKEDIN_CLIENT_ID` | Enable LinkedIn OAuth in `serve`. |
+| `RL_LINKEDIN_CLIENT_SECRET` | Required with `RL_LINKEDIN_CLIENT_ID`. |
+| `RL_AUTH_SECRET` | HMAC key for session cookies (32+ bytes). Auto-generated each start if unset — sessions reset on restart. |
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success. |
+| 1 | Generic error. |
+| 2 | Schema validation failed. |
+| 3 | Theme load failed. |

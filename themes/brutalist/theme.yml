@@ -1,0 +1,28 @@
+spec: v1
+
+name: brutalist
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#f4f1ea"
+    surface: "#ffffff"
+    surface_hover: "#ebe6d8"
+    border: "#000000"
+    text_primary: "#000000"
+    text_secondary: "#3a3a3a"
+    text_tertiary: "#6b6b6b"
+    accent: "#ff3b00"
+    accent_glow: "#ff3b00"
+  spacing:
+    section_gap: 32
+  typography:
+    heading_weight: 900
+    body_size: 14
+  radius:
+    base: 0

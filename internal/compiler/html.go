@@ -43,7 +43,8 @@ func ToHTML(r *schema.Resume, themePath string) ([]byte, error) {
 	cssData, _ := os.ReadFile(cssPath)
 
 	theme, _ := loadThemeYML(filepath.Join(themePath, "theme.yml"))
-	tokens := flattenTokens(theme.Tokens)
+	merged := mergeTokens(theme.Tokens, r.Meta.Tokens)
+	tokens := flattenTokens(merged)
 
 	ctx, err := buildContext(r, tokens, string(cssData))
 	if err != nil {
@@ -103,6 +104,57 @@ func loadThemeYML(path string) (ThemeInfo, error) {
 		return t, err
 	}
 	return t, yaml.Unmarshal(data, &t)
+}
+
+// mergeTokens deep-merges user tokens onto theme defaults. Map values are
+// merged recursively; everything else (scalars, slices) is overwritten.
+func mergeTokens(base, override map[string]any) map[string]any {
+	out := make(map[string]any, len(base))
+	for k, v := range base {
+		out[k] = v
+	}
+	for k, v := range override {
+		bv, exists := out[k]
+		if !exists {
+			out[k] = normalizeTokenValue(v)
+			continue
+		}
+		bm, baseIsMap := asStringMap(bv)
+		om, overIsMap := asStringMap(v)
+		if baseIsMap && overIsMap {
+			out[k] = mergeTokens(bm, om)
+			continue
+		}
+		out[k] = normalizeTokenValue(v)
+	}
+	return out
+}
+
+func asStringMap(v any) (map[string]any, bool) {
+	if m, ok := v.(map[string]any); ok {
+		return m, true
+	}
+	if m, ok := v.(map[any]any); ok {
+		out := make(map[string]any, len(m))
+		for k, vv := range m {
+			if ks, ok := k.(string); ok {
+				out[ks] = vv
+			}
+		}
+		return out, true
+	}
+	return nil, false
+}
+
+func normalizeTokenValue(v any) any {
+	if m, ok := asStringMap(v); ok {
+		out := make(map[string]any, len(m))
+		for k, vv := range m {
+			out[k] = normalizeTokenValue(vv)
+		}
+		return out
+	}
+	return v
 }
 
 func flattenTokens(tokens map[string]any) map[string]any {

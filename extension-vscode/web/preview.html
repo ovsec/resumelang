@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none';
+             style-src __CSP__ 'unsafe-inline';
+             script-src __CSP__;
+             font-src __CSP__ data:;
+             img-src __CSP__ https: data:;
+             frame-src 'self' data: blob:;
+             connect-src 'none';" />
+  <title>ResumeLang Preview</title>
+  <link rel="stylesheet" href="__PREVIEW_CSS__" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-logo" src="__LOGO__" alt="resumelang" height="20">
+      <span class="file" id="file-name">—</span>
+    </div>
+    <div class="controls">
+      <label class="select">
+        <span>theme</span>
+        <select id="theme-select"></select>
+      </label>
+      <button id="btn-print" class="btn" title="Open print dialog (Ctrl/Cmd+P)">Print</button>
+      <button id="btn-export" class="btn primary" title="Save standalone .html">Export</button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <iframe id="preview" sandbox="allow-same-origin allow-modals allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
+    <div class="empty" id="empty" hidden>
+      <div class="empty-card">
+        <h1>No resume open</h1>
+        <p>Open a <code>resume.yml</code> or <code>*.resume.yml</code> file in another editor tab.</p>
+      </div>
+    </div>
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <span class="loader-text">rendering…</span>
+    </div>
+  </main>
+
+  <footer class="statusbar">
+    <span id="status">idle</span>
+    <span class="grow"></span>
+    <span id="theme-info"></span>
+  </footer>
+
+  <script src="__PREVIEW_JS__"></script>
+</body>
+</html>

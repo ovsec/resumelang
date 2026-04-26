@@ -1,81 +1,115 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
-icon: 'rocket'
+description: "Install the binary, scaffold a resume, render every format."
+icon: "play"
 ---
 
-## Get started in three steps
+## 1. Install
 
-Get your documentation site running locally and make your first customization.
+<Tabs>
+  <Tab title="Go install">
+    ```bash
+    go install github.com/ovsec/resumelang@latest
+    ```
+  </Tab>
+  <Tab title="From source">
+    ```bash
+    git clone https://github.com/ovsec/resumelang.git
+    cd resumelang
+    go build -o resumelang .
+    ```
+  </Tab>
+  <Tab title="Homebrew (planned)">
+    ```bash
+    brew install ovsec/tap/resumelang
+    ```
+  </Tab>
+</Tabs>
 
-### Step 1: Set up your local environment
+Verify:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+```bash
+resumelang version
+```
 
-### Step 2: Deploy your changes
+## 2. Scaffold a resume
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+```bash
+resumelang init
+# → created resume.yml
+```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+The starter file already includes:
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+```yaml
+# yaml-language-server: $schema=https://resumelang.dev/schema/v1.json
+resumelang: v1
 
-### Step 3: Go live
+meta:
+  theme: minimal
+```
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+That preamble unlocks autocomplete and red-squiggle validation in any editor
+that speaks the YAML language server (VS Code, Neovim, JetBrains).
 
-## Next steps
+## 3. Build every format
 
-Now that you have your docs running, explore these key features:
+```bash
+resumelang build resume.yml
+```
+
+You get:
+
+```text
+dist/
+├── resume.html
+├── resume.json    # JSON Resume schema
+├── resume.md      # GitHub-flavored markdown
+└── resume.txt     # ATS-safe plain text
+```
+
+PDF is one keystroke away — open `dist/resume.html` in a browser and print.
+
+## 4. Switch theme
+
+Either change `meta.theme` in the YAML file, or build with a flag:
+
+```bash
+resumelang build resume.yml --formats html
+```
+
+Built-in themes: `minimal`, `aurora`, `material`, `terminal`, `sap`. See
+[Themes](/themes) for previews and how to add your own.
+
+## 5. Open the live editor
+
+```bash
+resumelang serve
+# → http://127.0.0.1:5500
+```
+
+Edit YAML on the left, watch the preview re-render on the right. Drag the
+splitter, switch themes, hit Print to save as PDF. Drafts auto-save to the
+browser's localStorage so you can close the tab without losing work.
+
+## 6. Ship it
+
+<Columns cols={2}>
+  <Card title="Publish via GitHub Actions" icon="github" href="/ci">
+    Every push to `resume.yml` rebuilds and deploys to GitHub Pages.
+  </Card>
+  <Card title="Use the VS Code extension" icon="code" href="/extension">
+    Inline preview, schema validation, theme picker — without leaving your editor.
+  </Card>
+</Columns>
+
+## What's next
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="DSL schema" icon="code" href="/schema">
+    Every field in `resume.yml`, with examples.
+  </Card>
+  <Card title="CLI reference" icon="terminal" href="/cli">
+    All commands and flags in one page.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

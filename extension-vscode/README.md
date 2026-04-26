@@ -1,92 +1,90 @@
-# Resume Lang VSCode Extension
+# ResumeLang for VS Code
 
-Live preview for resume.yml files - choose from built-in themes or external GitHub themes.
+Live preview, schema validation, and theme switching for **resumelang** YAML resumes — all rendered in-process. No CLI binary, no external server.
 
 ## Features
 
-- Live preview panel with rendered HTML
-- Built-in themes: minimal, bold, developer, aurora, terminal, material  
-- External GitHub theme support
-- Auto-refresh on save
+- **Live preview** in a side panel — re-renders as you type (debounced).
+- **Schema validation** via `redhat.vscode-yaml` — autocomplete, hover docs, error squiggles for `resume.yml`, `*.resume.yml`.
+- **Theme switching** — built-in: `minimal`, `aurora`, `material`, `terminal`, `sap`. Add your own under `themes/`.
+- **Print / Save as PDF** through the system print dialog (Ctrl/Cmd+P inside the preview).
+- **Export standalone HTML** — single self-contained file with theme CSS inlined.
+- **Pure JS rendering** — Handlebars + js-yaml in a webview. Same templates as the CLI and the web editor.
 
-## Setup
+## Quick start
 
-### 1. Build Go binary for your platform
-
-```bash
-# Linux/macOS
-GOOS=linux GOARCH=amd64 go build -o bin/resumelang
-GOOS=darwin GOARCH=amd64 go build -o bin/resumelang-darwin
-
-# Windows
-go build -o bin/resumelang.exe
-```
-
-### 2. Copy themes
-
-```bash
-cp -r ../themes ./themes
-```
-
-### 3. Install extension
-
-```bash
-# Open VSCode and run "Developer: Install Extension from Location"
-# Or package with vsce
-npm install -g @vscode/vsce
-vsce package
-```
-
-### 4. Install binary from GitHub releases (if published)
-
-The extension will automatically download the CLI binary from GitHub releases if not found locally.
-
-## Usage
-
-1. Open a `resume.yml` file
-2. Press `Ctrl+Shift+P` → "Resume: Show Preview"
-3. Choose a theme from the dropdown
-4. For external themes, enter a GitHub URL like `github.com/user/resume-theme`
+1. Open any `resume.yml` (or `*.resume.yml`) file.
+2. Run **ResumeLang: Open Preview** from the command palette, or click the preview icon in the editor title bar.
+3. Run **ResumeLang: Select Theme** to switch themes on the fly.
 
 ## Commands
 
 | Command | Description |
-|---------|-------------|
-| `resumelang.preview` | Open preview panel |
-| `resumelang.theme` | Choose default theme |
+| --- | --- |
+| `ResumeLang: Open Preview` | Opens the live preview panel beside the editor. |
+| `ResumeLang: Select Theme` | Quick-pick from installed themes. |
+| `ResumeLang: Export Standalone HTML` | Save the rendered HTML to disk. |
+| `ResumeLang: Print / Save as PDF` | Open the system print dialog for the preview. |
 
-## Configuration
+## Settings
 
-```json
-{
-  "resumelang.theme": "aurora"
-}
+| Key | Default | Description |
+| --- | --- | --- |
+| `resumelang.defaultTheme` | `minimal` | Theme used when opening a fresh preview. |
+| `resumelang.refreshDelay` | `200` | Debounce (ms) between edits and preview refresh. |
+| `resumelang.openPreviewOnResumeFile` | `false` | Auto-open preview when a resume file is opened. |
+
+## Architecture
+
+```text
+vscode editor (resume.yml)
+        │   onDidChangeTextDocument (debounced)
+        ▼
+extension.js  ──► reads themes/<name>/{templates/resume.hbs, assets/style.css, theme.yml}
+        │   postMessage({yaml, theme, template, css, themeYml})
+        ▼
+webview (preview.html)
+        │   js-yaml.load(yaml) → Handlebars.compile(template)(ctx)
+        ▼
+iframe srcdoc (themed resume HTML)
 ```
 
-## Adding Themes
+## Adding a theme
 
-Place themes in `./themes/` folder:
-```
-themes/
-├── aurora/
-│   ├── theme.yml
-│   ├── templates/resume.html
-│   └── assets/style.css
-├── minimal/
-│   └── ...
+Drop a folder under `themes/`:
+
+```text
+themes/<name>/
+├── theme.yml                 # spec: v1, name, version, supports, tokens, ...
+├── templates/resume.hbs      # Handlebars template
+└── assets/style.css          # injected via {{{themeCSS}}}
 ```
 
-Or use external GitHub repo:
-```bash
-resumelang build resume.yml --theme github.com/owner/theme-repo
-```
+The Handlebars context is the parsed YAML (lowercase keys) plus:
+
+- `themeCSS` — raw stylesheet (use `{{{themeCSS}}}` to inline)
+- `tokens` — flattened design tokens (e.g. `tokens.colors_background`)
+
+Built-in helpers: `join`, `eq`, `default`, `upper`, `lower` — match the Go side exactly.
 
 ## Development
 
 ```bash
-# Watch mode
-npm run watch
+# from extension-vscode/
+./sync.sh                 # mirror themes/ + schema/ + vendor libs from ../
+code --install-extension . # or: F5 in VS Code to launch Extension Host
+vsce package              # build .vsix
+```
 
-# Package
-vsce package
+The extension has no build step — `extension.js` and `web/*` ship as-is.
+
+## Schema
+
+`resume.yml` files are validated against `schema/v1.json` (JSON Schema draft-07).
+The mapping is contributed via `yamlValidation` so it works without any user
+configuration. Add this preamble for the same support outside this extension:
+
+```yaml
+# yaml-language-server: $schema=https://resumelang.dev/schema/v1.json
+resumelang: v1
 ```

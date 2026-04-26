@@ -1,5 +1,50 @@
+# Binaries
 resumelang
 resumelang.exe
 dist/
+*.test
+*.out
+
+# Build artifacts
+*.vsix
+extension-vscode/web/vendor/
+extension-vscode/schema/
+extension-vscode/themes/
+extension-vscode/assets/
+extension-vscode/node_modules/
+
+# Logs / temp
 *.log
+*.bak
+*.tmp
+*.swp
+*.swo
+*.cache
+
+# Archives
+*.zip
+*.tar.gz
+
+# Env / secrets
+.env
+.env.*
+*.env
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.sln
+*.csproj
+*.suo
+*.user
+*.userosscache
+
+# Node
+node_modules/
+
+# Mintlify
+docs/.mintlify/

@@ -1,0 +1,80 @@
+---
+title: "GitHub Actions"
+description: "Push resume.yml, get a deployed site."
+icon: "github"
+---
+
+The hosted path: keep `resume.yml` in **your own repo**, push, and let CI
+rebuild and deploy to GitHub Pages on every change.
+
+## 1. Drop in the workflow
+
+Create `.github/workflows/resume.yml`:
+
+```yaml
+name: Build resume
+
+on:
+  push:
+    paths:
+      - "resume.yml"
+      - ".github/workflows/resume.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - run: go install github.com/ovsec/resumelang@latest
+      - run: resumelang build resume.yml --out dist
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+## 2. Enable Pages
+
+Repo → **Settings** → **Pages** → Source: **GitHub Actions**.
+
+## 3. Push
+
+```bash
+resumelang init
+git add resume.yml .github
+git commit -m "chore: ship resume"
+git push
+```
+
+Within ~60 seconds the workflow finishes and your resume is live at
+`https://<username>.github.io/<repo>/`.
+
+## Tips
+
+- **Custom domain.** Drop a `CNAME` file into the same repo's root and set the
+  domain in **Settings → Pages**.
+- **Multiple themes.** Build several formats in one run:
+  ```yaml
+  - run: resumelang build resume.yml --out dist --formats html,pdf,json,md,txt
+  ```
+- **PR previews.** Add a second job that builds on `pull_request` and uploads
+  the artifact for download — reviewers see exactly how the resume changes.
+- **Pin the version.** `go install …@latest` always fetches the newest.
+  Replace with `@v0.x.y` to reproduce builds.

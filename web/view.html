@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>resumelang — view</title>
+  <link rel="icon" href="/web/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/web/styles.css">
+  <link rel="stylesheet" href="/web/view.css">
+</head>
+<body class="view-body">
+  <header class="topbar view-topbar">
+    <a class="brand" href="/" aria-label="resumelang home">
+      <img class="brand-logo" src="/web/assets/logo.svg" alt="resumelang" height="22">
+    </a>
+    <div class="view-meta">
+      <span id="resume-title" class="resume-title">resume</span>
+      <span id="resume-sub" class="resume-sub"></span>
+    </div>
+    <nav class="view-tabs" role="tablist">
+      <button id="tab-preview" class="tab active" role="tab" aria-selected="true" data-target="pane-preview">Preview</button>
+      <button id="tab-source" class="tab" role="tab" aria-selected="false" data-target="pane-source">Source</button>
+    </nav>
+    <div class="view-actions">
+      <select id="view-theme" class="select" title="Switch theme"></select>
+      <button id="btn-print" class="btn">Print / PDF</button>
+      <button id="btn-copy-yaml" class="btn">Copy YAML</button>
+      <a id="btn-edit" class="btn btn-primary" href="/" title="Open this resume in the editor">Edit copy</a>
+    </div>
+  </header>
+
+  <main class="view-main">
+    <section id="pane-preview" class="view-pane">
+      <iframe id="preview" title="resume preview"></iframe>
+    </section>
+    <section id="pane-source" class="view-pane" hidden>
+      <pre id="source"><code id="source-code"></code></pre>
+    </section>
+  </main>
+
+  <div id="view-error" class="view-error" hidden></div>
+
+  <script src="/web/vendor/handlebars.min.js"></script>
+  <script src="/web/vendor/js-yaml.min.js"></script>
+  <script src="/web/view.js"></script>
+</body>
+</html>

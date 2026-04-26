@@ -9,8 +9,8 @@ import (
 )
 
 func ServeStatic(args []string) {
-	addr := "127.0.0.1"
-	port := "5500"
+	addr := "0.0.0.0"
+	port := "3000"
 	root, _ := os.Getwd()
 
 	for i := 0; i < len(args); i++ {
@@ -52,6 +52,19 @@ func ServeStatic(args []string) {
 		}
 		http.ServeFile(w, r, filepath.Join(webDir, "index.html"))
 	})
+
+	// Login page
+	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(webDir, "login.html"))
+	})
+
+	// Read-only resume view (shareable link)
+	mux.HandleFunc("/r", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(webDir, "view.html"))
+	})
+
+	// OAuth + session
+	registerAuthRoutes(mux)
 
 	// Static editor assets
 	mux.Handle("/web/", http.StripPrefix("/web/", safeFileServer(webDir)))
@@ -101,7 +114,18 @@ func ServeStatic(args []string) {
 	fmt.Println("  resumelang editor")
 	fmt.Println("==============================================")
 	fmt.Println("  Editor:    " + url)
+	fmt.Println("  Login:     " + url + "/login")
 	fmt.Println("  Themes:    " + url + "/api/themes")
+	avail := providers()
+	if len(avail) == 0 {
+		fmt.Println("  Auth:      offline only (no RL_*_CLIENT_ID set)")
+	} else {
+		names := []string{}
+		for n := range avail {
+			names = append(names, n)
+		}
+		fmt.Println("  Auth:      " + strings.Join(names, ", "))
+	}
 	fmt.Println("==============================================")
 
 	if err := http.ListenAndServe(addr+":"+port, mux); err != nil {

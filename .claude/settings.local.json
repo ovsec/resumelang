@@ -7,7 +7,10 @@
       "Bash(/tmp/rl serve *)",
       "Bash(curl -fsS http://127.0.0.1:5501/web/editor.js)",
       "Bash(curl -fsS http://127.0.0.1:5501/web/styles.css)",
-      "Bash(curl -fsS http://127.0.0.1:5501/)"
+      "Bash(curl -fsS http://127.0.0.1:5501/)",
+      "Bash(npm install *)",
+      "Bash(rm -f resumelang-0.2.0.vsix)",
+      "Bash(npx --yes @vscode/vsce package)"
     ]
   }
 }

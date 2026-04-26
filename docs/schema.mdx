@@ -1,0 +1,132 @@
+---
+title: "DSL schema"
+description: "The full shape of resume.yml."
+icon: "code"
+---
+
+The schema is published at
+[`https://resumelang.dev/schema/v1.json`](https://resumelang.dev/schema/v1.json)
+and lives in-tree at [`schema/v1.json`](https://github.com/ovsec/resumelang/blob/main/schema/v1.json).
+
+Add this preamble to any resume file and your editor gets autocomplete + validation:
+
+```yaml
+# yaml-language-server: $schema=https://resumelang.dev/schema/v1.json
+resumelang: v1
+```
+
+## Top-level keys
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `resumelang` | `"v1"` | Spec version. Required for forward compatibility. |
+| `meta` | object | Theme, language, page size, section order. |
+| `person` | object | Name, contact, social handles. |
+| `summary` | string | One-paragraph elevator pitch (markdown allowed). |
+| `experience` | `Job[]` | Work history. Most recent first. |
+| `education` | `Education[]` | Schools and degrees. |
+| `skills` | `SkillGroup[]` | Categorized skills. |
+| `projects` | `Project[]` | Side projects, OSS, demos. |
+| `publications` | `Publication[]` | Papers, articles. |
+| `certifications` | `Certification[]` | Issued certificates with optional ID. |
+| `languages` | `Language[]` | Spoken languages with proficiency. |
+| `volunteer` | `Volunteer[]` | Volunteer work. |
+| `awards` | `Award[]` | Awards and recognitions. |
+| `custom` | `Section[]` | Arbitrary user-defined sections. |
+
+## meta
+
+```yaml
+meta:
+  theme: minimal           # minimal | aurora | material | terminal | sap | <custom>
+  color: "#6366f1"         # accent color override
+  language: en
+  page_size: a4            # a4 | letter
+  font: inter              # optional theme hint
+  sections:                # render order — omit to use theme default
+    - summary
+    - experience
+    - education
+    - skills
+    - projects
+```
+
+`meta.sections` controls both **order** and **visibility**. Sections not listed
+are skipped. Themes that ignore the field render their own canonical order.
+
+## person
+
+```yaml
+person:
+  name: Jane Doe
+  title: Senior Software Engineer
+  email: jane@example.com
+  phone: "+1 555 000 0000"
+  location: Stockholm, Sweden
+  website: https://janedoe.dev
+  github: janedoe          # username, not URL
+  linkedin: janedoe        # username, not URL
+  avatar: https://...      # optional
+```
+
+## experience
+
+```yaml
+experience:
+  - company: Acme Corp
+    role: Lead Engineer
+    location: Stockholm
+    start: "2021"          # any string — themes pretty-print
+    end: ""                # empty string = "Present"
+    description: One-liner under the title.
+    highlights:            # bullet list rendered under description
+      - Scaled API to 10M req/day
+      - Cut deploy time by 60%
+    tags: [Go, Kubernetes, Postgres]
+    url: https://acme.com
+```
+
+## skills
+
+```yaml
+skills:
+  - category: Languages
+    skills: [Go, TypeScript, Python, Rust]
+  - category: Infrastructure
+    skills: [Kubernetes, Terraform, AWS, Postgres]
+```
+
+## certifications
+
+```yaml
+certifications:
+  - name: CKA — Certified Kubernetes Administrator
+    issuer: CNCF
+    date: "2023"
+    id: "LF-abc123"        # optional credential ID
+    url: https://cncf.io/...
+```
+
+## Strictness
+
+The schema uses `additionalProperties: false` everywhere. Unknown keys are
+flagged as errors so typos like `experiance:` or `compamy:` fail loudly instead
+of silently disappearing. Extend the language by contributing to the schema —
+not by sneaking custom fields in.
+
+## Custom sections
+
+Need something the schema doesn't model? Use `custom`:
+
+```yaml
+custom:
+  - title: Speaking
+    items:
+      - heading: KubeCon EU 2023
+        subheading: Berlin
+        description: "Talk: scaling to a million pods"
+        date: "2023"
+        url: https://kubecon.eu/...
+```
+
+Themes that opt into `custom` render it; themes that don't, ignore it.

@@ -1,0 +1,77 @@
+---
+title: "VS Code extension"
+description: "Live preview, schema validation, theme switching — inside the editor."
+icon: "code"
+---
+
+The **ResumeLang** extension brings the same renderer that powers the CLI and
+the web editor into VS Code as a webview. No binary, no shell-out — pure JS.
+
+## Install
+
+<Steps>
+  <Step title="Marketplace">
+    Search for **ResumeLang** in the VS Code Extensions sidebar and click
+    install. The extension automatically depends on the **YAML** extension by
+    Red Hat.
+  </Step>
+  <Step title="From source">
+    ```bash
+    git clone https://github.com/ovsec/resumelang.git
+    cd resumelang/extension-vscode
+    code --install-extension .
+    ```
+  </Step>
+</Steps>
+
+## What you get
+
+<Columns cols={2}>
+  <Card title="Live preview" icon="eye">
+    Open any `resume.yml` and run **ResumeLang: Open Preview**. The webview
+    re-renders as you type, debounced.
+  </Card>
+  <Card title="Schema validation" icon="circle-check">
+    Autocomplete and red-squiggle errors for every field — contributed via
+    `yamlValidation`, no user config required.
+  </Card>
+  <Card title="Theme picker" icon="palette">
+    `Cmd/Ctrl+Shift+P` → **ResumeLang: Select Theme**. Switches the preview
+    instantly.
+  </Card>
+  <Card title="Export and print" icon="file-export">
+    Save a standalone HTML or open the system print dialog (Save as PDF) right
+    from the toolbar.
+  </Card>
+</Columns>
+
+## Commands
+
+| Command | Description |
+| --- | --- |
+| `ResumeLang: Open Preview` | Open a side-by-side preview panel. |
+| `ResumeLang: Select Theme` | Quick-pick from installed themes. |
+| `ResumeLang: Export Standalone HTML` | Save the rendered HTML to disk. |
+| `ResumeLang: Print / Save as PDF` | Open the system print dialog. |
+
+## Settings
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `resumelang.defaultTheme` | `minimal` | Theme used on first open. |
+| `resumelang.refreshDelay` | `200` | Debounce (ms) between edits and refresh. |
+| `resumelang.openPreviewOnResumeFile` | `false` | Auto-open preview when a resume file is opened. |
+
+## Adding themes
+
+The extension ships with the same five themes as the CLI. To add your own,
+drop a folder under `themes/` inside the extension directory:
+
+```text
+extension-vscode/themes/<name>/
+├── theme.yml
+├── templates/resume.hbs
+└── assets/style.css
+```
+
+Reload the extension host. Your theme appears in the **Select Theme** picker.

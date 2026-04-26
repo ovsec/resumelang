@@ -1,0 +1,28 @@
+spec: v1
+
+name: linear
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#08090a"
+    surface: "#101113"
+    surface_hover: "#16181c"
+    border: "#1f2126"
+    text_primary: "#f7f8f8"
+    text_secondary: "#8a8f98"
+    text_tertiary: "#62666d"
+    accent: "#5e6ad2"
+    accent_glow: "#7170ff"
+  spacing:
+    section_gap: 36
+  typography:
+    heading_weight: 510
+    body_size: 14
+  radius:
+    base: 6

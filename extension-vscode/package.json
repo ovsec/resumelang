@@ -1,42 +1,133 @@
 {
   "name": "resumelang",
-  "displayName": "Resume Lang",
-  "description": "Resume DSL compiler with live preview - open resume.yml and preview rendered HTML",
-  "version": "0.1.0",
+  "displayName": "ResumeLang",
+  "description": "Live preview, schema validation and theme switching for resumelang YAML resumes.",
+  "version": "0.2.0",
   "publisher": "ovsec",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ovsec/resumelang.git"
+  },
   "engines": {
     "vscode": "^1.70.0"
   },
   "categories": [
     "Other",
-    "Preview"
+    "Visualization",
+    "Linters"
+  ],
+  "keywords": [
+    "resume",
+    "cv",
+    "yaml",
+    "handlebars",
+    "preview"
   ],
   "activationEvents": [
     "onLanguage:yaml",
-    "onCommand:resumelang.preview"
+    "onCommand:resumelang.preview",
+    "onCommand:resumelang.selectTheme",
+    "onCommand:resumelang.themeGallery",
+    "onCommand:resumelang.exportHtml",
+    "onCommand:resumelang.print"
   ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
         "command": "resumelang.preview",
-        "title": "Resume: Show Preview"
+        "title": "ResumeLang: Open Preview",
+        "category": "ResumeLang",
+        "icon": "$(open-preview)"
       },
       {
-        "command": "resumelang.theme",
-        "title": "Resume: Choose Theme"
+        "command": "resumelang.selectTheme",
+        "title": "ResumeLang: Select Theme",
+        "category": "ResumeLang"
+      },
+      {
+        "command": "resumelang.themeGallery",
+        "title": "ResumeLang: Theme Gallery",
+        "category": "ResumeLang",
+        "icon": "$(symbol-color)"
+      },
+      {
+        "command": "resumelang.exportHtml",
+        "title": "ResumeLang: Export Standalone HTML",
+        "category": "ResumeLang"
+      },
+      {
+        "command": "resumelang.print",
+        "title": "ResumeLang: Print / Save as PDF",
+        "category": "ResumeLang"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == yaml && resourceFilename =~ /resume.*\\.ya?ml$/",
+          "command": "resumelang.preview",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceLangId == yaml && resourceFilename =~ /resume.*\\.ya?ml$/",
+          "command": "resumelang.preview",
+          "group": "resumelang"
+        }
+      ]
+    },
+    "yamlValidation": [
+      {
+        "fileMatch": [
+          "resume.yml",
+          "resume.yaml",
+          "*.resume.yml",
+          "*.resume.yaml"
+        ],
+        "url": "./schema/v1.json"
       }
     ],
     "configuration": {
-      "title": "Resume Lang",
+      "title": "ResumeLang",
       "properties": {
-        "resumelang.theme": {
+        "resumelang.defaultTheme": {
           "type": "string",
           "default": "minimal",
-          "enum": ["minimal", "bold", "developer", "aurora", "terminal", "material"],
-          "description": "Default theme for resume"
+          "enum": [
+            "minimal",
+            "aurora",
+            "material",
+            "terminal",
+            "sap",
+            "linear",
+            "vercel",
+            "brutalist",
+            "editorial",
+            "academic",
+            "dossier",
+            "timeline"
+          ],
+          "description": "Default theme used when opening a preview."
+        },
+        "resumelang.refreshDelay": {
+          "type": "number",
+          "default": 200,
+          "minimum": 0,
+          "maximum": 2000,
+          "description": "Debounce delay (ms) between edits and preview refresh."
+        },
+        "resumelang.openPreviewOnResumeFile": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically open the preview when a resume.yml file is opened."
         }
       }
     }
+  },
+  "dependencies": {
+    "handlebars": "^4.7.8",
+    "js-yaml": "^4.1.0"
   }
 }

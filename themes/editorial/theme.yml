@@ -1,0 +1,28 @@
+spec: v1
+
+name: editorial
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#fbf9f4"
+    surface: "#f5f1e8"
+    surface_hover: "#ede8d9"
+    border: "#d6cfc0"
+    text_primary: "#1c1916"
+    text_secondary: "#54493e"
+    text_tertiary: "#8a7e70"
+    accent: "#a8332b"
+    accent_glow: "#c64138"
+  spacing:
+    section_gap: 36
+  typography:
+    heading_weight: 700
+    body_size: 15
+  radius:
+    base: 0

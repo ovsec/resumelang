@@ -1,0 +1,28 @@
+spec: v1
+
+name: dossier
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [two-col]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#ffffff"
+    surface: "#1f2937"
+    surface_hover: "#374151"
+    border: "#e5e7eb"
+    text_primary: "#111827"
+    text_secondary: "#4b5563"
+    text_tertiary: "#9ca3af"
+    accent: "#0f766e"
+    accent_glow: "#14b8a6"
+  spacing:
+    section_gap: 24
+  typography:
+    heading_weight: 600
+    body_size: 13
+  radius:
+    base: 4

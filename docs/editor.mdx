@@ -1,0 +1,74 @@
+---
+title: "Web editor"
+description: "Live YAML editor with theme switching and PDF export — runs locally or hosted."
+icon: "window"
+---
+
+Launch the editor with one command:
+
+```bash
+resumelang serve
+# → http://127.0.0.1:5500
+```
+
+It is a static-served HTML/JS app with a Go file server in front. No build
+step, no Node, no internet required. Same Handlebars templates as the CLI, so
+the preview is bit-exact with what `resumelang build` produces.
+
+## Layout
+
+- **Left pane** — CodeMirror 5 with YAML syntax highlighting, line numbers, and
+  Save → localStorage. Drafts survive a tab close.
+- **Right pane** — sandboxed iframe with the rendered resume. Switches between
+  light/dark CodeMirror automatically based on the resume theme background.
+- **Splitter** — drag the seam to resize. Position is persisted per browser.
+
+## Toolbar
+
+| Control | What it does |
+| --- | --- |
+| Theme | Live-swap between installed themes. Re-render is instant. |
+| Print / PDF | Opens the system print dialog → Save as PDF. |
+| Download | Exports a single self-contained `resume.html` with theme CSS inlined. |
+| Sign in | Optional — links to OAuth login (see below). |
+
+## Sign in (optional)
+
+The editor works fully offline; sign-in is only needed for **publishing** to a
+GitHub repo or **importing** from LinkedIn. Set these env vars before launching
+the server to enable each provider:
+
+```bash
+export RL_GITHUB_CLIENT_ID=...
+export RL_GITHUB_CLIENT_SECRET=...
+export RL_LINKEDIN_CLIENT_ID=...
+export RL_LINKEDIN_CLIENT_SECRET=...
+export RL_AUTH_SECRET=$(openssl rand -hex 32)   # session cookie HMAC
+
+resumelang serve
+```
+
+Without those vars set, the **Sign in** button is hidden and the editor stays
+in offline-only mode.
+
+## Storage
+
+| Key | Contents |
+| --- | --- |
+| `resumelang.yaml` | Current YAML draft. Survives reloads and tab closes. |
+| `resumelang.theme` | Last-selected theme name. |
+| `resumelang.split` | Splitter position. |
+
+Clear the keys in DevTools → Application → Local Storage to reset.
+
+## Hosting your own
+
+The same binary that powers the CLI runs the editor — no separate process. Put
+it behind any reverse proxy:
+
+```bash
+resumelang serve --addr 0.0.0.0 --port 8080
+```
+
+The `web/` folder is the only thing the server reads from disk; everything else
+(themes, schema) is loaded from working directory at request time.

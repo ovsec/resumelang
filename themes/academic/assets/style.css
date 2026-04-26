@@ -1,0 +1,174 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'EB Garamond', 'Latin Modern Roman', 'CMU Serif', 'Times New Roman', Times, serif;
+  background: var(--rl-background);
+  color: var(--rl-text-primary);
+  font-size: var(--rl-typography-body-size);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 64px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--rl-text-primary);
+}
+
+.name {
+  font-size: 1.8rem;
+  font-weight: var(--rl-typography-heading-weight);
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+  font-variant: small-caps;
+}
+
+.title {
+  font-style: italic;
+  color: var(--rl-text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.contact {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--rl-text-secondary);
+}
+
+.contact a {
+  color: var(--rl-accent);
+  text-decoration: none;
+}
+.contact a:hover { text-decoration: underline; }
+
+.summary { margin-bottom: var(--rl-spacing-section-gap); }
+
+.summary p {
+  text-align: justify;
+  text-indent: 1.5em;
+  line-height: 1.55;
+  hyphens: auto;
+}
+
+.section { margin-bottom: var(--rl-spacing-section-gap); page-break-inside: avoid; }
+
+.section-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--rl-accent);
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+  border-bottom: 0.5px solid var(--rl-border);
+}
+
+.job, .project-item, .edu-item { margin-bottom: 14px; }
+
+.job-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+
+.job-role { font-weight: var(--rl-typography-heading-weight); }
+.job-company { font-style: italic; }
+.job-company::before { content: ", "; font-style: normal; }
+
+.job-dates, .edu-dates {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--rl-text-secondary);
+  white-space: nowrap;
+}
+
+.job-location, .edu-gpa {
+  color: var(--rl-text-secondary);
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+.job ul, .project-item ul {
+  padding-left: 22px;
+  margin-top: 4px;
+}
+
+.job li, .project-item li {
+  margin-bottom: 2px;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.tags {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--rl-text-secondary);
+  font-style: italic;
+}
+.tags::before { content: "Keywords: "; font-weight: var(--rl-typography-heading-weight); font-style: normal; }
+.tag { display: inline; }
+.tag::after { content: ", "; }
+.tag:last-child::after { content: "."; }
+
+.skill-group {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.skill-category {
+  font-variant: small-caps;
+  font-weight: var(--rl-typography-heading-weight);
+  letter-spacing: 0.04em;
+}
+.skill-category::after { content: ":"; }
+
+.skills-list { color: var(--rl-text-primary); }
+
+.project-name {
+  font-weight: var(--rl-typography-heading-weight);
+  margin-bottom: 2px;
+}
+.project-name a { color: var(--rl-accent); text-decoration: none; }
+
+.project-desc { font-style: italic; color: var(--rl-text-secondary); font-size: 0.92rem; }
+
+.edu-institution {
+  font-weight: var(--rl-typography-heading-weight);
+  font-variant: small-caps;
+}
+.edu-degree { font-style: italic; color: var(--rl-text-secondary); }
+
+ul.plain { list-style: none; padding-left: 1em; }
+ul.plain li {
+  margin-bottom: 6px;
+  text-indent: -1em;
+  text-align: justify;
+}
+ul.plain li::before { content: "— "; }
+ul.plain.inline { display: flex; flex-wrap: wrap; gap: 14px; }
+ul.plain.inline li { text-indent: 0; }
+ul.plain.inline li::before { content: ""; }
+
+@media print {
+  body { font-size: 10.5pt; }
+  .container { max-width: none; padding: 18mm; }
+  a { color: var(--rl-text-primary); text-decoration: none; }
+}

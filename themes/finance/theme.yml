@@ -1,0 +1,28 @@
+spec: v1
+
+name: finance
+version: 1.0.0
+author: resumelang
+description: Conservative two-column layout for banking, consulting, and corporate finance roles. Sober palette, sans-serif, ATS-safe.
+
+supports:
+  layouts: [two_column]
+  blocks: [bullets, tags, metrics, text]
+
+tokens:
+  colors:
+    background: "#ffffff"
+    sidebar:    "#f4f6fa"
+    text_primary:   "#0f172a"
+    text_secondary: "#475569"
+    rule:    "#dde3ec"
+    accent:  "#1e3a8a"
+    accent_alt: "#b08d57"
+  spacing:
+    section_gap: 22
+    item_gap: 12
+  typography:
+    body_size: 10.5
+    heading_weight: 700
+  radius:
+    base: 0

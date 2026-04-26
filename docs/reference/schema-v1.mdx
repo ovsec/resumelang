@@ -1,0 +1,79 @@
+---
+title: "Schema v1"
+description: "Full JSON Schema reference for resume.yml v1."
+icon: "code"
+---
+
+Canonical URL: [`https://resumelang.dev/schema/v1.json`](https://resumelang.dev/schema/v1.json)
+
+In-tree: [`schema/v1.json`](https://github.com/ovsec/resumelang/blob/main/schema/v1.json)
+
+## Definitions
+
+The schema declares these reusable definitions:
+
+| Name | Description |
+| --- | --- |
+| `Meta` | Theme, language, page size, sections. |
+| `Person` | Name, contact, social handles. |
+| `Job` | Single experience entry. |
+| `Education` | Single education entry. |
+| `SkillGroup` | Category + list of skills. |
+| `Project` | Side project entry. |
+| `Publication` | Paper or article. |
+| `Certification` | Certificate with optional credential ID. |
+| `Language` | Spoken language with proficiency. |
+| `Volunteer` | Volunteer entry. |
+| `Award` | Award entry. |
+| `Section` | Custom section with arbitrary items. |
+| `SectionItem` | Heading, subheading, description, date, url. |
+
+All definitions use `additionalProperties: false`, so unknown keys are
+errors — typos fail the validate step instead of silently disappearing.
+
+## Example
+
+```yaml
+# yaml-language-server: $schema=https://resumelang.dev/schema/v1.json
+resumelang: v1
+
+meta:
+  theme: aurora
+  language: en
+  page_size: a4
+  sections: [summary, experience, skills, projects]
+
+person:
+  name: Jane Doe
+  title: Senior Software Engineer
+  email: jane@example.com
+  github: janedoe
+  linkedin: janedoe
+
+summary: |
+  Engineer with 8 years building distributed systems.
+
+experience:
+  - company: Acme Corp
+    role: Lead Engineer
+    start: "2021"
+    end: ""
+    highlights:
+      - Scaled API to 10M req/day
+    tags: [Go, Kubernetes]
+
+skills:
+  - category: Languages
+    skills: [Go, Rust]
+```
+
+## Versioning
+
+The `resumelang` top-level field declares which version a file targets:
+
+```yaml
+resumelang: v1
+```
+
+Compilers refuse files with a version they do not understand and emit a
+warning when the field is missing.

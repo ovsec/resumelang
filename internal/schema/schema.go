@@ -21,12 +21,13 @@ type Resume struct {
 }
 
 type Meta struct {
-	Theme    string   `yaml:"theme"     json:"theme,omitempty"`
-	Language string   `yaml:"language"  json:"language,omitempty"`
-	Color    string   `yaml:"color"     json:"color,omitempty"`
-	Font     string   `yaml:"font"      json:"font,omitempty"`
-	PageSize string   `yaml:"page_size" json:"page_size,omitempty"`
-	Sections []string `yaml:"sections"  json:"sections,omitempty"`
+	Theme    string         `yaml:"theme"     json:"theme,omitempty"`
+	Language string         `yaml:"language"  json:"language,omitempty"`
+	Color    string         `yaml:"color"     json:"color,omitempty"`
+	Font     string         `yaml:"font"      json:"font,omitempty"`
+	PageSize string         `yaml:"page_size" json:"page_size,omitempty"`
+	Sections []string       `yaml:"sections"  json:"sections,omitempty"`
+	Tokens   map[string]any `yaml:"tokens"    json:"tokens,omitempty"`
 }
 
 type Person struct {

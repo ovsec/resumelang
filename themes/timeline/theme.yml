@@ -1,0 +1,28 @@
+spec: v1
+
+name: timeline
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#fafafa"
+    surface: "#ffffff"
+    surface_hover: "#f5f5f5"
+    border: "#e5e5e5"
+    text_primary: "#1a1a1a"
+    text_secondary: "#525252"
+    text_tertiary: "#a3a3a3"
+    accent: "#ea580c"
+    accent_glow: "#fb923c"
+  spacing:
+    section_gap: 40
+  typography:
+    heading_weight: 600
+    body_size: 14
+  radius:
+    base: 8

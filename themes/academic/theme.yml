@@ -1,0 +1,28 @@
+spec: v1
+
+name: academic
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#ffffff"
+    surface: "#fafaf8"
+    surface_hover: "#f0eee9"
+    border: "#cfcfcf"
+    text_primary: "#1a1a1a"
+    text_secondary: "#444444"
+    text_tertiary: "#777777"
+    accent: "#7a1f1f"
+    accent_glow: "#a83232"
+  spacing:
+    section_gap: 28
+  typography:
+    heading_weight: 700
+    body_size: 13
+  radius:
+    base: 0

@@ -43,6 +43,11 @@
           "type": "array",
           "items": { "type": "string" },
           "description": "Order + visibility of sections. Names: summary, experience, education, skills, projects, publications, certifications, languages, volunteer, awards."
+        },
+        "tokens": {
+          "type": "object",
+          "description": "Override theme design tokens (colors, spacing, typography, radius, ...). Deep-merged onto the theme's own tokens at render time.",
+          "additionalProperties": true
         }
       }
     },

@@ -1,0 +1,28 @@
+spec: v1
+
+name: vercel
+version: 1.0.0
+author: resumelang
+
+supports:
+  layouts: [single]
+  blocks: [bullets, tags, text]
+
+tokens:
+  colors:
+    background: "#ffffff"
+    surface: "#fafafa"
+    surface_hover: "#f4f4f5"
+    border: "#e4e4e7"
+    text_primary: "#000000"
+    text_secondary: "#52525b"
+    text_tertiary: "#a1a1aa"
+    accent: "#000000"
+    accent_glow: "#0070f3"
+  spacing:
+    section_gap: 40
+  typography:
+    heading_weight: 600
+    body_size: 14
+  radius:
+    base: 0

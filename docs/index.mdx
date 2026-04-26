@@ -1,133 +1,72 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
-icon: 'star'
+title: "resumelang"
+description: "A universal resume DSL — one resume.yml, every output."
+icon: "file-lines"
 ---
 
-## Setting up
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.png"
+  alt="resumelang hero"
+  noZoom
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.png"
+  alt="resumelang hero"
+  noZoom
+/>
 
-Get your documentation site up and running in minutes.
+**resumelang** turns a single, version-controlled `resume.yml` file into a
+themed HTML resume, a PDF, JSON Resume, Markdown, and ATS-safe plain text. It
+ships as **one Go binary** that doubles as a CLI, a web editor, and a CI
+target. There is no SaaS lock-in. Your resume is a file, your themes are
+folders, your history is `git log`.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+## Three ways to use it
 
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<Columns cols={3}>
+  <Card title="Web editor" icon="window" href="/editor">
+    Edit YAML on the left, see the rendered resume on the right. Switch themes,
+    print, or download a standalone HTML file. Runs locally or hosted.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="CLI" icon="terminal" href="/cli">
+    `resumelang build resume.yml` — produces every format. Zero config. Single
+    binary, no Node, no Python.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="GitHub Action" icon="rocket" href="/ci">
+    Keep `resume.yml` in your own repo. On push, CI rebuilds and publishes the
+    output to GitHub Pages.
   </Card>
 </Columns>
 
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
+## Pick a path
 
 <Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+  <Card title="Quickstart" icon="play" href="/quickstart">
+    Install the binary and ship your first themed resume in under five minutes.
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="DSL schema" icon="code" href="/schema">
+    The full `resume.yml` shape — every field, every type, every example.
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
+  <Card title="Theme system" icon="palette" href="/themes">
+    Five built-in themes plus a strict `theme.yml` spec for community themes.
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
+  <Card title="VS Code extension" icon="code-pull-request" href="/extension">
+    Live preview, schema validation, and theme switching inside your editor.
   </Card>
 </Columns>
 
-## Make your content agent ready
+## Why a DSL?
 
-Make your docs work for humans and AI agents alike.
+A resume is structured data — a name, jobs, dates, skills — not a Word document.
+Once it is structured, every problem people have with resumes goes away:
 
-<Columns cols={2}>
-  <Card
-    title="Prompt component"
-    icon="robot"
-    href="/agent-ready/prompt"
-  >
-    Embed shareable AI prompts readers can copy or open in Cursor.
-  </Card>
-  <Card
-    title="Visibility"
-    icon="eye"
-    href="/agent-ready/visibility"
-  >
-    Show different content to humans and agents reading your docs.
-  </Card>
-  <Card
-    title="Contextual menu"
-    icon="bolt"
-    href="/agent-ready/contextual"
-  >
-    Give readers one-click access to Claude, ChatGPT, Cursor, and more.
-  </Card>
-  <Card
-    title="AI coding tools"
-    icon="wand-magic-sparkles"
-    href="/ai-tools/claude-code"
-  >
-    Set up Claude Code, Cursor, or Windsurf with Mintlify's skill.
-  </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+- **One source, every format.** Apply with PDF, share online as HTML, paste
+  into ATS as plain text.
+- **Diffable.** `git diff` shows exactly what changed between versions.
+- **Re-themable.** Pick `minimal`, `aurora`, `material`, `terminal`, `sap`, or
+  ship your own.
+- **Schema-validated.** Your editor autocompletes fields and red-squiggles
+  typos.
+- **Portable.** A single binary builds it on Linux, macOS, Windows, and CI.

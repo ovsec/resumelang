@@ -1,0 +1,111 @@
+---
+title: "Themes"
+description: "Five built-in themes plus a strict spec for community themes."
+icon: "palette"
+---
+
+A theme is a folder. resumelang validates it against a versioned `theme.yml`
+spec at load time, so a broken theme fails the build instead of producing
+half-rendered HTML.
+
+## Built-in themes
+
+| Theme | Best for |
+| --- | --- |
+| `minimal` | One-page, no-frills, ATS-friendly. The default. |
+| `aurora` | Modern two-column with hero gradient. Designer-leaning. |
+| `material` | Card-based grid, opinionated for tech roles. |
+| `terminal` | Monospace, dark, hacker aesthetic. |
+| `sap` | Two-column with sidebar for certs/skills/langs. Built for SAP, finance, consulting. |
+
+Pick one in `meta.theme`:
+
+```yaml
+meta:
+  theme: aurora
+```
+
+## Anatomy of a theme
+
+```text
+themes/<name>/
+├── theme.yml                 # spec: v1, name, version, supports, tokens
+├── templates/resume.hbs      # Handlebars template
+└── assets/style.css          # injected via {{{themeCSS}}}
+```
+
+The Handlebars context is the parsed YAML (lowercase keys), plus:
+
+- `themeCSS` — the raw stylesheet (use `{{{themeCSS}}}` to inline)
+- `tokens` — flattened design tokens (e.g. `{{tokens.colors_background}}`)
+
+Helpers that ship with both the Go and JS runtimes:
+
+| Helper | Example |
+| --- | --- |
+| `join` | `{{join skills ", "}}` |
+| `eq` | `{{#if (eq meta.theme "minimal")}}…{{/if}}` |
+| `default` | `{{default end "Present"}}` |
+| `upper` | `{{upper person.name}}` |
+| `lower` | `{{lower meta.language}}` |
+
+## theme.yml — the contract
+
+```yaml
+spec: v1
+
+name: aurora
+version: 1.0.0
+author: ovsec
+
+supports:
+  layouts: [timeline, grid, cards]
+  blocks: [bullets, tags, metrics, text]
+  ui:
+    variant: [card, compact]
+
+tokens:
+  colors:
+    background: "#0e0f13"
+    accent: "#7c8cff"
+  spacing:
+    section_gap: 24
+  typography:
+    body_size: 14
+    heading_weight: 600
+```
+
+`tokens` is flattened into a single namespace at compile time (e.g.
+`{{tokens.colors_accent}}`) and exposed as CSS custom properties at runtime
+(`--rl-colors-accent`).
+
+## Validation rules
+
+| Level | Behavior |
+| --- | --- |
+| ERROR | Build fails. Wrong `spec` version, missing required fields, missing template files. |
+| WARN | Build continues, prints to stderr. Unknown top-level keys (forward compat). |
+| IGNORE | Silently skipped. Blocks not in `supports.blocks`. |
+
+Validate a theme without rendering anything:
+
+```bash
+resumelang theme validate ./my-theme
+```
+
+## Contributing a theme
+
+1. Fork [`ovsec/resumelang`](https://github.com/ovsec/resumelang).
+2. `cp -r themes/minimal themes/<your-name>`.
+3. Edit `theme.yml`, `templates/resume.hbs`, `assets/style.css`.
+4. `resumelang theme validate ./themes/<your-name>`.
+5. Open a PR with a screenshot rendered from `examples/jane.yml`.
+
+Themes ship as part of the binary via `embed.FS`, so they get the same
+versioning and offline guarantee as the compiler itself.
+
+## Forward compatibility
+
+`theme.yml` is versioned. A theme written for `spec: v1` will keep working when
+the compiler bumps to `v2`. Compilers refuse to load themes with a higher
+`spec` than they understand, with a clear error message.

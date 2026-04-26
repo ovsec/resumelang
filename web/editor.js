@@ -100,6 +100,19 @@ projects:
     return data;
   }
 
+  function mergeTokens(base, override) {
+    const out = Object.assign({}, base || {});
+    if (!override || typeof override !== 'object') return out;
+    for (const k of Object.keys(override)) {
+      const bv = out[k];
+      const ov = override[k];
+      const bothMaps = bv && typeof bv === 'object' && !Array.isArray(bv)
+        && ov && typeof ov === 'object' && !Array.isArray(ov);
+      out[k] = bothMaps ? mergeTokens(bv, ov) : ov;
+    }
+    return out;
+  }
+
   function flattenTokens(tokens, prefix, out) {
     out = out || {};
     if (!tokens || typeof tokens !== 'object') return out;
@@ -151,8 +164,9 @@ projects:
     localStorage.setItem(THEME_KEY, themeName);
 
     loadTheme(themeName).then(({ compiled, css, themeYml }) => {
-      applyEditorAppearance(themeYml);
-      const tokens = flattenTokens(themeYml.tokens || {});
+      const merged = mergeTokens(themeYml.tokens || {}, (resume.meta && resume.meta.tokens) || {});
+      applyEditorAppearance({ tokens: merged });
+      const tokens = flattenTokens(merged);
       const ctx = Object.assign({}, resume, {
         tokens,
         themeCSS: css,
@@ -199,11 +213,232 @@ projects:
     }
     select.addEventListener('change', render);
 
-    // Initial content
-    const saved_yaml = localStorage.getItem(STORAGE_KEY);
-    cm.setValue(saved_yaml || DEFAULT_YAML);
-    render();
+    // Initial content — share link in URL fragment beats localStorage beats default
+    decodeShareYaml().then(shared => {
+      if (shared) {
+        cm.setValue(shared);
+        status('loaded shared resume — saved locally', 'ok');
+      } else {
+        const saved_yaml = localStorage.getItem(STORAGE_KEY);
+        cm.setValue(saved_yaml || DEFAULT_YAML);
+      }
+      render();
+    });
   }).catch(e => status('themes: ' + e.message, 'err'));
+
+  // Theme gallery modal
+  const galleryModal = document.getElementById('gallery-modal');
+  const galleryGrid = document.getElementById('gallery-grid');
+  const gallerySearch = document.getElementById('gallery-search');
+  const galleryCount = document.getElementById('gallery-count');
+  const galleryLoader = document.getElementById('gallery-loader');
+  let galleryFilter = '';
+  let galleryItems = [];
+
+  function renderThemeForGallery(name, yamlText) {
+    return loadTheme(name).then(({ compiled, css, themeYml }) => {
+      let resume;
+      try { resume = jsyaml.load(yamlText) || {}; } catch { resume = {}; }
+      const merged = mergeTokens(themeYml.tokens || {}, (resume.meta && resume.meta.tokens) || {});
+      const tokens = flattenTokens(merged);
+      const ctx = Object.assign({}, resume, { tokens, themeCSS: css });
+      return { name, html: compiled(ctx), version: themeYml.version || '' };
+    });
+  }
+
+  function renderGalleryGrid() {
+    galleryGrid.innerHTML = '';
+    const q = galleryFilter.trim().toLowerCase();
+    const visible = galleryItems.filter(t => !q || t.name.toLowerCase().includes(q));
+    galleryCount.textContent = `${visible.length} / ${galleryItems.length}`;
+    const active = document.getElementById('theme-select').value;
+
+    if (visible.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'gallery-empty';
+      empty.textContent = q ? `no themes match "${q}"` : 'no themes';
+      galleryGrid.appendChild(empty);
+      return;
+    }
+
+    for (const t of visible) {
+      const card = document.createElement('div');
+      card.className = 'gallery-card' + (t.name === active ? ' active' : '');
+      card.dataset.name = t.name;
+
+      const thumb = document.createElement('div');
+      thumb.className = 'gallery-thumb';
+
+      const iframe = document.createElement('iframe');
+      iframe.setAttribute('sandbox', '');
+      iframe.setAttribute('referrerpolicy', 'no-referrer');
+      iframe.setAttribute('loading', 'lazy');
+      iframe.srcdoc = t.html;
+
+      const cover = document.createElement('div');
+      cover.className = 'gallery-thumb-cover';
+
+      thumb.appendChild(iframe);
+      thumb.appendChild(cover);
+
+      const body = document.createElement('div');
+      body.className = 'gallery-card-body';
+      const nameEl = document.createElement('span');
+      nameEl.className = 'gallery-card-name';
+      nameEl.textContent = t.name;
+      const meta = document.createElement('span');
+      meta.className = 'gallery-card-meta';
+      meta.textContent = t.version ? 'v' + t.version : '';
+      body.appendChild(nameEl);
+      body.appendChild(meta);
+
+      card.appendChild(thumb);
+      card.appendChild(body);
+      card.addEventListener('click', () => applyTheme(t.name));
+      galleryGrid.appendChild(card);
+    }
+  }
+
+  function applyTheme(name) {
+    const select = document.getElementById('theme-select');
+    select.value = name;
+    select.dispatchEvent(new Event('change'));
+    closeGallery();
+  }
+
+  function openGallery() {
+    galleryModal.hidden = false;
+    galleryFilter = '';
+    gallerySearch.value = '';
+    galleryGrid.innerHTML = '';
+    galleryLoader.hidden = false;
+    setTimeout(() => gallerySearch.focus(), 30);
+
+    const yamlText = cm.getValue();
+    const select = document.getElementById('theme-select');
+    const themes = Array.from(select.options).map(o => o.value);
+
+    Promise.all(themes.map(n => renderThemeForGallery(n, yamlText).catch(() => null)))
+      .then(results => {
+        galleryItems = results.filter(Boolean);
+        galleryLoader.hidden = true;
+        renderGalleryGrid();
+      });
+  }
+
+  function closeGallery() {
+    galleryModal.hidden = true;
+  }
+
+  document.getElementById('btn-gallery').addEventListener('click', openGallery);
+  galleryModal.addEventListener('click', (e) => {
+    if (e.target.dataset.close !== undefined) closeGallery();
+  });
+  gallerySearch.addEventListener('input', (e) => {
+    galleryFilter = e.target.value;
+    renderGalleryGrid();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (galleryModal.hidden) return;
+    if (e.key === 'Escape') {
+      if (gallerySearch.value) {
+        gallerySearch.value = '';
+        galleryFilter = '';
+        renderGalleryGrid();
+      } else {
+        closeGallery();
+      }
+    }
+  });
+
+  // Share link — gzip + base64url into URL fragment, fully client-side
+  async function encodeShareYaml(text) {
+    if (!('CompressionStream' in window)) {
+      return base64UrlEncode(new TextEncoder().encode(text));
+    }
+    const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+    const buf = await new Response(stream).arrayBuffer();
+    return 'g.' + base64UrlEncode(new Uint8Array(buf));
+  }
+  async function decodeShareYaml() {
+    const m = location.hash.match(/^#yml=(.+)$/);
+    if (!m) return null;
+    try {
+      let raw = m[1];
+      if (raw.startsWith('g.')) {
+        const bytes = base64UrlDecode(raw.slice(2));
+        if ('DecompressionStream' in window) {
+          const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+          return await new Response(stream).text();
+        }
+        return null;
+      }
+      return new TextDecoder().decode(base64UrlDecode(raw));
+    } catch (e) {
+      status('share: ' + e.message, 'err');
+      return null;
+    }
+  }
+  function base64UrlEncode(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function base64UrlDecode(str) {
+    const pad = '='.repeat((4 - (str.length % 4)) % 4);
+    const b64 = (str + pad).replace(/-/g, '+').replace(/_/g, '/');
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  document.getElementById('btn-share').addEventListener('click', async () => {
+    try {
+      const enc = await encodeShareYaml(cm.getValue());
+      const url = location.origin + location.pathname + '#yml=' + enc;
+      if (url.length > 8000) {
+        status('share: link is ' + url.length + ' chars — may not work on all platforms', 'err');
+      }
+      try {
+        await navigator.clipboard.writeText(url);
+        status('share link copied (' + url.length + ' chars)', 'ok');
+      } catch {
+        prompt('Copy this share link:', url);
+      }
+      history.replaceState(null, '', '#yml=' + enc);
+    } catch (e) {
+      status('share: ' + e.message, 'err');
+    }
+  });
+
+  // User widget
+  fetch('/api/me', { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(data => {
+      const widget = document.getElementById('user-widget');
+      if (!widget) return;
+      const chip = document.getElementById('user-link');
+      const signin = document.getElementById('user-signin');
+      widget.hidden = false;
+      if (data && data.user) {
+        const u = data.user;
+        document.getElementById('user-avatar').src = u.avatar || '/web/favicon.svg';
+        document.getElementById('user-name').textContent = u.name || u.login || u.provider;
+        chip.style.display = '';
+        chip.href = '/auth/logout';
+        chip.title = 'Signed in as ' + (u.login || u.email || u.provider) + ' — click to sign out';
+        signin.style.display = 'none';
+      } else {
+        chip.style.display = 'none';
+        signin.style.display = '';
+        // No providers configured? Hide button entirely (offline-only mode).
+        if (!data || !Array.isArray(data.providers) || data.providers.length === 0) {
+          signin.style.display = 'none';
+        }
+      }
+    })
+    .catch(() => { /* offline fine */ });
 
   // Print
   document.getElementById('btn-print').addEventListener('click', () => {

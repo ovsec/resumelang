@@ -1,0 +1,178 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  background: var(--rl-background);
+  color: var(--rl-text-primary);
+  font-size: var(--rl-typography-body-size);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--rl-surface);
+  color: #f3f4f6;
+  padding: 36px 24px;
+}
+
+.sidebar-head { margin-bottom: 28px; padding-bottom: 16px; border-bottom: 2px solid var(--rl-accent); }
+
+.name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.title {
+  font-size: 0.85rem;
+  color: var(--rl-accent-glow);
+  font-weight: 500;
+}
+
+.side-section { margin-bottom: 24px; }
+
+.side-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--rl-accent-glow);
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #4b5563;
+}
+
+.contact-list {
+  list-style: none;
+  font-size: 0.8rem;
+}
+
+.contact-list li {
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.contact-list .lbl {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--rl-text-tertiary);
+  margin-bottom: 1px;
+}
+
+.contact-list a { color: #d1fae5; text-decoration: none; }
+.contact-list a:hover { color: #ffffff; }
+
+.skill-group { margin-bottom: 10px; }
+.skill-category {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+.skills-list { font-size: 0.78rem; color: #d1d5db; line-height: 1.5; }
+
+.edu-item { margin-bottom: 12px; font-size: 0.8rem; }
+.edu-institution { font-weight: 600; color: #ffffff; }
+.edu-degree { color: #d1d5db; font-size: 0.78rem; }
+.edu-dates, .edu-gpa { color: var(--rl-text-tertiary); font-size: 0.72rem; }
+
+.sidebar .plain { list-style: none; font-size: 0.8rem; }
+.sidebar .plain li { margin-bottom: 8px; color: #d1d5db; line-height: 1.4; }
+.sidebar .plain li strong { color: #ffffff; }
+
+.main {
+  padding: 36px 40px;
+}
+
+.main-section { margin-bottom: var(--rl-spacing-section-gap); }
+
+.main-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--rl-accent);
+  margin-bottom: 14px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--rl-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.summary-text {
+  color: var(--rl-text-secondary);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.job, .project-item { margin-bottom: 18px; }
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.job-role { font-weight: var(--rl-typography-heading-weight); }
+.job-company { color: var(--rl-accent); font-weight: 500; }
+.job-company::before { content: " · "; color: var(--rl-text-tertiary); }
+
+.job-dates {
+  font-size: 0.78rem;
+  color: var(--rl-text-secondary);
+  white-space: nowrap;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: var(--rl-radius-base);
+}
+
+.job-location { color: var(--rl-text-tertiary); font-size: 0.85rem; margin-bottom: 6px; }
+
+.job ul, .project-item ul {
+  padding-left: 18px;
+  color: var(--rl-text-secondary);
+  margin-top: 4px;
+}
+
+.job li, .project-item li {
+  margin-bottom: 3px;
+  font-size: 0.92rem;
+}
+.job li::marker { color: var(--rl-accent); }
+
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.tag {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  background: var(--rl-accent);
+  color: #ffffff;
+  border-radius: var(--rl-radius-base);
+  font-weight: 500;
+}
+
+.project-name { font-weight: var(--rl-typography-heading-weight); margin-bottom: 4px; }
+.project-name a { color: var(--rl-accent); text-decoration: none; }
+.project-desc { color: var(--rl-text-secondary); font-size: 0.92rem; }
+
+.main .plain { list-style: none; }
+.main .plain li { margin-bottom: 4px; font-size: 0.92rem; color: var(--rl-text-secondary); }
+
+@media print {
+  .layout { min-height: auto; }
+  .sidebar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+@media (max-width: 720px) {
+  .layout { grid-template-columns: 1fr; }
+}

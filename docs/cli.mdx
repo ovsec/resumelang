@@ -1,0 +1,88 @@
+---
+title: "CLI"
+description: "Single binary. Every command in one page."
+icon: "terminal"
+---
+
+```text
+resumelang <command> [args] [flags]
+```
+
+## Commands
+
+| Command | Status | Purpose |
+| --- | --- | --- |
+| `init [file]` | shipped | Scaffold a starter `resume.yml`. |
+| `build [file] [flags]` | shipped | Compile to `html`, `json`, `md`, `txt`. |
+| `validate [file]` | shipped | Schema check + helpful warnings. |
+| `themes` | shipped | List built-in themes. |
+| `theme validate <dir>` | shipped | Lint a custom theme against `theme.yml` spec. |
+| `serve [flags]` | shipped | Launch the local web editor. |
+| `version` | shipped | Print binary version. |
+| `lint [file]` | planned | ATS keyword + readability score. |
+| `diff <a> <b>` | planned | Diff two resume files. |
+| `pdf [file]` | planned | One-shot PDF via headless Chrome. |
+| `import linkedin <zip>` | planned | LinkedIn export → resume.yml. |
+| `import jsonresume <json>` | planned | JSON Resume → resume.yml. |
+
+## `build`
+
+```bash
+resumelang build [file] [flags]
+```
+
+| Flag | Default | Purpose |
+| --- | --- | --- |
+| `--out <dir>` | `dist` | Output directory. |
+| `--formats <list>` | `html,json,md,txt` | Comma-separated subset of formats. |
+| `--theme <name|path>` | from YAML | Override `meta.theme`. |
+
+```bash
+resumelang build resume.yml --formats html,pdf --out public
+resumelang build jane.resume.yml --theme aurora
+```
+
+Output filenames mirror the input, with the `.resume` segment stripped:
+
+| Input | Output base |
+| --- | --- |
+| `resume.yml` | `resume.html`, `resume.txt`, … |
+| `jane.resume.yml` | `jane.html`, `jane.txt`, … |
+
+## `serve`
+
+```bash
+resumelang serve [--port N] [--addr H] [--root DIR]
+```
+
+| Flag | Default | Purpose |
+| --- | --- | --- |
+| `--port` | `5500` | Listen port. |
+| `--addr` | `127.0.0.1` | Bind address. Use `0.0.0.0` to expose on LAN. |
+| `--root` | `cwd` | Project root that holds `web/`, `themes/`, `schema/`. |
+
+OAuth env vars (optional — enable login providers):
+
+```bash
+RL_GITHUB_CLIENT_ID, RL_GITHUB_CLIENT_SECRET
+RL_LINKEDIN_CLIENT_ID, RL_LINKEDIN_CLIENT_SECRET
+RL_AUTH_SECRET             # 32+ bytes — HMAC for session cookie
+```
+
+## `validate`
+
+```bash
+resumelang validate resume.yml
+```
+
+Returns non-zero on schema errors. Warnings (missing `resumelang: v1` preamble,
+unrecognized theme name) are printed to stderr but do not fail the command.
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success. |
+| 1 | Generic error. |
+| 2 | Schema validation failed. |
+| 3 | Theme load failed. |

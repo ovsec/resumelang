@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>resumelang editor</title>
+  <link rel="icon" href="/web/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,18 +14,26 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
-      <span class="brand-mark">◇</span>
-      <span class="brand-name">resumelang</span>
-    </div>
+    <a class="brand" href="/" aria-label="resumelang home">
+      <img class="brand-logo" src="/web/assets/logo.svg" alt="resumelang" height="22">
+    </a>
     <div class="controls">
       <div class="control">
         <span class="label">Theme</span>
         <select id="theme-select" class="select"></select>
+        <button id="btn-gallery" type="button" class="btn btn-ghost" title="Browse themes with previews">Browse…</button>
       </div>
       <button id="btn-print" type="button" class="btn">Print / PDF</button>
+      <button id="btn-share" type="button" class="btn" title="Copy a self-contained link to this resume">Share</button>
       <button id="btn-download" type="button" class="btn btn-primary">Download</button>
       <span id="status" class="status"></span>
+      <div id="user-widget" class="user-widget" hidden>
+        <a id="user-link" class="user-chip" href="#" title="Account">
+          <img id="user-avatar" alt="" width="22" height="22">
+          <span id="user-name"></span>
+        </a>
+        <a id="user-signin" class="btn btn-ghost" href="/login">Sign in</a>
+      </div>
     </div>
   </header>
   <main class="split" id="split">
@@ -38,6 +47,27 @@
       <iframe id="preview" title="resume preview"></iframe>
     </section>
   </main>
+  <div id="gallery-modal" class="gallery-modal" hidden aria-modal="true" role="dialog" aria-label="Theme gallery">
+    <div class="gallery-backdrop" data-close></div>
+    <div class="gallery-panel">
+      <header class="gallery-head">
+        <h2 class="gallery-title">Theme Gallery</h2>
+        <div class="gallery-search">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="gallery-search" type="search" placeholder="Search themes…" autocomplete="off" />
+          <span class="kbd">esc</span>
+        </div>
+        <span id="gallery-count" class="gallery-count"></span>
+        <button class="btn btn-ghost" data-close aria-label="Close">×</button>
+      </header>
+      <div id="gallery-grid" class="gallery-grid"></div>
+      <div id="gallery-loader" class="gallery-loader">
+        <div class="gallery-spinner"></div>
+        <span>rendering thumbnails…</span>
+      </div>
+    </div>
+  </div>
+
   <script src="/web/vendor/codemirror.min.js"></script>
   <script src="/web/vendor/yaml.min.js"></script>
   <script src="/web/vendor/handlebars.min.js"></script>
