@@ -579,6 +579,136 @@ body.dragging iframe { pointer-events: none; }
 .hl-key     { color: #818cf8; }
 .hl-str     { color: #86efac; }
 
+/* ── Share modal ─────────────────────────────────── */
+.share-modal {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.share-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(5,5,10,0.72); backdrop-filter: blur(6px); cursor: pointer;
+}
+.share-panel {
+  position: relative; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 14px; width: min(440px, 95vw);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.55); overflow: hidden;
+}
+.share-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 12px; border-bottom: 1px solid var(--border);
+}
+.share-title { font-size: 14px; font-weight: 600; }
+.share-close {
+  width: 28px; height: 28px; border-radius: 7px; border: 1px solid transparent;
+  background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center;
+  transition: background .1s, color .1s;
+}
+.share-close:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+.share-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.share-label { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 8px; }
+.share-label-row { display: flex; align-items: center; gap: 8px; margin-bottom: 0; cursor: pointer; color: var(--text); font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.share-label-row input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
+.share-fmt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.share-fmt {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  border-radius: 8px; border: 1px solid var(--border2); background: var(--bg);
+  color: var(--muted); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: border-color .1s, color .1s, background .1s;
+}
+.share-fmt:hover { border-color: var(--accent); color: var(--text); }
+.share-fmt.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-h); }
+.share-pw-row { margin-top: 10px; }
+.share-pw-input {
+  width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 9px 12px; font: inherit; font-size: 13px; outline: none;
+  transition: border-color .12s;
+}
+.share-pw-input:focus { border-color: var(--accent); }
+.share-pw-hint { font-size: 11.5px; color: var(--muted2); margin-top: 6px; }
+.share-actions { padding: 14px 16px; }
+.share-actions .nav-primary { width: 100%; justify-content: center; height: 36px; }
+.share-result { margin-top: 10px; font-size: 12.5px; font-family: var(--font-mono); padding: 8px 10px; border-radius: 7px; }
+.share-result-ok  { color: var(--ok);  background: rgba(74,222,128,.08);  border: 1px solid rgba(74,222,128,.2);  }
+.share-result-err { color: var(--err); background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.2); }
+
+/* ── Dashboard ───────────────────────────────────── */
+.dash-main { padding: 32px; max-width: 900px; margin: 0 auto; overflow-y: auto; height: calc(100vh - 50px); }
+.dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.dash-empty { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 80px 20px; color: var(--muted); }
+.dash-empty p { font-size: 14px; }
+.dash-card {
+  background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px; transition: border-color .15s;
+}
+.dash-card:hover { border-color: var(--accent); }
+.dash-card-body { display: flex; flex-direction: column; gap: 4px; }
+.dash-card-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.dash-card-date { font-size: 11.5px; color: var(--muted2); font-family: var(--font-mono); }
+.dash-card-actions { display: flex; gap: 6px; }
+.btn-sm {
+  height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--border2);
+  background: transparent; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer;
+  text-decoration: none; display: inline-flex; align-items: center; transition: border-color .1s, color .1s;
+}
+.btn-sm:hover { border-color: var(--accent); color: var(--text); }
+.btn-sm-share { color: var(--accent); border-color: var(--accent-soft); }
+.btn-sm-danger:hover { border-color: var(--err); color: var(--err); }
+
+/* ── Login page ──────────────────────────────────── */
+.login-shell {
+  display: grid; place-items: center; min-height: 100vh;
+  background: var(--bg);
+}
+.login-card {
+  width: min(400px, 92vw); padding: 40px 36px;
+  background: var(--surface); border: 1px solid var(--border2); border-radius: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+}
+.login-brand { margin-bottom: 24px; }
+.login-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.login-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 28px; text-align: center; }
+.login-providers { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.login-provider-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; height: 42px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font: inherit; font-size: 14px; font-weight: 500;
+  text-decoration: none; cursor: pointer; transition: border-color .1s, background .1s;
+}
+.login-provider-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.login-no-providers { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.6; }
+.login-no-providers code { font-family: var(--font-mono); font-size: 11.5px; background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+.login-skip { font-size: 13px; color: var(--muted2); text-decoration: none; }
+.login-skip:hover { color: var(--text); }
+
+/* ── Password overlay (view page) ────────────────── */
+.pw-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(5,5,10,0.85); backdrop-filter: blur(8px);
+  display: grid; place-items: center;
+}
+.pw-overlay[hidden] { display: none; }
+.pw-panel {
+  width: min(360px, 90vw); background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 14px; padding: 28px 24px; display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+.pw-label { font-size: 14px; font-weight: 600; color: var(--text); text-align: center; }
+.pw-input {
+  width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 10px 14px; font: inherit; font-size: 14px; outline: none;
+  transition: border-color .12s;
+}
+.pw-input:focus { border-color: var(--accent); }
+.pw-error { font-size: 12.5px; color: var(--err); text-align: center; }
+.pw-error[hidden] { display: none; }
+
+/* ── Gallery card loading stub ───────────────────── */
+.gallery-card-stub .gallery-thumb-loading {
+  display: grid; place-items: center; background: var(--bg2);
+}
+
 /* ── Mobile ───────────────────────────────────────── */
 @media (max-width: 760px) {
   .editor-nav { padding: 0 12px; }

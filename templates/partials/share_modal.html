@@ -1,0 +1,225 @@
+<div class="share-modal" id="share-modal">
+  <div class="share-backdrop" onclick="closeShareModal()"></div>
+  <div class="share-panel">
+    <header class="share-head">
+      <h2 class="share-title">Share Resume</h2>
+      <button class="share-close" onclick="closeShareModal()" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 1l12 12M13 1L1 13"/></svg>
+      </button>
+    </header>
+
+    <!-- Format picker -->
+    <div class="share-section">
+      <label class="share-label">Format</label>
+      <div class="share-fmt-grid">
+        <button class="share-fmt active" data-fmt="link" onclick="selectFmt(this,'link')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Live Link
+        </button>
+        <button class="share-fmt" data-fmt="html" onclick="selectFmt(this,'html')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          HTML File
+        </button>
+        <button class="share-fmt" data-fmt="txt" onclick="selectFmt(this,'txt')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Text (ATS)
+        </button>
+        <button class="share-fmt" data-fmt="pdf" onclick="selectFmt(this,'pdf')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Print / PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Password lock (link format only) -->
+    <div class="share-section" id="share-lock-section">
+      <label class="share-label share-label-row">
+        <input type="checkbox" id="share-lock-chk" onchange="togglePwRow(this.checked)">
+        Password protect
+      </label>
+      <div id="share-pw-row" hidden>
+        <input type="password" id="share-pw" class="share-pw-input" placeholder="Enter password…" autocomplete="new-password">
+        <p class="share-pw-hint">Recipient will be prompted for this password.</p>
+      </div>
+    </div>
+
+    <!-- Action -->
+    <div class="share-actions">
+      <button id="share-action-btn" class="nav-primary" onclick="doShareAction()">
+        Copy Link
+      </button>
+      <div id="share-result" class="share-result" hidden></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let currentFmt = 'link';
+
+  function getEditorYAML() {
+    if (window.editorGetYAML) return window.editorGetYAML();
+    const ta = document.getElementById('yaml-hidden');
+    return ta ? ta.value : '';
+  }
+  function getEditorTheme() {
+    const sel = document.getElementById('theme-select');
+    return sel ? sel.value : 'sap';
+  }
+
+  window.selectFmt = function(btn, fmt) {
+    document.querySelectorAll('.share-fmt').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFmt = fmt;
+    const lockSec = document.getElementById('share-lock-section');
+    const actionBtn = document.getElementById('share-action-btn');
+    if (fmt === 'link') {
+      lockSec.hidden = false;
+      actionBtn.textContent = 'Copy Link';
+    } else if (fmt === 'pdf') {
+      lockSec.hidden = true;
+      actionBtn.textContent = 'Print / Save PDF';
+    } else {
+      lockSec.hidden = true;
+      actionBtn.textContent = 'Download ' + (fmt === 'html' ? 'HTML' : 'Text');
+    }
+    document.getElementById('share-result').hidden = true;
+  };
+
+  window.togglePwRow = function(on) {
+    document.getElementById('share-pw-row').hidden = !on;
+    if (on) document.getElementById('share-pw').focus();
+  };
+
+  window.closeShareModal = function() {
+    const el = document.getElementById('share-modal');
+    if (el) el.remove();
+  };
+
+  window.doShareAction = async function() {
+    const btn = document.getElementById('share-action-btn');
+    const result = document.getElementById('share-result');
+    result.hidden = true;
+    btn.disabled = true;
+    btn.textContent = '…';
+
+    try {
+      const yaml = getEditorYAML();
+      const theme = getEditorTheme();
+
+      if (currentFmt === 'pdf') {
+        const iframe = document.getElementById('preview');
+        if (iframe && iframe.contentWindow) iframe.contentWindow.print();
+        closeShareModal();
+        return;
+      }
+
+      if (currentFmt === 'html') {
+        const res = await fetch('/api/export/html', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({yaml, theme}),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const blob = await res.blob();
+        triggerDownload(blob, 'resume.html');
+        closeShareModal();
+        return;
+      }
+
+      if (currentFmt === 'txt') {
+        const res = await fetch('/api/export/txt', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({yaml}),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const blob = await res.blob();
+        triggerDownload(blob, 'resume.txt');
+        closeShareModal();
+        return;
+      }
+
+      // Live link
+      const locked = document.getElementById('share-lock-chk').checked;
+      const pw = locked ? document.getElementById('share-pw').value : '';
+      if (locked && !pw) {
+        document.getElementById('share-pw').focus();
+        btn.disabled = false;
+        btn.textContent = 'Copy Link';
+        return;
+      }
+
+      let encoded;
+      if (locked) {
+        encoded = await encryptYaml(yaml, pw);
+      } else {
+        encoded = await gzipEncode(yaml);
+      }
+
+      const url = location.origin + '/r#yml=' + encoded;
+      try {
+        await navigator.clipboard.writeText(url);
+        showResult('✓ Link copied to clipboard', false);
+      } catch {
+        prompt('Copy this link:', url);
+      }
+    } catch(e) {
+      showResult('Error: ' + e.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = currentFmt === 'link' ? 'Copy Link'
+        : currentFmt === 'pdf' ? 'Print / Save PDF'
+        : 'Download ' + (currentFmt === 'html' ? 'HTML' : 'Text');
+    }
+  };
+
+  function showResult(msg, isErr) {
+    const el = document.getElementById('share-result');
+    el.textContent = msg;
+    el.className = 'share-result' + (isErr ? ' share-result-err' : ' share-result-ok');
+    el.hidden = false;
+  }
+
+  function triggerDownload(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  async function gzipEncode(text) {
+    if ('CompressionStream' in window) {
+      const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+      const buf = await new Response(stream).arrayBuffer();
+      return 'g.' + b64url(new Uint8Array(buf));
+    }
+    return b64url(new TextEncoder().encode(text));
+  }
+
+  async function encryptYaml(yaml, password) {
+    const enc = new TextEncoder();
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv   = crypto.getRandomValues(new Uint8Array(12));
+    const km = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey(
+      {name:'PBKDF2', salt, iterations:100000, hash:'SHA-256'},
+      km, {name:'AES-GCM', length:256}, false, ['encrypt']
+    );
+    const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, enc.encode(yaml));
+    return 'p.' + b64url(salt) + '.' + b64url(iv) + '.' + b64url(new Uint8Array(ct));
+  }
+
+  function b64url(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+
+  // Close on Escape
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { closeShareModal(); document.removeEventListener('keydown', esc); }
+  });
+})();
+</script>

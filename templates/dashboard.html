@@ -1,0 +1,53 @@
+<header class="editor-nav">
+  <div class="editor-nav-left">
+    <a class="nav-brand" href="/" title="Home">
+      <img src="/web/assets/logo.svg" alt="resumelang" height="20">
+    </a>
+    <span class="nav-sep"></span>
+    <span style="font-size:13px;font-weight:600;color:var(--text)">My Resumes</span>
+  </div>
+  <div class="editor-nav-right">
+    <a class="nav-ghost" href="/editor">New resume</a>
+    <span class="nav-divider"></span>
+    {{if .User}}
+    <a class="user-chip" href="/dashboard">
+      {{if .User.Avatar}}<img src="{{.User.Avatar}}" alt="" width="20" height="20">{{end}}
+      <span>{{if .User.Name}}{{.User.Name}}{{else}}{{.User.Login}}{{end}}</span>
+    </a>
+    <a class="nav-ghost" href="/auth/logout" style="font-size:12px;padding:0 8px">↩</a>
+    {{end}}
+  </div>
+</header>
+
+<main class="dash-main">
+  {{if not .Resumes}}
+  <div class="dash-empty">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <p>No saved resumes yet.</p>
+    <a class="nav-primary" href="/editor">Create one</a>
+  </div>
+  {{else}}
+  <div class="dash-grid" id="resume-list">
+    {{range .Resumes}}
+    <div class="dash-card" id="card-{{.ID}}">
+      <div class="dash-card-body">
+        <span class="dash-card-name">{{.Name}}</span>
+        <span class="dash-card-date">{{.UpdatedAt.Format "Jan 2, 2006"}}</span>
+      </div>
+      <div class="dash-card-actions">
+        <a class="btn-sm" href="/editor?id={{.ID}}">Edit</a>
+        <button class="btn-sm btn-sm-share"
+                hx-get="/partials/share-modal?resume_id={{.ID}}"
+                hx-target="#modal-container"
+                hx-swap="innerHTML">Share</button>
+        <button class="btn-sm btn-sm-danger"
+                hx-delete="/api/resumes/{{.ID}}"
+                hx-target="#card-{{.ID}}"
+                hx-swap="outerHTML swap:0.2s"
+                hx-confirm="Delete {{.Name}}?">Delete</button>
+      </div>
+    </div>
+    {{end}}
+  </div>
+  {{end}}
+</main>

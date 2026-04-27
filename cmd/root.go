@@ -22,7 +22,9 @@ func Execute() {
 		Init(args[1:])
 	case "themes":
 		Themes()
-	case "serve", "serve-static":
+	case "serve":
+		Serve(args[1:])
+	case "serve-static":
 		ServeStatic(args[1:])
 	case "version", "--version", "-v":
 		fmt.Println("resumelang " + Version)

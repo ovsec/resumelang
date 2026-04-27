@@ -1,0 +1,80 @@
+<div class="gallery-modal" id="gallery-modal">
+  <div class="gallery-backdrop" onclick="closeGallery()"></div>
+  <div class="gallery-panel">
+    <header class="gallery-head">
+      <h2 class="gallery-title">Themes</h2>
+      <div class="gallery-search-wrap">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5"/><path d="m13 13-3-3"/></svg>
+        <input id="gallery-search" type="search" placeholder="Search…" autocomplete="off"
+               oninput="filterGallery(this.value)">
+        <kbd>esc</kbd>
+      </div>
+      <span id="gallery-count" class="gallery-count"></span>
+      <button class="gallery-close" onclick="closeGallery()" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 1l12 12M13 1L1 13"/></svg>
+      </button>
+    </header>
+
+    <div id="gallery-grid" class="gallery-grid">
+      {{range .Themes}}
+      <div class="gallery-card gallery-card-stub" data-theme="{{.}}"
+           hx-post="/partials/gallery/card/{{.}}"
+           hx-include="#yaml-hidden"
+           hx-trigger="intersect once"
+           hx-swap="outerHTML">
+        <div class="gallery-thumb gallery-thumb-loading">
+          <div class="gallery-spinner"></div>
+        </div>
+        <div class="gallery-card-body">
+          <span class="gallery-card-name">{{.}}</span>
+        </div>
+      </div>
+      {{end}}
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  window.closeGallery = function() {
+    const el = document.getElementById('gallery-modal');
+    if (el) el.remove();
+  };
+
+  window.applyTheme = function(name) {
+    const sel = document.getElementById('theme-select');
+    if (sel) { sel.value = name; sel.dispatchEvent(new Event('change')); }
+    closeGallery();
+  };
+
+  window.filterGallery = function(q) {
+    const cards = document.querySelectorAll('.gallery-card[data-theme]');
+    let vis = 0;
+    cards.forEach(c => {
+      const match = !q || c.dataset.theme.toLowerCase().includes(q.toLowerCase());
+      c.style.display = match ? '' : 'none';
+      if (match) vis++;
+    });
+    const cnt = document.getElementById('gallery-count');
+    if (cnt) cnt.textContent = vis + ' / ' + cards.length;
+  };
+
+  // Update active state when a card is rendered
+  document.body.addEventListener('htmx:afterSwap', function() {
+    const active = document.getElementById('theme-select');
+    if (!active) return;
+    document.querySelectorAll('.gallery-card[data-theme]').forEach(c => {
+      c.classList.toggle('active', c.dataset.theme === active.value);
+    });
+    const all = document.querySelectorAll('.gallery-card[data-theme]').length;
+    const cnt = document.getElementById('gallery-count');
+    if (cnt) cnt.textContent = all + ' / ' + all;
+  });
+
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { closeGallery(); document.removeEventListener('keydown', esc); }
+  });
+
+  setTimeout(() => document.getElementById('gallery-search')?.focus(), 30);
+})();
+</script>

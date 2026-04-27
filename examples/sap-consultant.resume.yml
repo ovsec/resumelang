@@ -1,5 +1,4 @@
 # yaml-language-server: $schema=https://resumelang.dev/schema/v1.json
-## yaml-language-server: $schema=../schema/v1.json
 resumelang: v1
 
 meta:
