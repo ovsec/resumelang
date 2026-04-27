@@ -219,7 +219,7 @@ body {
   box-shadow: 0 4px 24px rgba(99, 102, 241, 0.35);
 }
 .cta-primary:active { transform: scale(0.975); }
-.cta-center { display: block; width: fit-content; margin: 28px auto 0; }
+.cta-center { display: flex; justify-content: center; width: fit-content; margin: 28px auto 0; }
 
 .cta-secondary {
   display: inline-flex;
