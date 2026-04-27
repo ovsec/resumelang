@@ -20,9 +20,7 @@ WORKDIR /app
 COPY --from=builder /app/resumelang .
 COPY web/ ./web/
 COPY schema/ ./schema/
-
-# Create themes directory (even if empty for basic serving)
-RUN mkdir -p themes
+COPY themes/ ./themes/
 
 ENV PORT=8080
 EXPOSE 8080
