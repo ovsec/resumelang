@@ -1,38 +1,78 @@
 # yaml-language-server: $schema=https://resumelang.dev/schema/v1.json
 resumelang: v1
 
+# ── Meta ─────────────────────────────────────────────────────────────────────
 meta:
-  theme: sap
-  language: en
-  page_size: a4
-  sections:
+  theme: sap              # sap | minimal | linear | vercel | brutalist | editorial
+                          # academic | dossier | timeline | aurora | material | finance | terminal
+  language: en            # en | de | fr | es | pt | ja | zh
+  page_size: a4           # a4 | letter
+  color: "#0070f2"        # accent color override (any hex) — shorthand for tokens.colors.accent
+  font: inter             # inter | mono | serif
+
+  sections:               # remove or reorder to hide / reorder sections
     - summary
     - experience
     - certifications
     - skills
     - education
+    - projects
+    - publications
+    - volunteer
+    - awards
     - languages
+    # - custom             # uncomment when custom sections are defined below
 
+  # ── Token overrides ────────────────────────────────────────────────────────
+  # Every value here is merged on top of the theme's defaults.
+  # All keys below match the SAP theme's token tree exactly.
+  tokens:
+    colors:
+      background:    "#f7f9fc"   # page background
+      surface:       "#ffffff"   # card / section background
+      surface_hover: "#eef2f7"   # hover state surface
+      border:        "#d6dde6"   # dividers and card borders
+      text_primary:  "#0a2540"   # headings, names
+      text_secondary: "#4a5b73"  # body text, dates, subtitles
+      accent:        "#0070f2"   # links, tags, active elements
+      accent_glow:   "#0040b0"   # darker accent (hover / shadow)
+      success:       "#107e3e"   # positive indicators
+      warning:       "#e9730c"   # caution indicators
+      error:         "#bb0000"   # error / negative indicators
+    spacing:
+      section_gap: 28            # vertical gap (px) between sections
+    typography:
+      heading_weight: 600        # font-weight for section headings
+      body_size: 14              # base font size (px)
+    radius:
+      base: 4                    # border-radius (px) for cards / tags
+
+# ── Person ────────────────────────────────────────────────────────────────────
 person:
-  name: Ravi Kumar
-  title: Senior SAP S/4HANA Consultant
-  email: ravi.kumar@example.com
-  phone: +49 170 1234 5678
+  name:     Ravi Kumar
+  title:    Senior SAP S/4HANA Consultant
+  email:    ravi.kumar@example.com
+  phone:    "+49 170 1234 5678"
   location: Walldorf, Germany
-  linkedin: ravikumar-sap
-  website: https://ravikumar.dev
+  website:  https://ravikumar.dev
+  github:   ravikumar-sap            # username only (no https://github.com/)
+  linkedin: ravikumar-sap            # handle only (no https://linkedin.com/in/)
+  avatar:   https://i.pravatar.cc/150?u=ravikumar  # optional profile picture URL
 
+# ── Summary ───────────────────────────────────────────────────────────────────
 summary: |
   SAP-certified consultant with 12 years of experience leading S/4HANA implementations
   across FI, CO, and MM modules. Delivered 8 full-cycle greenfield projects and 14 brownfield
   migrations for manufacturing, retail, and pharma clients across EMEA.
 
+# ── Experience ────────────────────────────────────────────────────────────────
 experience:
-  - company: Deloitte Consulting GmbH
-    role: Lead SAP S/4HANA Consultant
-    location: Frankfurt, Germany
-    start: "2021"
-    end: ""
+  - company:     Deloitte Consulting GmbH
+    role:        Lead SAP S/4HANA Consultant
+    location:    Frankfurt, Germany
+    start:       "2021"
+    end:         ""                   # blank = Present
+    url:         https://deloitte.com # optional company website
     description: Lead module owner for FI/CO workstream on multi-country S/4HANA rollout for a Fortune 500 chemicals client.
     highlights:
       - Designed Universal Journal architecture spanning 23 country codes and 6 group currencies
@@ -41,11 +81,12 @@ experience:
       - Mentored team of 6 junior consultants on Fiori app development
     tags: [S/4HANA 2022, FI, CO, Group Reporting, Fiori, CDS Views, ABAP OO, BAdI]
 
-  - company: Capgemini
-    role: SAP FICO Consultant
-    location: Mumbai, India
-    start: "2017"
-    end: "2021"
+  - company:     Capgemini
+    role:        SAP FICO Consultant
+    location:    Mumbai, India
+    start:       "2017"
+    end:         "2021"
+    url:         https://capgemini.com
     description: Implemented FI and CO modules for retail and manufacturing clients in APAC region.
     highlights:
       - Configured New GL with parallel ledgers for IFRS and local GAAP reporting
@@ -54,11 +95,11 @@ experience:
       - Delivered SAP Activate methodology training to 50+ consultants
     tags: [ECC 6.0, S/4HANA 1909, FI, CO-PA, New GL, ASAP, Activate]
 
-  - company: Tata Consultancy Services
-    role: SAP ABAP Developer
-    location: Bangalore, India
-    start: "2013"
-    end: "2017"
+  - company:     Tata Consultancy Services
+    role:        SAP ABAP Developer
+    location:    Bangalore, India
+    start:       "2013"
+    end:         "2017"
     description: Developed and maintained custom ABAP programs for global FMCG client.
     highlights:
       - Built 80+ ALV reports, BAPIs, and IDoc interfaces
@@ -66,24 +107,29 @@ experience:
       - Implemented EDI integration with 12 trading partners via PI/PO
     tags: [ABAP, ALV, BAPI, IDoc, RFC, SAP PI/PO, BDC]
 
-certifications:
-  - name: SAP Certified Application Associate — SAP S/4HANA for Financial Accounting
-    issuer: SAP SE
-    date: "2023"
-    id: "C_TS4FI_2023"
-  - name: SAP Certified Application Associate — Management Accounting (SAP S/4HANA)
-    issuer: SAP SE
-    date: "2022"
-    id: "C_TS4CO_2021"
-  - name: SAP Certified Development Associate — ABAP with SAP NetWeaver
-    issuer: SAP SE
-    date: "2018"
-    id: "C_TAW12_750"
-  - name: SAP Activate Project Manager
-    issuer: SAP SE
-    date: "2020"
-    id: "C_ACTIVATE13"
+# ── Education ─────────────────────────────────────────────────────────────────
+education:
+  - institution: Indian Institute of Technology Bombay
+    degree:      M.Tech
+    field:       Industrial Engineering
+    location:    Mumbai, India
+    start:       "2011"
+    end:         "2013"
+    gpa:         "8.9/10"
+    url:         https://iitb.ac.in
+    highlights:
+      - "Thesis: Simulation-based optimisation of ERP rollout sequencing in multi-plant environments"
 
+  - institution: Anna University
+    degree:      B.E.
+    field:       Computer Science
+    location:    Chennai, India
+    start:       "2007"
+    end:         "2011"
+    gpa:         "8.2/10"
+    url:         https://annauniv.edu
+
+# ── Skills ────────────────────────────────────────────────────────────────────
 skills:
   - category: SAP Modules
     skills: [FI, CO, MM, SD, FI-AA, CO-PA, FSCM, Group Reporting]
@@ -96,25 +142,123 @@ skills:
   - category: Methodology
     skills: [SAP Activate, ASAP, Agile/Scrum, SAFe]
 
-education:
-  - institution: Indian Institute of Technology Bombay
-    degree: M.Tech
-    field: Industrial Engineering
-    start: "2011"
-    end: "2013"
-    gpa: "8.9/10"
-  - institution: Anna University
-    degree: B.E.
-    field: Computer Science
-    start: "2007"
-    end: "2011"
+# ── Projects ──────────────────────────────────────────────────────────────────
+projects:
+  - name:        S4Migrate CLI
+    description: Open-source CLI tool that validates S/4HANA migration object lists against SAP's simplification database.
+    url:         https://github.com/ravikumar-sap/s4migrate
+    github:      ravikumar-sap/s4migrate   # enables star count display
+    start:       "2022"
+    end:         ""
+    highlights:
+      - 2 000+ downloads in first month on GitHub
+      - Saves ~4h per migration project in manual validation effort
+    tags: [Go, SAP, Open Source, CLI]
 
+  - name:        Fiori Launchpad Toolkit
+    description: Reusable BTP extensions for personalised Fiori Launchpad deployments.
+    url:         https://github.com/ravikumar-sap/fiori-toolkit
+    start:       "2023"
+    end:         "2024"
+    highlights:
+      - Used across 3 Deloitte client engagements
+    tags: [BTP, Fiori, SAPUI5, CAP]
+
+# ── Certifications ────────────────────────────────────────────────────────────
+certifications:
+  - name:   SAP Certified Application Associate — SAP S/4HANA for Financial Accounting
+    issuer: SAP SE
+    date:   "2023"
+    id:     C_TS4FI_2023
+    url:    https://www.credly.com/badges/example-fi
+
+  - name:   SAP Certified Application Associate — Management Accounting (SAP S/4HANA)
+    issuer: SAP SE
+    date:   "2022"
+    id:     C_TS4CO_2021
+    url:    https://www.credly.com/badges/example-co
+
+  - name:   SAP Certified Development Associate — ABAP with SAP NetWeaver
+    issuer: SAP SE
+    date:   "2018"
+    id:     C_TAW12_750
+
+  - name:   SAP Activate Project Manager
+    issuer: SAP SE
+    date:   "2020"
+    id:     C_ACTIVATE13
+
+# ── Publications ──────────────────────────────────────────────────────────────
+publications:
+  - title:     "Zero-Downtime Cutover Playbook for S/4HANA Greenfield Projects"
+    publisher: SAP Community Blog
+    date:      "2023"
+    url:       https://community.sap.com/example
+    summary:   Step-by-step runbook covering technical cutover, fallback triggers, and hypercare for large-scale S/4HANA go-lives.
+
+  - title:     "Parallel Ledger Design Patterns in SAP S/4HANA Finance"
+    publisher: DSAG Jahrestagung Proceedings
+    date:      "2022"
+    url:       https://dsag.de/example
+
+# ── Languages ─────────────────────────────────────────────────────────────────
 languages:
-  - name: English
-    proficiency: Fluent (C2)
-  - name: German
-    proficiency: Professional (B2)
-  - name: Hindi
-    proficiency: Native
-  - name: Tamil
-    proficiency: Native
+  - name:        English
+    proficiency: native
+  - name:        German
+    proficiency: professional    # native | fluent | professional | conversational | basic
+  - name:        Hindi
+    proficiency: native
+  - name:        Tamil
+    proficiency: native
+
+# ── Volunteer ─────────────────────────────────────────────────────────────────
+volunteer:
+  - organization: SAP Community (SCN)
+    role:         Moderator — FI/CO Forum
+    start:        "2018"
+    end:          ""
+    url:          https://community.sap.com
+    description:  Moderated the Financial Accounting and Controlling forums.
+    highlights:
+      - Answered 500+ questions, maintaining top-10 contributor ranking
+      - Authored 12 wiki articles on Universal Journal migration
+
+  - organization: Code for India
+    role:         Volunteer Developer
+    start:        "2016"
+    end:          "2017"
+    description:  Built open-source tools for NGO financial reporting.
+    highlights:
+      - Delivered simple tally-export tool adopted by 3 NGOs
+
+# ── Awards ────────────────────────────────────────────────────────────────────
+awards:
+  - title:   SAP Community MVP
+    awarder: SAP SE
+    date:    "2023"
+    url:     https://community.sap.com/mvp
+    summary: Awarded to top community contributors across forums, blogs, and events.
+
+  - title:   Deloitte Delivery Excellence Award
+    awarder: Deloitte Consulting GmbH
+    date:    "2022"
+    summary: Recognised for zero-defect go-live on the EMEA chemicals S/4HANA programme.
+
+# ── Custom sections ───────────────────────────────────────────────────────────
+custom:
+  - title: Speaking & Events
+    items:
+      - title:       "S/4HANA Migration at Scale — Lessons Learned"
+        subtitle:    DSAG Jahrestagung 2023
+        date:        "Oct 2023"
+        url:         https://dsag.de/events/2023
+        description: Keynote session on zero-downtime cutover methodology for Fortune 500 rollouts.
+        highlights:
+          - 400+ attendees
+          - Slides published on SAP Community
+
+      - title:       SAP Inside Track Frankfurt
+        subtitle:    Lightning Talk — CDS Views Best Practices
+        date:        "May 2022"
+        url:         https://sitfrankfurt.de

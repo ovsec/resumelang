@@ -244,7 +244,14 @@ projects:
 
   // Share link decoding on load (for /editor#yml=... deep links)
   (async function init() {
-    const yaml = await decodeShareYaml() || localStorage.getItem(STORAGE_KEY) || DEFAULT_YAML;
+    let yaml = await decodeShareYaml() || localStorage.getItem(STORAGE_KEY);
+    if (!yaml) {
+      // Ask server: resume.yml in cwd → examples/ → 204 (use stub)
+      try {
+        const res = await fetch('/api/default-yaml');
+        yaml = res.ok && res.status !== 204 ? await res.text() : DEFAULT_YAML;
+      } catch { yaml = DEFAULT_YAML; }
+    }
     cm.setValue(yaml);
     if (yamlHidden) yamlHidden.value = yaml;
 

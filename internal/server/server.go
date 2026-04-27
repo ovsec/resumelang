@@ -59,6 +59,7 @@ func Start(args []string) {
 	app.Post("/api/render", apiRender)
 	app.Get("/api/themes", apiThemes)
 	app.Get("/api/me", apiMe)
+	app.Get("/api/default-yaml", apiDefaultYAML)
 	app.Post("/api/export/html", apiExportHTML)
 	app.Post("/api/export/txt", apiExportTxt)
 

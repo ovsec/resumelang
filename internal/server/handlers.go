@@ -86,6 +86,34 @@ func partialGalleryCard(c *fiber.Ctx) error {
 
 // ── API ────────────────────────────────────────────────────────────
 
+func apiDefaultYAML(c *fiber.Ctx) error {
+	// 1. resume.yml in cwd
+	// 2. first *.yml / *.resume.yml in examples/
+	// 3. empty string (client falls back to hardcoded stub)
+	candidates := []string{"resume.yml", "resume.resume.yml"}
+	for _, name := range candidates {
+		if data, err := os.ReadFile(name); err == nil {
+			c.Set("Content-Type", "text/plain; charset=utf-8")
+			return c.Send(data)
+		}
+	}
+	if entries, err := os.ReadDir("examples"); err == nil {
+		for _, e := range entries {
+			if e.IsDir() {
+				continue
+			}
+			n := e.Name()
+			if strings.HasSuffix(n, ".yml") || strings.HasSuffix(n, ".yaml") {
+				if data, err := os.ReadFile(filepath.Join("examples", n)); err == nil {
+					c.Set("Content-Type", "text/plain; charset=utf-8")
+					return c.Send(data)
+				}
+			}
+		}
+	}
+	return c.SendStatus(204) // no content — client uses its own stub
+}
+
 type renderBody struct {
 	YAML  string `json:"yaml"`
 	Theme string `json:"theme"`
