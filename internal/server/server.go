@@ -45,7 +45,7 @@ func Start(args []string) {
 	app.Static("/schema", "./schema")
 
 	// Pages
-	app.Get("/", pageEditor)
+	app.Get("/", pageLanding)
 	app.Get("/editor", pageEditor)
 	app.Get("/r", pageView)
 	app.Get("/login", pageLogin)

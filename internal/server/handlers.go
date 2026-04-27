@@ -13,6 +13,10 @@ import (
 
 // ── Pages ──────────────────────────────────────────────────────────
 
+func pageLanding(c *fiber.Ctx) error {
+	return c.SendFile("web/landing.html")
+}
+
 func pageEditor(c *fiber.Ctx) error {
 	user, _ := sessionUser(c)
 	return c.Render("editor", fiber.Map{
@@ -178,7 +182,9 @@ func apiExportHTML(c *fiber.Ctx) error {
 }
 
 func apiExportTxt(c *fiber.Ctx) error {
-	var body struct{ YAML string `json:"yaml"` }
+	var body struct {
+		YAML string `json:"yaml"`
+	}
 	if err := c.BodyParser(&body); err != nil || body.YAML == "" {
 		return c.Status(400).SendString("missing yaml")
 	}

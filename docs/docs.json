@@ -36,6 +36,12 @@
               "ci",
               "extension"
             ]
+          },
+          {
+            "group": "Project",
+            "pages": [
+              "roadmap"
+            ]
           }
         ]
       },

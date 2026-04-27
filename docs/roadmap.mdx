@@ -1,0 +1,156 @@
+---
+title: "Roadmap"
+description: "What's coming to resumelang — open source features and the premium tier."
+icon: "map"
+---
+
+resumelang is free and open source. The roadmap below covers both upcoming OSS improvements and the planned **resumelang Pro** tier that funds continued development.
+
+## Now — shipped
+
+<CardGroup cols={2}>
+  <Card title="13 built-in themes" icon="palette">
+    SAP, Vercel, Linear, Aurora, Material, Brutalist, Terminal, Editorial,
+    Dossier, Academic, Finance, Timeline, Minimal — switchable from the
+    dropdown or via `meta.theme` in YAML.
+  </Card>
+  <Card title="Web editor" icon="window">
+    Live preview, CodeMirror 5, HTMX-powered gallery, share modal with
+    gzip-encoded URLs and AES-GCM password encryption.
+  </Card>
+  <Card title="User dashboard" icon="layout-dashboard">
+    Sign in with GitHub or LinkedIn. Save up to 5 resumes in the cloud,
+    load them from any device.
+  </Card>
+  <Card title="Export everywhere" icon="download">
+    Download standalone HTML, ATS plain text, or print to PDF directly
+    from the browser. CLI builds all formats in one command.
+  </Card>
+</CardGroup>
+
+---
+
+## Next — in progress
+
+### PDF compiler (native)
+
+Right now the editor uses `window.print()`. A proper headless PDF compiler
+via Puppeteer subprocess is in progress, producing pixel-perfect PDFs
+server-side without any browser interaction.
+
+```bash
+resumelang build resume.yml --formats pdf
+```
+
+### VS Code extension improvements
+
+- Live preview panel without leaving the editor
+- Jump-to-field (click a rendered element → highlight the YAML line)
+- Schema validation red-squiggles as you type
+
+### `lint` command
+
+ATS keyword scoring, date-overlap detection, missing-field warnings,
+and a readability score:
+
+```bash
+resumelang lint resume.yml
+# → ATS score: 72/100
+# → Missing: certifications, volunteer
+# → Date gap: 2019-01 → 2020-06 (18 months)
+```
+
+---
+
+## Q3 2025
+
+### LinkedIn import
+
+```bash
+resumelang import linkedin linkedin-export.zip
+```
+
+Parses the official LinkedIn data export, produces a `resume.yml`.
+Handles work history, education, certifications, and skills.
+
+### JSON Resume import / export
+
+Two-way bridge to the [JSON Resume](https://jsonresume.org) ecosystem:
+
+```bash
+resumelang import jsonresume resume.json   # → resume.yml
+resumelang build resume.yml --formats json  # already works
+```
+
+### Theme gallery (community)
+
+A public theme registry at `resumelang.dev/themes`. Anyone can submit
+a theme that passes `resumelang theme validate`. Themes are versioned
+against the `ThemeSpec v1` schema.
+
+---
+
+## resumelang Pro
+
+Pro is a hosted subscription that funds OSS development. The core binary,
+CLI, and all 13 themes remain free forever.
+
+<CardGroup cols={2}>
+  <Card title="AI resume tailoring" icon="sparkles">
+    Paste a job description. AI rewrites your highlights to match the
+    role — keywords, tone, and order — without touching structure or
+    dates. Powered by Claude.
+  </Card>
+  <Card title="Link analytics" icon="chart-line">
+    Every shared resume link gets a unique slug. See opens, geography,
+    device type, and time-on-page — without third-party scripts. All
+    data lives in your dashboard.
+  </Card>
+  <Card title="Custom domain" icon="globe">
+    Publish your resume at `resume.yourdomain.com` with one DNS record.
+    Auto-renewing TLS, versioned URLs, and redirect management included.
+  </Card>
+  <Card title="PDF export (server-side)" icon="file-pdf">
+    Pixel-perfect PDF generated server-side — no browser quirks,
+    consistent across operating systems. One-click from the editor or
+    via API.
+  </Card>
+  <Card title="ATS score & coaching" icon="graduation-cap">
+    Upload a job description and get a tailored ATS score, missing
+    keyword suggestions, and formatting warnings before you apply.
+  </Card>
+  <Card title="Unlimited cloud saves" icon="cloud">
+    Free tier: 5 resumes. Pro: unlimited resumes, version history with
+    one-click restore, and folder organisation.
+  </Card>
+  <Card title="Org & team themes" icon="building">
+    Companies and recruiting teams can upload a private branded theme.
+    Distribute a consistent look across all team members' resumes.
+  </Card>
+  <Card title="Live collaboration" icon="users">
+    Share an edit link with a recruiter or career coach. Real-time
+    collaborative editing with presence indicators and comment threads.
+  </Card>
+</CardGroup>
+
+---
+
+## Principles
+
+1. **Core stays free.** The binary, the DSL, the CLI, and all built-in
+   themes are MIT licensed and will never be paywalled.
+2. **Pro funds OSS.** Every Pro subscription directly funds open source
+   development time.
+3. **No lock-in.** Your `resume.yml` is yours. Export at any time.
+   Switch to self-hosting with one command.
+4. **Privacy first.** Analytics are opt-in. No third-party trackers.
+   Link data is end-to-end owned by you.
+
+---
+
+## Feedback & priorities
+
+Have a feature you need sooner?
+[Open an issue on GitHub](https://github.com/ovsec/resumelang/issues) or
+reach out at **mr.abhisheksaha@gmail.com**. Upvotes on issues directly
+influence what gets built next.
