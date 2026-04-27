@@ -1,11 +1,36 @@
 {
   "yaml.schemas": {
+    "file:///c%3A/Users/ABSA0014/scoop/apps/vscode/1.104.3/data/extensions/continue.continue-1.2.11-win32-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///c%3A/Users/ABSA0014/scoop/apps/vscode/1.104.3/data/extensions/continue.continue-1.2.14-win32-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///c%3A/Users/ABSA0014/scoop/apps/vscode/1.108.2/data/extensions/continue.continue-1.2.14-win32-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///c%3A/Users/ABSA0014/scoop/apps/vscode/1.108.2/data/extensions/continue.continue-1.2.16-win32-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///c%3A/Users/ABSA0014/scoop/apps/vscode/1.108.2/data/extensions/continue.continue-1.2.17-win32-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///c%3A/Users/ABSA0014/scoop/apps/vscode/1.108.2/data/extensions/continue.continue-1.2.18-win32-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///c%3A/Users/ABSA0014/scoop/apps/vscode/1.108.2/data/extensions/continue.continue-1.2.21-win32-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
+    "file:///c%3A/Users/ABSA0014/scoop/apps/vscode/1.108.2/data/extensions/continue.continue-1.2.22-win32-x64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ],
     "./schema/v1.json": [
       "examples/*.yml",
       "examples/*.yaml",
       "*.resume.yml",
       "resume.yml"
-    ]
+    ],
+    "https://resumelang.dev/schema/v1.json": "file:///c%3A/Users/ABSA0014/Github/resumelang/examples/sap-consultant.resume.yml"
   },
   "yaml.schemaStore.enable": true
 }

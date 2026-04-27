@@ -17,15 +17,15 @@ meta:
     - awards
 
 person:
-  name: Jane Doe
+  name: Ashok Saha
   title: Senior Software Engineer
-  email: jane@example.com
+  email: ashok@example.com
   phone: +1 555 000 0000
   location: Stockholm, Sweden
-  website: https://janedoe.dev
-  github: janedoe
-  linkedin: janedoe
-  avatar: https://avatars.githubusercontent.com/janedoe
+  website: https://ashoksaha.dev
+  github: ashoksaha
+  linkedin: ashoksaha
+  avatar: https://avatars.githubusercontent.com/ashoksaha
 
 summary: |
   Experienced engineer with 8 years building distributed systems.
@@ -75,8 +75,8 @@ skills:
 projects:
   - name: gitshare
     description: P2P git repo sharing via bore.pub tunnels.
-    url: https://github.com/janedoe/gitshare
-    github: janedoe/gitshare
+    url: https://github.com/ashoksaha/gitshare
+    github: ashoksaha/gitshare
     highlights:
       - Zero-dependency single binary
       - Token-authenticated bore tunnel

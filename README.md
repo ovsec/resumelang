@@ -122,14 +122,14 @@ meta:
     - certifications
 
 person:
-  name:     Jane Doe
+  name:     Ashok Saha
   title:    Senior Software Engineer
-  email:    jane@example.com
+  email:    ashok@example.com
   phone:    "+1 555 000 0000"
   location: Stockholm, Sweden
-  website:  https://janedoe.dev
-  github:   janedoe
-  linkedin: janedoe
+  website:  https://ashoksaha.dev
+  github:   ashoksaha
+  linkedin: ashoksaha
 
 summary: |
   Experienced engineer with 8 years building distributed systems.
@@ -159,7 +159,7 @@ skills:
 projects:
   - name:        gitshare
     description: P2P git repo sharing. Zero-dependency single binary.
-    url:         https://github.com/janedoe/gitshare
+    url:         https://github.com/ashoksaha/gitshare
     tags: [Go, P2P, CLI]
 ```
 
@@ -285,6 +285,22 @@ go test ./...
 - Issues and feature requests → [GitHub Issues](https://github.com/ovsec/resumelang/issues)
 - New themes welcome — see [Themes docs](https://docs.resumelang.dev/themes) for the `theme.yml` spec
 - All PRs should pass `go test ./...` and `resumelang validate examples/sap-consultant.resume.yml`
+
+---
+
+## Credits
+
+Built with open source:
+
+| Library | Use |
+| ------- | --- |
+| [Go Fiber](https://gofiber.io) | Web framework |
+| [HTMX](https://htmx.org) | Server-driven UI |
+| [CodeMirror](https://codemirror.net) | Code editor |
+| [raymond](https://github.com/aymerick/raymond) | Handlebars templates |
+| [yaml.v3](https://github.com/go-yaml/yaml) | YAML parsing |
+| [Inter](https://rsms.me/inter) | UI typeface |
+| [JetBrains Mono](https://www.jetbrains.com/lp/mono/) | Code typeface |
 
 ---
 

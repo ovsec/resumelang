@@ -19,14 +19,14 @@ meta:
     - awards
 
 person:
-  name:     Jane Doe
+  name:     Ashok Saha
   title:    Senior Software Engineer
-  email:    jane@example.com
+  email:    ashok@example.com
   phone:    "+1 555 000 0000"
   location: Stockholm, Sweden
-  website:  https://janedoe.dev
-  github:   janedoe
-  linkedin: janedoe
+  website:  https://ashoksaha.dev
+  github:   ashoksaha
+  linkedin: ashoksaha
 
 summary: |
   Experienced engineer with 8 years building distributed systems.

@@ -49,15 +49,15 @@ meta:
 
 # ── Person ────────────────────────────────────────────────────────────────────
 person:
-  name:     Ravi Kumar
+  name:     Ashok Saha
   title:    Senior SAP S/4HANA Consultant
-  email:    ravi.kumar@example.com
+  email:    ashok.saha@example.com
   phone:    "+49 170 1234 5678"
   location: Walldorf, Germany
-  website:  https://ravikumar.dev
-  github:   ravikumar-sap            # username only (no https://github.com/)
-  linkedin: ravikumar-sap            # handle only (no https://linkedin.com/in/)
-  avatar:   https://i.pravatar.cc/150?u=ravikumar  # optional profile picture URL
+  website:  https://ashoksaha.dev
+  github:   ashoksaha-sap            # username only (no https://github.com/)
+  linkedin: ashoksaha-sap            # handle only (no https://linkedin.com/in/)
+  avatar:   https://i.pravatar.cc/150?u=ashoksaha  # optional profile picture URL
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 summary: |
@@ -146,8 +146,8 @@ skills:
 projects:
   - name:        S4Migrate CLI
     description: Open-source CLI tool that validates S/4HANA migration object lists against SAP's simplification database.
-    url:         https://github.com/ravikumar-sap/s4migrate
-    github:      ravikumar-sap/s4migrate   # enables star count display
+    url:         https://github.com/ashoksaha-sap/s4migrate
+    github:      ashoksaha-sap/s4migrate   # enables star count display
     start:       "2022"
     end:         ""
     highlights:
@@ -157,7 +157,7 @@ projects:
 
   - name:        Fiori Launchpad Toolkit
     description: Reusable BTP extensions for personalised Fiori Launchpad deployments.
-    url:         https://github.com/ravikumar-sap/fiori-toolkit
+    url:         https://github.com/ashoksaha-sap/fiori-toolkit
     start:       "2023"
     end:         "2024"
     highlights:
