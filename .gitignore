@@ -48,3 +48,5 @@ node_modules/
 
 # Mintlify
 docs/.mintlify/
+promotion/
+CLAUDE.md
