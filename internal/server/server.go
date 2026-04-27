@@ -42,6 +42,7 @@ func Start(args []string) {
 	// Static
 	app.Static("/web", "./web")
 	app.Static("/themes", "./themes")
+	app.Static("/schema", "./schema")
 
 	// Pages
 	app.Get("/", pageEditor)
