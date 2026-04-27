@@ -14,7 +14,15 @@ import (
 // ── Pages ──────────────────────────────────────────────────────────
 
 func pageLanding(c *fiber.Ctx) error {
-	return c.SendFile("web/landing.html")
+	user, ok := sessionUser(c)
+	data := fiber.Map{
+		"Themes":    themeNames(),
+		"Providers": providerList(),
+	}
+	if ok {
+		data["User"] = user
+	}
+	return c.Render("landing", data, "")
 }
 
 func pageEditor(c *fiber.Ctx) error {
