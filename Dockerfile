@@ -21,6 +21,7 @@ COPY --from=builder /app/resumelang .
 COPY web/ ./web/
 COPY schema/ ./schema/
 COPY themes/ ./themes/
+COPY templates/ ./templates/
 
 ENV PORT=8080
 EXPOSE 8080

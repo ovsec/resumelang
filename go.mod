@@ -1,8 +1,6 @@
 module github.com/ovsec/resumelang
 
-go 1.24.0
-
-toolchain go1.24.3
+go 1.22
 
 require (
 	github.com/aymerick/raymond v2.0.2+incompatible
