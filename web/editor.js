@@ -280,6 +280,7 @@ awards:
 
   // Render
   let lastHTML = '';
+  let lastGoodTheme = localStorage.getItem(THEME_KEY) || 'sap';
   function render() {
     const yamlText = cm.getValue();
     localStorage.setItem(STORAGE_KEY, yamlText);
@@ -296,10 +297,17 @@ awards:
       return;
     }
 
-    const themeName = document.getElementById('theme-select').value || 'minimal';
-    localStorage.setItem(THEME_KEY, themeName);
+    const select = document.getElementById('theme-select');
+    const metaTheme = ((resume.meta && resume.meta.theme) || '').trim();
 
-    loadTheme(themeName).then(({ compiled, css, themeYml }) => {
+    // Sync dropdown when meta.theme matches a known option
+    if (metaTheme && select.querySelector(`option[value="${metaTheme}"]`)) {
+      select.value = metaTheme;
+    }
+
+    const themeName = metaTheme || select.value || lastGoodTheme;
+
+    function applyThemeData({ compiled, css, themeYml }) {
       const merged = mergeTokens(themeYml.tokens || {}, (resume.meta && resume.meta.tokens) || {});
       applyEditorAppearance({ tokens: merged });
       const tokens = flattenTokens(merged);
@@ -312,7 +320,23 @@ awards:
       } catch (e) {
         status('render error: ' + e.message, 'err');
       }
-    }).catch(e => status('theme load: ' + e.message, 'err'));
+    }
+
+    loadTheme(themeName).then(data => {
+      lastGoodTheme = themeName;
+      localStorage.setItem(THEME_KEY, themeName);
+      select.value = themeName;
+      applyThemeData(data);
+    }).catch(() => {
+      const fallback = themeName !== lastGoodTheme ? lastGoodTheme : 'sap';
+      status(`theme "${themeName}" not found — using "${fallback}"`, 'err');
+      select.value = fallback;
+      localStorage.setItem(THEME_KEY, fallback);
+      loadTheme(fallback).then(data => {
+        lastGoodTheme = fallback;
+        applyThemeData(data);
+      }).catch(e2 => status('theme load failed: ' + e2.message, 'err'));
+    });
   }
 
   let renderTimer = null;

@@ -177,4 +177,6 @@ ul.plain.inline { display: flex; flex-wrap: wrap; gap: 14px; }
 @media print {
   body { background: white; }
   header { box-shadow: none; }
+  .section-title { break-after: avoid; }
+  .job, .project-item, .edu-item, .skill-group { break-inside: avoid; }
 }
