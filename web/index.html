@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>resumelang editor</title>
+  <title>resumelang — editor</title>
   <link rel="icon" href="/web/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,58 +12,101 @@
   <link rel="stylesheet" href="/web/vendor/cm-material-darker.min.css">
   <link rel="stylesheet" href="/web/styles.css">
 </head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="/" aria-label="resumelang home">
-      <img class="brand-logo" src="/web/assets/logo.svg" alt="resumelang" height="22">
-    </a>
-    <div class="controls">
-      <div class="control">
-        <span class="label">Theme</span>
-        <select id="theme-select" class="select"></select>
-        <button id="btn-gallery" type="button" class="btn btn-ghost" title="Browse themes with previews">Browse…</button>
-      </div>
-      <button id="btn-print" type="button" class="btn">Print / PDF</button>
-      <button id="btn-share" type="button" class="btn" title="Copy a self-contained link to this resume">Share</button>
-      <button id="btn-download" type="button" class="btn btn-primary">Download</button>
-      <span id="status" class="status"></span>
-      <div id="user-widget" class="user-widget" hidden>
-        <a id="user-link" class="user-chip" href="#" title="Account">
-          <img id="user-avatar" alt="" width="22" height="22">
-          <span id="user-name"></span>
-        </a>
-        <a id="user-signin" class="btn btn-ghost" href="/login">Sign in</a>
+<body class="editor-layout">
+
+  <!-- Topbar -->
+  <header class="editor-nav">
+    <div class="editor-nav-left">
+      <a class="nav-brand" href="/" title="Home">
+        <img src="/web/assets/logo.svg" alt="resumelang" height="20">
+      </a>
+      <span class="nav-sep"></span>
+      <div class="theme-cluster">
+        <select id="theme-select" class="theme-select" aria-label="Theme"></select>
+        <button id="btn-gallery" type="button" class="nav-icon-btn" title="Browse all themes">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>
+        </button>
       </div>
     </div>
+
+    <div class="editor-nav-right">
+      <a class="nav-ghost" href="https://docs.resumelang.dev" target="_blank" rel="noopener">Docs</a>
+      <button id="btn-share" class="nav-ghost" title="Copy shareable read-only link">Share</button>
+      <button id="btn-print" class="nav-ghost">Print</button>
+      <button id="btn-download" class="nav-primary">Download</button>
+      <span class="nav-divider"></span>
+      <div id="user-widget" class="user-widget" hidden>
+        <a id="user-link" class="user-chip" href="#" title="Sign out">
+          <img id="user-avatar" alt="" width="20" height="20">
+          <span id="user-name"></span>
+        </a>
+        <a id="user-signin" class="nav-ghost" href="/login">Sign in</a>
+      </div>
+    </div>
+
+    <div id="status" class="status-toast" aria-live="polite"></div>
   </header>
-  <main class="split" id="split">
-    <section class="pane editor-pane">
-      <div class="pane-label">resume.yml</div>
+
+  <!-- Workspace -->
+  <div class="workspace" id="split">
+
+    <!-- Editor pane -->
+    <div class="ws-pane editor-pane">
+      <div class="pane-bar">
+        <span class="pane-title">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="1" y="1" width="10" height="10" rx="2.5"/><path d="M3.5 4.5h5M3.5 6.5h5M3.5 8.5h3"/></svg>
+          resume.yml
+        </span>
+        <span class="pane-badge">YAML</span>
+      </div>
       <textarea id="editor"></textarea>
-    </section>
-    <div class="splitter" id="splitter" aria-label="resize panes" role="separator"></div>
-    <section class="pane preview-pane">
-      <div class="pane-label">preview</div>
-      <iframe id="preview" title="resume preview"></iframe>
-    </section>
-  </main>
-  <div id="gallery-modal" class="gallery-modal" hidden aria-modal="true" role="dialog" aria-label="Theme gallery">
+    </div>
+
+    <!-- Splitter -->
+    <div class="ws-splitter" id="splitter" role="separator" aria-label="Resize panes"></div>
+
+    <!-- Preview pane -->
+    <div class="ws-pane preview-pane">
+      <div class="pane-bar">
+        <div class="pane-tabs">
+          <button class="pane-tab active" data-view="preview">Preview</button>
+          <button class="pane-tab" data-view="yaml">YAML</button>
+        </div>
+        <div class="pane-bar-end">
+          <span class="pane-live-dot" title="Live preview active"></span>
+          <span class="pane-badge">live</span>
+        </div>
+      </div>
+      <div class="pane-view" id="view-preview">
+        <iframe id="preview" title="resume preview"></iframe>
+      </div>
+      <div class="pane-view pane-yaml-view" id="view-yaml" hidden>
+        <pre id="yaml-pre"><code id="yaml-code"></code></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Gallery modal -->
+  <div id="gallery-modal" class="gallery-modal" hidden aria-modal="true" role="dialog">
     <div class="gallery-backdrop" data-close></div>
     <div class="gallery-panel">
       <header class="gallery-head">
-        <h2 class="gallery-title">Theme Gallery</h2>
-        <div class="gallery-search">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <input id="gallery-search" type="search" placeholder="Search themes…" autocomplete="off" />
-          <span class="kbd">esc</span>
+        <h2 class="gallery-title">Themes</h2>
+        <div class="gallery-search-wrap">
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5"/><path d="m13 13-3-3"/></svg>
+          <input id="gallery-search" type="search" placeholder="Search…" autocomplete="off">
+          <kbd>esc</kbd>
         </div>
         <span id="gallery-count" class="gallery-count"></span>
-        <button class="btn btn-ghost" data-close aria-label="Close">×</button>
+        <button class="gallery-close" data-close aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 1l12 12M13 1L1 13"/></svg>
+        </button>
       </header>
       <div id="gallery-grid" class="gallery-grid"></div>
       <div id="gallery-loader" class="gallery-loader">
         <div class="gallery-spinner"></div>
-        <span>rendering thumbnails…</span>
+        <span>rendering previews…</span>
       </div>
     </div>
   </div>

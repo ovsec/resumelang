@@ -175,11 +175,11 @@
     $('source-code').innerHTML = syntaxHighlight(yamlText);
 
     // Pass YAML to "Edit copy" button
-    $('btn-edit').href = '/' + location.hash;
+    $('btn-edit').href = '/editor' + location.hash;
 
     // Theme select
     const select = $('view-theme');
-    let themes = ['minimal'];
+    let themes = ['sap'];
     try {
       const res = await fetch('/api/themes');
       const data = await res.json();

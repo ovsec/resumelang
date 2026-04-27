@@ -44,12 +44,17 @@ func ServeStatic(args []string) {
 
 	mux := http.NewServeMux()
 
-	// Editor shell
+	// Landing page
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
 			return
 		}
+		http.ServeFile(w, r, filepath.Join(webDir, "landing.html"))
+	})
+
+	// Editor shell
+	mux.HandleFunc("/editor", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(webDir, "index.html"))
 	})
 

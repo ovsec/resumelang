@@ -25,11 +25,11 @@ func ToHTML(r *schema.Resume, themePath string) ([]byte, error) {
 	if themePath == "" {
 		name := r.Meta.Theme
 		if name == "" {
-			name = "minimal"
+			name = "sap"
 		}
 		themePath = filepath.Join("themes", name)
 		if _, err := os.Stat(themePath); err != nil {
-			themePath = filepath.Join("themes", "minimal")
+			themePath = filepath.Join("themes", "sap")
 		}
 	}
 

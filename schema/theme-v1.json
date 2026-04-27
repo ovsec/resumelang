@@ -1,0 +1,243 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://resumelang.dev/schema/theme-v1.json",
+  "title": "resumelang Theme",
+  "description": "Schema for resumelang theme.yml (spec: v1). Add `# yaml-language-server: $schema=https://resumelang.dev/schema/theme-v1.json` to enable editor autocomplete.",
+  "type": "object",
+  "required": ["spec", "name", "version"],
+  "additionalProperties": true,
+  "properties": {
+
+    "spec": {
+      "type": "string",
+      "enum": ["v1"],
+      "description": "Theme spec version. Must be `v1`."
+    },
+
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Unique theme identifier. Lowercase letters, digits, hyphens. Used as the folder name and the value users put in `meta.theme`.",
+      "examples": ["minimal", "aurora", "my-theme"]
+    },
+
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version (major.minor.patch).",
+      "examples": ["1.0.0", "2.1.3"]
+    },
+
+    "author": {
+      "type": "string",
+      "description": "Theme author name or GitHub handle.",
+      "examples": ["your-name", "jane-doe"]
+    },
+
+    "description": {
+      "type": "string",
+      "description": "Short human-readable description of the theme style."
+    },
+
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier.",
+      "examples": ["MIT", "Apache-2.0", "GPL-3.0"]
+    },
+
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Theme homepage or repository URL."
+    },
+
+    "supports": {
+      "type": "object",
+      "description": "Declares what layout types and content blocks this theme supports.",
+      "additionalProperties": true,
+      "properties": {
+        "layouts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["single", "timeline", "grid", "cards", "sidebar", "two-column"]
+          },
+          "description": "Layout types this theme uses.",
+          "examples": [["single"], ["timeline", "grid"]]
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["bullets", "tags", "metrics", "text", "pills", "timeline-item"]
+          },
+          "description": "Content block types this theme renders.",
+          "examples": [["bullets", "tags", "text"]]
+        },
+        "ui": {
+          "type": "object",
+          "description": "Optional UI hints exposed to users.",
+          "additionalProperties": true,
+          "properties": {
+            "variant": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Named visual variants the theme supports.",
+              "examples": [["card", "compact"], ["default", "minimal"]]
+            },
+            "emphasis": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["low", "medium", "high"] },
+              "description": "Accent emphasis levels."
+            }
+          }
+        }
+      }
+    },
+
+    "features": {
+      "type": "object",
+      "description": "Feature flags this theme supports.",
+      "additionalProperties": true,
+      "properties": {
+        "dark_mode":   { "type": "boolean", "description": "Theme ships a dark colour scheme." },
+        "responsive":  { "type": "boolean", "description": "Theme is mobile-responsive." },
+        "print_ready": { "type": "boolean", "description": "Theme is optimised for print / PDF output." },
+        "rtl":         { "type": "boolean", "description": "Theme supports right-to-left text." }
+      }
+    },
+
+    "layout": {
+      "type": "object",
+      "description": "Maps resume sections to layout types.",
+      "additionalProperties": { "type": "string" },
+      "properties": {
+        "experience":     { "type": "string", "examples": ["timeline", "grid", "cards"] },
+        "education":      { "type": "string" },
+        "skills":         { "type": "string", "examples": ["grid", "pills", "single"] },
+        "projects":       { "type": "string", "examples": ["cards", "grid"] },
+        "certifications": { "type": "string" },
+        "publications":   { "type": "string" }
+      }
+    },
+
+    "components": {
+      "type": "object",
+      "description": "Maps content blocks to template file names (without extension) under templates/.",
+      "additionalProperties": true,
+      "properties": {
+        "experience": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "properties": {
+            "default": { "type": "string", "description": "Template name in templates/experience/.", "examples": ["timeline_item"] }
+          }
+        },
+        "blocks": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "properties": {
+            "bullets":  { "type": "string", "examples": ["bullet_list"] },
+            "tags":     { "type": "string", "examples": ["pill_group"] },
+            "metrics":  { "type": "string", "examples": ["stat_cards"] },
+            "text":     { "type": "string", "examples": ["paragraph"] }
+          }
+        }
+      }
+    },
+
+    "tokens": {
+      "type": "object",
+      "description": "Design tokens. Merged with user `meta.tokens` overrides at render time, then exposed as CSS variables (e.g. `--rl-colors-accent`).",
+      "additionalProperties": true,
+      "properties": {
+
+        "colors": {
+          "type": "object",
+          "description": "Colour palette. All values must be valid CSS colour strings.",
+          "additionalProperties": { "type": "string" },
+          "properties": {
+            "background":    { "type": "string", "description": "Page/document background.", "examples": ["#ffffff", "#08090a"] },
+            "surface":       { "type": "string", "description": "Card / section background." },
+            "surface_hover": { "type": "string", "description": "Hovered surface colour." },
+            "border":        { "type": "string", "description": "Rule and border colour." },
+            "text_primary":  { "type": "string", "description": "Headings and primary body text." },
+            "text_secondary":{ "type": "string", "description": "Secondary / muted text." },
+            "text_tertiary": { "type": "string", "description": "Tertiary / very muted text." },
+            "accent":        { "type": "string", "description": "Primary brand / accent colour." },
+            "accent_glow":   { "type": "string", "description": "Glow or hover variant of accent." },
+            "success":       { "type": "string" },
+            "warning":       { "type": "string" },
+            "error":         { "type": "string" }
+          }
+        },
+
+        "typography": {
+          "type": "object",
+          "description": "Typographic scale and weights.",
+          "additionalProperties": true,
+          "properties": {
+            "heading_weight": {
+              "type": "number",
+              "minimum": 100, "maximum": 900,
+              "description": "CSS font-weight for section headings.",
+              "examples": [600, 700]
+            },
+            "body_size": {
+              "type": "number",
+              "minimum": 8, "maximum": 24,
+              "description": "Base body font size in px.",
+              "examples": [13, 14, 15]
+            },
+            "font_family": {
+              "type": "string",
+              "description": "CSS font-family stack.",
+              "examples": ["'Inter', system-ui, sans-serif", "'Georgia', serif"]
+            },
+            "line_height": {
+              "type": "number",
+              "description": "Base line-height multiplier.",
+              "examples": [1.5, 1.6]
+            }
+          }
+        },
+
+        "spacing": {
+          "type": "object",
+          "description": "Spatial scale in px.",
+          "additionalProperties": { "type": "number" },
+          "properties": {
+            "section_gap":  { "type": "number", "description": "Vertical gap between resume sections.", "examples": [28, 32, 36] },
+            "item_gap":     { "type": "number", "description": "Vertical gap between items within a section.", "examples": [12, 14, 16] },
+            "page_padding": { "type": "number", "description": "Outer page padding in px.", "examples": [40, 48, 60] }
+          }
+        },
+
+        "radius": {
+          "type": "object",
+          "description": "Border-radius values in px.",
+          "additionalProperties": { "type": "number" },
+          "properties": {
+            "base":  { "type": "number", "description": "Default border radius.", "examples": [4, 6, 8] },
+            "card":  { "type": "number", "description": "Card border radius." },
+            "tag":   { "type": "number", "description": "Tag / pill border radius." }
+          }
+        }
+
+      }
+    },
+
+    "variants": {
+      "type": "object",
+      "description": "Named style variants users can activate. Each variant is a free-form object of overrides.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "examples": [
+        { "compact": { "padding": "sm", "body_size": 12 } }
+      ]
+    }
+
+  }
+}

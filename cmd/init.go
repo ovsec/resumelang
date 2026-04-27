@@ -9,7 +9,7 @@ const starter = `# yaml-language-server: $schema=https://resumelang.dev/schema/v
 resumelang: v1
 
 meta:
-  theme: minimal        # minimal | aurora | material | terminal | sap | <custom>
+  theme: sap        # sap | minimal | aurora | material | terminal | <custom>
   color: "#6366f1"
   language: en
   page_size: a4

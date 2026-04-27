@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>resumelang — one resume.yml, every output</title>
+  <meta name="description" content="A universal resume DSL. Write one resume.yml, compile to HTML, PDF, JSON, Markdown, and ATS-safe text. Git-native, offline-first, open source.">
+  <link rel="icon" href="/web/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/web/landing.css">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="/" aria-label="resumelang">
+        <img src="/web/assets/logo.svg" alt="resumelang" height="20">
+      </a>
+      <div class="nav-links">
+        <a href="https://docs.resumelang.dev" target="_blank" rel="noopener">Docs</a>
+        <a href="https://github.com/ovsec/resumelang" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="nav-right">
+        <a id="nav-signin" class="nav-btn-ghost" href="/login" hidden>Sign in</a>
+        <div id="nav-user" class="nav-user" hidden>
+          <a class="nav-user-chip" href="/auth/logout" title="Sign out">
+            <img id="nav-avatar" alt="" width="20" height="20">
+            <span id="nav-name"></span>
+          </a>
+        </div>
+        <a class="nav-btn-primary" href="/editor">Open editor</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">Single binary · Git-native · Open source</div>
+    <h1 class="hero-h1">Your resume,<br>every format.</h1>
+    <p class="hero-p">Write <code>resume.yml</code> once. Get HTML, PDF, JSON, Markdown, and ATS text — with live preview, multiple themes, and a shareable link. No lock-in.</p>
+    <div class="hero-actions">
+      <a class="cta-primary" href="/editor">Open editor</a>
+      <a class="cta-secondary" href="https://docs.resumelang.dev" target="_blank" rel="noopener">
+        Read the docs
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 11L11 2M11 2H5M11 2V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+    <div id="hero-providers" class="hero-providers" hidden>
+      <span class="hero-providers-or">or sign in to publish</span>
+      <div id="provider-buttons" class="hero-provider-list"></div>
+    </div>
+  </section>
+
+  <!-- Preview -->
+  <section class="preview-section">
+    <div class="preview-frame">
+      <div class="preview-bar">
+        <div class="preview-dots">
+          <span class="preview-dot dot-r"></span>
+          <span class="preview-dot dot-y"></span>
+          <span class="preview-dot dot-g"></span>
+        </div>
+        <div class="preview-tabs">
+          <button class="preview-tab active" data-view="rendered">Preview</button>
+          <button class="preview-tab" data-view="yaml">YAML</button>
+        </div>
+        <select id="demo-theme" class="preview-theme-select" aria-label="Theme"></select>
+      </div>
+      <div class="preview-body">
+        <div class="preview-view" id="demo-view-rendered">
+          <iframe id="demo-preview" title="resume preview" loading="lazy"></iframe>
+        </div>
+        <div class="preview-view preview-yaml-view" id="demo-view-yaml" hidden>
+          <pre id="demo-yaml-pre"><code id="demo-yaml-code"></code></pre>
+        </div>
+        <div class="preview-spinner" id="preview-loader">
+          <span class="spinner"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features-section">
+    <div class="features-grid">
+      <div class="feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h14M3 10h14M3 15h8"/></svg>
+        </div>
+        <h3>One source, every output</h3>
+        <p>Plain YAML, readable diffs, zero proprietary format. Compile to HTML, PDF, JSON Resume, Markdown, or ATS text in one command.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+        </div>
+        <h3>Switch themes in one click</h3>
+        <p>Linear, brutalist, dossier, vercel, academic, timeline. Your content stays — only the aesthetic changes.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 16l5-5-5-5"/><path d="M7 4L2 9l5 5"/><path d="M11 3L9 17"/></svg>
+        </div>
+        <h3>CLI · Editor · CI pipeline</h3>
+        <p>Same Go binary serves the editor, runs the CLI, and powers the GitHub Action. One install, three workflows.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Code block -->
+  <section class="how-section">
+    <h2 class="how-h2">Up in three lines</h2>
+    <div class="code-window">
+      <div class="code-bar">
+        <div class="preview-dots">
+          <span class="preview-dot dot-r"></span>
+          <span class="preview-dot dot-y"></span>
+          <span class="preview-dot dot-g"></span>
+        </div>
+        <span class="code-bar-label">terminal</span>
+      </div>
+      <pre class="code-body"><code><span class="p">$</span> go install github.com/ovsec/resumelang@latest
+<span class="p">$</span> resumelang init <span class="op">&amp;&amp;</span> resumelang build resume.yml
+<span class="p">$</span> git push   <span class="c"># GitHub Action publishes to Pages</span></code></pre>
+    </div>
+    <a class="cta-primary cta-center" href="/editor">Try it in the browser →</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <a class="nav-brand" href="/" aria-label="resumelang home">
+        <img src="/web/assets/logo.svg" alt="resumelang" height="18">
+      </a>
+      <span class="footer-note">MIT license · Built in Go · No tracking</span>
+      <div class="footer-links">
+        <a href="https://docs.resumelang.dev" target="_blank" rel="noopener">Docs</a>
+        <a href="https://github.com/ovsec/resumelang" target="_blank" rel="noopener">GitHub</a>
+        <a href="/editor">Editor</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="text/x-yaml" id="sample-yaml">
+resumelang: v1
+meta:
+  theme: sap
+  color: "#6366f1"
+  language: en
+  page_size: a4
+  sections: [summary, experience, education, skills, projects]
+person:
+  name: Jane Doe
+  title: Senior Software Engineer
+  email: jane@example.com
+  location: Stockholm, Sweden
+  website: https://janedoe.dev
+  github: janedoe
+  linkedin: janedoe
+summary: |
+  Experienced engineer with 8 years building distributed systems.
+  Loves Go, Postgres, and small sharp tools.
+experience:
+  - company: Acme Corp
+    role: Lead Engineer
+    location: Stockholm
+    start: "2021"
+    end: ""
+    description: Led the platform team.
+    highlights:
+      - Scaled API to 10M requests/day
+      - Reduced deploy time by 60%
+    tags: [Go, Kubernetes, Postgres]
+  - company: Startup Inc
+    role: Senior Engineer
+    location: Remote
+    start: "2018"
+    end: "2021"
+    description: Built core billing and payments system.
+    highlights:
+      - Designed idempotent payment retry flow
+      - Authored OSS library used by 200+ companies
+    tags: [Python, Postgres, Stripe]
+education:
+  - institution: KTH Royal Institute of Technology
+    degree: MSc
+    field: Computer Science
+    start: "2013"
+    end: "2015"
+skills:
+  - category: Languages
+    skills: [Go, TypeScript, Python, Rust]
+  - category: Infrastructure
+    skills: [Kubernetes, Terraform, AWS, Postgres]
+projects:
+  - name: gitshare
+    description: P2P git repo sharing via bore.pub tunnels.
+    url: https://github.com/janedoe/gitshare
+    tags: [Go, P2P]
+  </script>
+
+  <script src="/web/vendor/handlebars.min.js"></script>
+  <script src="/web/vendor/js-yaml.min.js"></script>
+  <script src="/web/landing.js"></script>
+</body>
+</html>
