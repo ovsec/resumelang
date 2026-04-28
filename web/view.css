@@ -65,6 +65,13 @@
   gap: 8px;
 }
 
+.view-nav-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
 .view-main {
   flex: 1;
   min-height: 0;
@@ -155,34 +162,24 @@
 }
 .btn-primary:hover { background: var(--accent-h); border-color: var(--accent-h); color: #fff; }
 
-.select {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border2);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  height: 30px;
-  padding: 0 22px 0 8px;
-  border-radius: 7px;
-  cursor: pointer;
-  outline: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='%237070a0' stroke-width='1.4'><path d='m2 4 3 3 3-3'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 6px center;
-  transition: border-color 0.1s;
-}
-.select:hover { border-color: var(--accent); }
-.select option { background: var(--surface); color: var(--text); }
 
 @media (max-width: 700px) {
   .view-topbar {
     grid-template-columns: 1fr auto;
     gap: 8px;
   }
-  .view-meta { grid-column: 1 / -1; order: 3; }
-  .view-tabs { grid-column: 1 / -1; order: 4; justify-self: start; }
+  .view-meta    { grid-column: 1 / -1; order: 3; }
+  .view-tabs    { grid-column: 1 / -1; order: 4; justify-self: start; }
   .view-actions { grid-column: 1 / -1; order: 5; flex-wrap: wrap; }
+
+  /* Theme picker: fixed full-width sheet below topbar (mirrors editor behaviour) */
+  .theme-picker-menu {
+    position: fixed;
+    top: 58px;
+    left: 8px;
+    right: 8px;
+    max-height: 52vh;
+    min-width: unset;
+    border-radius: 14px;
+  }
 }

@@ -163,7 +163,8 @@
     $('resume-title').textContent = name;
     $('resume-sub').textContent   = title;
     document.title = name + ' — resumelang';
-    $('btn-edit').href = '/editor' + location.hash;
+    const editorLink = document.getElementById('btn-open-editor');
+    if (editorLink) editorLink.href = '/editor' + location.hash;
   }
 
   function syntaxHighlight(yamlText) {
@@ -201,7 +202,85 @@
     catch (e) { showError('print: ' + e.message); }
   });
 
-  $('view-theme').addEventListener('change', e => renderPreview(e.target.value));
+  // ── Theme picker ───────────────────────────────────────────────
+
+  let currentViewTheme = '';
+
+  function closeViewPicker() {
+    const menu = $('theme-picker-menu');
+    const btn  = $('theme-picker-btn');
+    if (menu) menu.hidden = true;
+    if (btn)  btn.setAttribute('aria-expanded', 'false');
+  }
+
+  function initViewThemePicker(themes, initial) {
+    const btn  = $('theme-picker-btn');
+    const menu = $('theme-picker-menu');
+    if (!btn || !menu) return;
+
+    themes.forEach(t => {
+      const li = document.createElement('li');
+      li.className = 'theme-picker-item';
+      li.setAttribute('role', 'option');
+      li.setAttribute('tabindex', '-1');
+      li.dataset.theme = t;
+      li.textContent = t;
+      menu.appendChild(li);
+    });
+
+    function setViewTheme(name) {
+      currentViewTheme = name;
+      const label = $('theme-picker-label');
+      if (label) label.textContent = name;
+      menu.querySelectorAll('.theme-picker-item').forEach(li => {
+        const active = li.dataset.theme === name;
+        li.classList.toggle('active', active);
+        li.setAttribute('aria-selected', String(active));
+      });
+      renderPreview(name);
+    }
+
+    menu.addEventListener('click', e => {
+      const item = e.target.closest('.theme-picker-item');
+      if (!item) return;
+      closeViewPicker();
+      setViewTheme(item.dataset.theme);
+      btn.focus();
+    });
+
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = !menu.hidden;
+      menu.hidden = isOpen;
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      if (!isOpen) {
+        (menu.querySelector('.theme-picker-item.active') || menu.querySelector('.theme-picker-item'))?.focus();
+      }
+    });
+
+    btn.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        menu.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+        (menu.querySelector('.theme-picker-item.active') || menu.querySelector('.theme-picker-item'))?.focus();
+      }
+    });
+
+    menu.addEventListener('keydown', e => {
+      const items = [...menu.querySelectorAll('.theme-picker-item')];
+      const idx   = items.indexOf(document.activeElement);
+      if      (e.key === 'ArrowDown') { e.preventDefault(); items[Math.min(idx + 1, items.length - 1)]?.focus(); }
+      else if (e.key === 'ArrowUp')   { e.preventDefault(); if (idx <= 0) { closeViewPicker(); btn.focus(); } else items[idx - 1]?.focus(); }
+      else if (e.key === 'Enter')     { e.preventDefault(); if (document.activeElement.dataset?.theme) { closeViewPicker(); setViewTheme(document.activeElement.dataset.theme); btn.focus(); } }
+      else if (e.key === 'Escape')    { closeViewPicker(); btn.focus(); }
+    });
+
+    document.addEventListener('click', closeViewPicker);
+    menu.addEventListener('click', e => e.stopPropagation());
+
+    setViewTheme(initial);
+  }
 
   // ── Init ───────────────────────────────────────────────────────
 
@@ -226,8 +305,7 @@
     setTitle();
     $('source-code').innerHTML = syntaxHighlight(yamlText);
 
-    // Theme select
-    const select = $('view-theme');
+    // Theme picker
     let themes = ['sap'];
     try {
       const data = await fetch('/api/themes').then(r => r.json());
@@ -235,12 +313,6 @@
     } catch { /* ignore */ }
 
     const initial = (currentResume.meta && currentResume.meta.theme) || themes[0];
-    for (const t of themes) {
-      const opt = document.createElement('option');
-      opt.value = t; opt.textContent = t;
-      if (t === initial) opt.selected = true;
-      select.appendChild(opt);
-    }
-    renderPreview(select.value);
+    initViewThemePicker(themes, initial);
   })();
 })();

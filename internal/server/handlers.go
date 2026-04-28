@@ -35,9 +35,15 @@ func pageEditor(c *fiber.Ctx) error {
 }
 
 func pageView(c *fiber.Ctx) error {
-	return c.Render("view", fiber.Map{
-		"Title": "resumelang — view",
-	})
+	user, loggedIn := sessionUser(c)
+	data := fiber.Map{
+		"Title":    "resumelang — view",
+		"ViewPage": true,
+	}
+	if loggedIn {
+		data["User"] = user
+	}
+	return c.Render("view", data)
 }
 
 func pageLogin(c *fiber.Ctx) error {
@@ -216,6 +222,21 @@ func apiListResumes(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(fiber.Map{"resumes": list})
+}
+
+func apiGetResume(c *fiber.Ctx) error {
+	user, _ := sessionUser(c)
+	id := c.Params("id")
+	list, err := globalStore.List(user.Provider + "-" + user.ID)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	for _, r := range list {
+		if r.ID == id {
+			return c.JSON(r)
+		}
+	}
+	return c.Status(404).JSON(fiber.Map{"error": "not found"})
 }
 
 func apiSaveResume(c *fiber.Ctx) error {

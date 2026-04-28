@@ -32,8 +32,9 @@ func Start(args []string) {
 	engine.Reload(os.Getenv("RL_DEV") != "")
 
 	app := fiber.New(fiber.Config{
-		Views:       engine,
-		ViewsLayout: "layout",
+		Views:          engine,
+		ViewsLayout:    "layout",
+		ReadBufferSize: 65536,
 	})
 
 	app.Use(recover.New())
@@ -66,6 +67,7 @@ func Start(args []string) {
 
 	// User resumes (requires auth)
 	app.Get("/api/resumes", requireAuth, apiListResumes)
+	app.Get("/api/resumes/:id", requireAuth, apiGetResume)
 	app.Post("/api/resumes", requireAuth, apiSaveResume)
 	app.Delete("/api/resumes/:id", requireAuth, apiDeleteResume)
 
