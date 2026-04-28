@@ -4,7 +4,16 @@ resumelang.exe
 dist/
 *.test
 *.out
+data/
 
+# Screenshots / stray files
+screenshots/
+editor.html
+
+# Unused vendor files
+web/vendor/cm-show-hint.min.js
+web/vendor/cm-show-hint.min.css
+web/vendor/yaml.min.js
 # Build artifacts
 *.vsix
 extension-vscode/web/vendor/
