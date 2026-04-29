@@ -22,7 +22,7 @@ func pageLanding(c *fiber.Ctx) error {
 	if ok {
 		data["User"] = user
 	}
-	return c.Render("landing", data, "")
+	return c.Render("landing", data, "layout_landing")
 }
 
 func pageEditor(c *fiber.Ctx) error {

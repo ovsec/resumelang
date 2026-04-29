@@ -17,6 +17,24 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Scrollbars ──────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+*::-webkit-scrollbar        { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track  { background: transparent; }
+*::-webkit-scrollbar-corner { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background 0.2s;
+}
+*::-webkit-scrollbar-thumb:hover  { background: rgba(255,255,255,0.18); background-clip: content-box; }
+*::-webkit-scrollbar-thumb:active { background: rgba(255,255,255,0.28); background-clip: content-box; }
+
 html {
   scroll-behavior: smooth;
 }
@@ -304,7 +322,7 @@ body {
   color: var(--muted2);
 }
 .hero-provider-list { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-.provider-btn {
+.hero-provider-btn {
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -319,8 +337,12 @@ body {
   font-weight: 500;
   transition: background 0.12s, border-color 0.12s;
 }
-.provider-btn:hover { background: var(--surface2); border-color: var(--accent); }
-.provider-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.hero-provider-btn:hover { background: var(--surface2); border-color: var(--border2); }
+.hero-provider-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.hero-provider-github:hover { border-color: rgba(240,246,252,0.3); }
+.hero-provider-github svg  { color: #e6edf3; }
+.hero-provider-linkedin:hover { border-color: rgba(10,102,194,0.5); }
+.hero-provider-linkedin svg   { color: #0a66c2; }
 
 /* ── Preview ─────────────────────────────────────── */
 .preview-section {
@@ -423,11 +445,17 @@ body {
 .preview-yaml-view {
   background: var(--bg);
   overflow: auto;
-  scrollbar-color: var(--border2) transparent;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
   scrollbar-width: thin;
 }
 .preview-yaml-view::-webkit-scrollbar { width: 8px; }
-.preview-yaml-view::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.preview-yaml-view::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.preview-yaml-view::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); background-clip: content-box; }
 #demo-yaml-pre {
   padding: 24px 28px;
   font-family: var(--font-mono);

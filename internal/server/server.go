@@ -71,10 +71,10 @@ func Start(args []string) {
 	app.Post("/api/resumes", requireAuth, apiSaveResume)
 	app.Delete("/api/resumes/:id", requireAuth, apiDeleteResume)
 
-	// Auth
+	// Auth — logout must be before :provider wildcard
+	app.Get("/auth/logout", authLogout)
 	app.Get("/auth/:provider", authStart)
 	app.Get("/auth/:provider/callback", authCallbackHandler)
-	app.Get("/auth/logout", authLogout)
 
 	bind := addr + ":" + port
 	fmt.Println("resumelang editor →", "http://"+bind)

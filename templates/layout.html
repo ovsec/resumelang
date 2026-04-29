@@ -25,5 +25,26 @@
   {{embed}}
   <div id="modal-container"></div>
   <div id="status" class="status-toast" aria-live="polite"></div>
+  <script>
+    (function(){
+      var t=document.getElementById('user-menu-trigger'),
+          d=document.getElementById('user-menu-dropdown');
+      if(!t||!d)return;
+      t.addEventListener('click',function(e){
+        e.stopPropagation();
+        var open=!d.hidden;
+        d.hidden=open;
+        t.setAttribute('aria-expanded',String(!open));
+      });
+      document.addEventListener('click',function(){
+        d.hidden=true;
+        t.setAttribute('aria-expanded','false');
+      });
+      d.addEventListener('click',function(e){e.stopPropagation();});
+      document.addEventListener('keydown',function(e){
+        if(e.key==='Escape'&&!d.hidden){d.hidden=true;t.setAttribute('aria-expanded','false');t.focus();}
+      });
+    })();
+  </script>
 </body>
 </html>

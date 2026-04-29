@@ -26,26 +26,26 @@ meta:
   # ── Token overrides ────────────────────────────────────────────────────────
   # Every value here is merged on top of the theme's defaults.
   # All keys below match the SAP theme's token tree exactly.
-  tokens:
-    colors:
-      background:    "#f7f9fc"   # page background
-      surface:       "#ffffff"   # card / section background
-      surface_hover: "#eef2f7"   # hover state surface
-      border:        "#d6dde6"   # dividers and card borders
-      text_primary:  "#0a2540"   # headings, names
-      text_secondary: "#4a5b73"  # body text, dates, subtitles
-      accent:        "#0070f2"   # links, tags, active elements
-      accent_glow:   "#0040b0"   # darker accent (hover / shadow)
-      success:       "#107e3e"   # positive indicators
-      warning:       "#e9730c"   # caution indicators
-      error:         "#bb0000"   # error / negative indicators
-    spacing:
-      section_gap: 28            # vertical gap (px) between sections
-    typography:
-      heading_weight: 600        # font-weight for section headings
-      body_size: 14              # base font size (px)
-    radius:
-      base: 4                    # border-radius (px) for cards / tags
+  # tokens:
+  #   colors:
+  #     background:    "#f7f9fc"   # page background
+  #     surface:       "#ffffff"   # card / section background
+  #     surface_hover: "#eef2f7"   # hover state surface
+  #     border:        "#d6dde6"   # dividers and card borders
+  #     text_primary:  "#0a2540"   # headings, names
+  #     text_secondary: "#4a5b73"  # body text, dates, subtitles
+  #     accent:        "#0070f2"   # links, tags, active elements
+  #     accent_glow:   "#0040b0"   # darker accent (hover / shadow)
+  #     success:       "#107e3e"   # positive indicators
+  #     warning:       "#e9730c"   # caution indicators
+  #     error:         "#bb0000"   # error / negative indicators
+  #   spacing:
+  #     section_gap: 28            # vertical gap (px) between sections
+  #   typography:
+  #     heading_weight: 600        # font-weight for section headings
+  #     body_size: 14              # base font size (px)
+  #   radius:
+  #     base: 4                    # border-radius (px) for cards / tags
 
 # ── Person ────────────────────────────────────────────────────────────────────
 person:

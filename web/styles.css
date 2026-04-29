@@ -21,20 +21,23 @@
 /* ── Reset ───────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Global scrollbars ───────────────────────────── */
+/* ── Global scrollbars — floating pill ───────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border2) transparent;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
 }
-*::-webkit-scrollbar       { width: 6px; height: 6px; }
-*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar         { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track   { background: transparent; }
+*::-webkit-scrollbar-corner  { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: var(--border2);
-  border-radius: 3px;
-  transition: background 0.15s;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background 0.2s;
 }
-*::-webkit-scrollbar-thumb:hover { background: var(--muted2); }
-*::-webkit-scrollbar-corner      { background: transparent; }
+*::-webkit-scrollbar-thumb:hover  { background: rgba(255,255,255,0.18); background-clip: content-box; }
+*::-webkit-scrollbar-thumb:active { background: rgba(255,255,255,0.28); background-clip: content-box; }
 
 html, body {
   height: 100%;
@@ -240,6 +243,75 @@ html, body {
 .user-chip img { border-radius: 50%; flex-shrink: 0; background: var(--border2); }
 .user-chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+/* ── User dropdown (shared across all app pages) ─── */
+.user-menu { position: relative; }
+
+.user-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 10px 0 5px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+.user-menu-trigger:hover { border-color: var(--accent); background: var(--surface2); }
+.user-menu-trigger[aria-expanded="true"] { border-color: var(--accent); }
+.user-menu-trigger[aria-expanded="true"] .user-menu-chevron { transform: rotate(180deg); }
+
+.user-menu-avatar { border-radius: 50%; flex-shrink: 0; }
+.user-menu-initials {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.user-menu-name { max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+.user-menu-chevron { flex-shrink: 0; transition: transform 0.15s; color: var(--muted); }
+
+.user-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 170px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  padding: 4px;
+  z-index: 300;
+}
+.user-menu-dropdown[hidden] { display: none; }
+
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+.user-menu-item:hover { background: var(--surface2); color: var(--text); }
+.user-menu-item svg { flex-shrink: 0; opacity: .7; }
+.user-menu-item-danger { color: #f87171; }
+.user-menu-item-danger:hover { background: rgba(248,113,113,.1); color: #f87171; }
+.user-menu-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
 /* ── Save dialog ─────────────────────────────────── */
 .save-dialog-overlay {
   position: fixed;
@@ -360,6 +432,92 @@ html, body {
   gap: 6px;
 }
 
+/* ── Keys help button + panel ───────────────────── */
+.keys-help-btn {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--muted2);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.keys-help-btn:hover,
+.keys-help-btn[aria-expanded="true"] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--bg2);
+}
+
+/* when .User buttons exist, remove the auto-margin from the ? button
+   (Save button already has margin-left:auto) */
+#btn-save ~ #btn-keys { margin-left: 0; }
+
+.keys-panel {
+  position: absolute;
+  top: 38px; /* pane-bar height */
+  right: 0;
+  z-index: 120;
+  width: 280px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  padding: 12px 14px 14px;
+}
+
+.keys-panel-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted2);
+  margin-bottom: 10px;
+}
+
+.keys-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 14px;
+  align-items: center;
+}
+
+.keys-key {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.keys-key kbd {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 4px;
+  line-height: 17px;
+  color: var(--text);
+}
+
+.keys-desc {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* ── Render mode toggle ──────────────────────────── */
 .render-toggle {
   display: inline-flex;
@@ -456,7 +614,7 @@ html, body {
 .pane-view[hidden] { display: none; }
 
 /* ── Editor pane ─────────────────────────────────── */
-.editor-pane { background: var(--bg); }
+.editor-pane { background: var(--bg); position: relative; }
 .editor-pane .CodeMirror {
   flex: 1;
   height: 100%;
@@ -473,17 +631,26 @@ html, body {
 .editor-pane .CodeMirror-linenumber { color: var(--muted2); }
 .editor-pane .CodeMirror-cursor { border-left-color: var(--accent-h); }
 
-/* CM scroll: floating thumb via border gap */
+/* CM scroll — same floating pill, slightly wider for comfort */
 .editor-pane .CodeMirror-scroll::-webkit-scrollbar       { width: 10px; height: 10px; }
-.editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 6px; border: 3px solid var(--bg); }
-.editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted2); }
+.editor-pane .CodeMirror-scroll::-webkit-scrollbar-track { background: transparent; }
+.editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  border: 3px solid var(--bg);
+  background-clip: content-box;
+  transition: background 0.2s;
+}
+.editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb:hover  { background: rgba(255,255,255,0.2); background-clip: content-box; }
+.editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb:active { background: rgba(255,255,255,0.32); background-clip: content-box; }
 
 /* Light variant */
 body.cm-light .editor-pane,
 body.cm-light .editor-pane .CodeMirror,
 body.cm-light .editor-pane .CodeMirror-gutters { background: #f8f8fc; color: #1c1c30; }
 body.cm-light .editor-pane .CodeMirror-gutters { border-right-color: #e0e0ec; }
-body.cm-light .editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb { background: #d0d0e0; border-color: #f8f8fc; }
+body.cm-light .editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-color: #f8f8fc; }
+body.cm-light .editor-pane .CodeMirror-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); border-color: #f8f8fc; }
 
 /* ── Preview pane ────────────────────────────────── */
 .preview-pane { background: var(--surface); }

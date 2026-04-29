@@ -295,6 +295,25 @@ projects:
 
   // ── CodeMirror init ──────────────────────────────────────────────────────────
 
+  function toggleComment(editor) {
+    const sel = editor.listSelections()[0];
+    const fromLine = Math.min(sel.anchor.line, sel.head.line);
+    const toLine   = Math.max(sel.anchor.line, sel.head.line);
+    // determine: all lines commented?
+    const allCommented = Array.from({length: toLine - fromLine + 1}, (_, i) => fromLine + i)
+      .every(ln => /^(\s*)# ?/.test(editor.getLine(ln)));
+    editor.operation(() => {
+      for (let ln = fromLine; ln <= toLine; ln++) {
+        const text = editor.getLine(ln);
+        if (allCommented) {
+          editor.replaceRange(text.replace(/^(\s*)# ?/, '$1'), {line: ln, ch: 0}, {line: ln, ch: text.length});
+        } else {
+          editor.replaceRange('# ' + text, {line: ln, ch: 0}, {line: ln, ch: text.length});
+        }
+      }
+    });
+  }
+
   // CodeMirror
   const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
     mode:         'yaml',
@@ -307,6 +326,8 @@ projects:
       Tab:           c => c.execCommand('insertSoftTab'),
       'Ctrl-Space':  c => showSchemaHint(c),
       'Ctrl-Enter':  () => { clearTimeout(renderTimer); render(); },
+      'Ctrl-/':      c => toggleComment(c),
+      'Cmd-/':       c => toggleComment(c),
     },
   });
 
@@ -642,6 +663,24 @@ projects:
 
   document.getElementById('btn-save')?.addEventListener('click', () => doSave(false));
   document.getElementById('btn-rename')?.addEventListener('click', () => doSave(true));
+
+  // ── Keys help panel ──────────────────────────────────────────────────────────
+  (function() {
+    const btn   = document.getElementById('btn-keys');
+    const panel = document.getElementById('keys-panel');
+    if (!btn || !panel) return;
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = !panel.hidden;
+      panel.hidden = open;
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+    document.addEventListener('click', () => { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); });
+    panel.addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !panel.hidden) { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+    });
+  })();
 
   // YAML syntax highlighter
   function syntaxHighlight(yaml) {
