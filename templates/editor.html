@@ -38,7 +38,17 @@
             hx-target="#modal-container"
             hx-swap="innerHTML">Share</button>
     <button id="btn-print" class="nav-ghost">Print</button>
-    <button id="btn-download" class="nav-primary">Download</button>
+    <div class="dl-split" id="dl-split">
+      <button id="btn-download" class="nav-primary dl-split-main" title="Download PDF">Download</button>
+      <button id="btn-download-toggle" class="nav-primary dl-split-chevron" aria-haspopup="listbox" aria-expanded="false" title="More formats">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="m2 4 3 3 3-3"/></svg>
+      </button>
+      <ul id="dl-menu" class="dl-menu" role="listbox" hidden>
+        <li class="dl-menu-item" role="option" data-fmt="pdf">PDF</li>
+        <li class="dl-menu-item" role="option" data-fmt="html">HTML</li>
+        <li class="dl-menu-item" role="option" data-fmt="txt">Plain text</li>
+      </ul>
+    </div>
     <span class="nav-divider"></span>
     {{if .User}}
     <div class="user-menu" id="user-menu">

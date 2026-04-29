@@ -222,6 +222,33 @@ html, body {
 .nav-primary:hover { background: var(--accent-h); }
 .nav-primary:active { transform: scale(0.97); }
 
+/* ── Download split button ────────────────────────── */
+.dl-split { position: relative; display: inline-flex; }
+.dl-split-main { border-radius: 7px 0 0 7px; padding-right: 10px; }
+.dl-split-chevron { border-radius: 0 7px 7px 0; padding: 0 8px; border-left: 1px solid rgba(255,255,255,0.25); }
+.dl-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  list-style: none;
+  padding: 4px;
+  margin: 0;
+  min-width: 120px;
+  z-index: 200;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+}
+.dl-menu-item {
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--fg);
+}
+.dl-menu-item:hover { background: var(--hover); }
+
 .user-widget { display: inline-flex; align-items: center; gap: 6px; }
 .user-chip {
   display: inline-flex;

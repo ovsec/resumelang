@@ -583,23 +583,68 @@ projects:
     catch (e) { status('print: ' + e.message, 'err'); }
   });
 
-  // Download HTML (quick shortcut from top bar)
-  document.getElementById('btn-download')?.addEventListener('click', async () => {
+  // Download split button
+  const dlSplit   = document.getElementById('dl-split');
+  const dlMenu    = document.getElementById('dl-menu');
+  const dlToggle  = document.getElementById('btn-download-toggle');
+
+  const fmtMeta = {
+    html: { endpoint: '/api/export/html', ext: 'html', mime: 'text/html' },
+    txt:  { endpoint: '/api/export/txt',  ext: 'txt',  mime: 'text/plain' },
+  };
+
+  function printPDF() {
+    try { document.getElementById('preview').contentWindow.print(); }
+    catch (e) { status('print: ' + e.message, 'err'); }
+  }
+
+  async function doDownload(fmt) {
+    if (fmt === 'pdf') { printPDF(); return; }
+    const meta  = fmtMeta[fmt];
     const yaml  = cm.getValue();
     const theme = currentTheme || lastGoodTheme;
+    status(`generating ${fmt.toUpperCase()}…`);
     try {
-      const res = await fetch('/api/export/html', {
+      const res = await fetch(meta.endpoint, {
         method:  'POST',
         headers: {'Content-Type': 'application/json'},
         body:    JSON.stringify({yaml, theme}),
       });
       if (!res.ok) { status(await res.text(), 'err'); return; }
       const blob = await res.blob();
+      const cd   = res.headers.get('Content-Disposition') || '';
+      const m    = cd.match(/filename="([^"]+)"/);
+      const name = m ? m[1] : `resume.${meta.ext}`;
       const a = Object.assign(document.createElement('a'), {
-        href: URL.createObjectURL(blob), download: 'resume.html',
+        href: URL.createObjectURL(blob), download: name,
       });
       a.click(); URL.revokeObjectURL(a.href);
+      status(`downloaded ${name}`);
     } catch (e) { status('download: ' + e.message, 'err'); }
+  }
+
+  document.getElementById('btn-download')?.addEventListener('click', () => doDownload('pdf'));
+
+  dlToggle?.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = !dlMenu.hidden;
+    dlMenu.hidden = open;
+    dlToggle.setAttribute('aria-expanded', String(!open));
+  });
+
+  dlMenu?.addEventListener('click', e => {
+    const item = e.target.closest('.dl-menu-item');
+    if (!item) return;
+    dlMenu.hidden = true;
+    dlToggle.setAttribute('aria-expanded', 'false');
+    doDownload(item.dataset.fmt);
+  });
+
+  document.addEventListener('click', e => {
+    if (dlSplit && !dlSplit.contains(e.target)) {
+      dlMenu.hidden = true;
+      dlToggle?.setAttribute('aria-expanded', 'false');
+    }
   });
 
   // Save (logged-in users)
