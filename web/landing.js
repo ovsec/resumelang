@@ -8,6 +8,30 @@
     document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 16);
   }, { passive: true });
 
+  // User dropdown
+  const trigger  = $('user-menu-trigger');
+  const dropdown = $('user-menu-dropdown');
+  if (trigger && dropdown) {
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = !dropdown.hidden;
+      dropdown.hidden = open;
+      trigger.setAttribute('aria-expanded', String(!open));
+    });
+    document.addEventListener('click', () => {
+      dropdown.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+    });
+    dropdown.addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        dropdown.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.focus();
+      }
+    });
+  }
+
   // Sample YAML
   const sampleYaml = $('sample-yaml').textContent.trim();
 

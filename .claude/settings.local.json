@@ -12,7 +12,8 @@
       "Bash(rm -f resumelang-0.2.0.vsix)",
       "Bash(npx --yes @vscode/vsce package)",
       "Bash(bash sync.sh)",
-      "Bash(npx --yes @vscode/vsce package --out resumelang-0.2.0.vsix)"
+      "Bash(npx --yes @vscode/vsce package --out resumelang-0.2.0.vsix)",
+      "Bash(git rm *)"
     ]
   }
 }

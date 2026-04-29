@@ -44,28 +44,21 @@ func ServeStatic(args []string) {
 
 	mux := http.NewServeMux()
 
-	// Landing page
+	// Pages are server-rendered by the Fiber server (resumelang serve).
+	// serve-static is a limited dev mode: auth works, but pages need the full server.
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
+		if r.URL.Path != "/" && !strings.HasPrefix(r.URL.Path, "/web/") &&
+			!strings.HasPrefix(r.URL.Path, "/themes/") && !strings.HasPrefix(r.URL.Path, "/schema/") &&
+			!strings.HasPrefix(r.URL.Path, "/api/") && !strings.HasPrefix(r.URL.Path, "/auth/") {
 			http.NotFound(w, r)
 			return
 		}
-		http.ServeFile(w, r, filepath.Join(webDir, "landing.html"))
-	})
-
-	// Editor shell
-	mux.HandleFunc("/editor", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join(webDir, "index.html"))
-	})
-
-	// Login page
-	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join(webDir, "login.html"))
-	})
-
-	// Read-only resume view (shareable link)
-	mux.HandleFunc("/r", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join(webDir, "view.html"))
+		if r.URL.Path == "/" {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Write([]byte(`<!doctype html><html><body style="font:14px/2 system-ui,sans-serif;padding:40px">` +
+				`<p>Run <code>resumelang serve</code> for the full editor.</p>` +
+				`<p><a href="/editor">Editor</a> · <a href="/dashboard">Dashboard</a></p></body></html>`))
+		}
 	})
 
 	// OAuth + session
