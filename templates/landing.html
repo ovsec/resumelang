@@ -160,9 +160,47 @@
     </div>
   </section>
 
-  <!-- Code block -->
+  <!-- Install block -->
   <section class="how-section">
-    <h2 class="how-h2">Up in three lines</h2>
+    <h2 class="how-h2">Install</h2>
+    <div class="install-window">
+      <div class="install-bar">
+        <div class="preview-dots">
+          <span class="preview-dot dot-r"></span>
+          <span class="preview-dot dot-y"></span>
+          <span class="preview-dot dot-g"></span>
+        </div>
+        <div class="install-tabs" role="tablist">
+          <button class="install-tab active" role="tab" aria-selected="true"  data-pane="curl">curl</button>
+          <button class="install-tab"         role="tab" aria-selected="false" data-pane="go">go install</button>
+          <button class="install-tab"         role="tab" aria-selected="false" data-pane="brew">brew</button>
+          <button class="install-tab"         role="tab" aria-selected="false" data-pane="scoop">scoop</button>
+        </div>
+        <button class="install-copy" id="install-copy-btn" title="Copy command" aria-label="Copy">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="9" height="9" rx="1.5"/><path d="M1 5v7a1 1 0 0 0 1 1h7"/></svg>
+        </button>
+      </div>
+
+      <div class="install-pane active" id="install-curl">
+        <pre class="code-body"><code><span class="p">$</span> curl -sSfL https://raw.githubusercontent.com/ovsec/resumelang/main/install.sh | sh</code></pre>
+        <div class="install-note">macOS · Linux · Windows (WSL) &nbsp;·&nbsp; no Go required</div>
+      </div>
+      <div class="install-pane" id="install-go">
+        <pre class="code-body"><code><span class="p">$</span> go install github.com/ovsec/resumelang@latest</code></pre>
+        <div class="install-note">Requires Go 1.22+</div>
+      </div>
+      <div class="install-pane" id="install-brew">
+        <pre class="code-body"><code><span class="p">$</span> brew install ovsec/tap/resumelang</code></pre>
+        <div class="install-note">macOS · Linux</div>
+      </div>
+      <div class="install-pane" id="install-scoop">
+        <pre class="code-body"><code><span class="p">$</span> scoop bucket add ovsec https://github.com/ovsec/scoop-resumelang
+<span class="p">$</span> scoop install resumelang</code></pre>
+        <div class="install-note">Windows</div>
+      </div>
+    </div>
+
+    <div class="how-then-label">then</div>
     <div class="code-window">
       <div class="code-bar">
         <div class="preview-dots">
@@ -172,8 +210,7 @@
         </div>
         <span class="code-bar-label">terminal</span>
       </div>
-      <pre class="code-body"><code><span class="p">$</span> go install github.com/ovsec/resumelang@latest
-<span class="p">$</span> resumelang init <span class="op">&amp;&amp;</span> resumelang build resume.yml
+      <pre class="code-body"><code><span class="p">$</span> resumelang init <span class="op">&amp;&amp;</span> resumelang build resume.yml
 <span class="p">$</span> git push   <span class="c"># GitHub Action publishes to Pages</span></code></pre>
     </div>
     <a class="cta-primary cta-center" href="/editor">Try it in the browser →</a>

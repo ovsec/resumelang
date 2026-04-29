@@ -580,6 +580,82 @@ body {
 .code-body .op { color: var(--muted); }
 .code-body .c  { color: var(--muted2); }
 
+/* ── Install block ───────────────────────────────── */
+.install-window {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: left;
+  margin-bottom: 12px;
+}
+.install-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 14px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.install-tabs {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  justify-content: center;
+}
+.install-tab {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.install-tab:hover { background: var(--hover); color: var(--text); }
+.install-tab.active {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.install-copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.install-copy:hover { background: var(--hover); color: var(--text); }
+.install-copy.copied { color: #4ade80; }
+.install-pane { display: none; }
+.install-pane.active { display: block; }
+.install-note {
+  padding: 0 24px 14px;
+  font-size: 11.5px;
+  color: var(--muted2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.how-then-label {
+  font-size: 12px;
+  color: var(--muted2);
+  text-align: center;
+  margin: 20px 0 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
 /* ── Roadmap / Coming soon ───────────────────────── */
 .roadmap-section {
   max-width: 1100px;

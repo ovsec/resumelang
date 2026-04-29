@@ -32,6 +32,39 @@
     });
   }
 
+  // Install tabs
+  const installTabs = document.querySelectorAll('.install-tab');
+  installTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      installTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      document.querySelectorAll('.install-pane').forEach(p => p.classList.remove('active'));
+      const pane = document.getElementById('install-' + tab.dataset.pane);
+      if (pane) pane.classList.add('active');
+    });
+  });
+
+  // Copy install command
+  const copyBtn = $('install-copy-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      const active = document.querySelector('.install-pane.active');
+      if (!active) return;
+      const text = active.querySelector('code').innerText
+        .split('\n').map(l => l.replace(/^\$\s*/, '')).join('\n').trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5L12 3"/></svg>';
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="9" height="9" rx="1.5"/><path d="M1 5v7a1 1 0 0 0 1 1h7"/></svg>';
+        }, 1800);
+      } catch { /* ignore */ }
+    });
+  }
+
   // Sample YAML
   const sampleYaml = $('sample-yaml').textContent.trim();
 

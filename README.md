@@ -257,15 +257,36 @@ docker run -p 8080:8080 resumelang
 
 ## Roadmap
 
+### Near-term (v0.x)
+
 | Feature | Status |
 |---------|--------|
-| Native PDF (server-side Puppeteer) | In progress |
-| `resumelang lint` — ATS keyword score | Planned |
-| LinkedIn import (`import linkedin export.zip`) | Planned |
-| JSON Resume import | Planned |
-| AI resume tailoring (Pro) | Planned |
-| Link analytics — see who opens your resume (Pro) | Planned |
-| Custom domain publishing (Pro) | Planned |
+| `resumelang lint` — ATS keyword density, date gaps, weak verbs | Planned |
+| LinkedIn import — `import linkedin export.zip` → YAML | Planned |
+| JSON Resume import — `import jsonresume resume.json` | Planned |
+| Live reload SSE — `serve` hot-reloads when `resume.yml` changes on disk | Planned |
+| Publish to GitHub Pages — one-click from the web editor | Planned |
+| Resume version history — diff view for saved resumes on dashboard | Planned |
+| `resumelang diff a.yml b.yml` — semantic section-level diff | Planned |
+
+### Medium-term (v1.x)
+
+| Feature | Status |
+|---------|--------|
+| AI tailoring — paste a job description, get keyword gap analysis | Planned |
+| Share link analytics — open counts, last-seen timestamp (no tracking pixels) | Planned |
+| Community theme registry — `resumelang theme install user/repo` | Planned |
+| Custom domain publishing — `resume.yourname.com` → hosted resume | Planned |
+| Multi-resume workspaces — manage role-targeted resume variants | Planned |
+| Collaborative review — share editor access for mentor feedback | Planned |
+
+### Later / Pro
+
+| Feature | Notes |
+| ------- | ----- |
+| Cover letter generator | Co-authored with AI from resume + job description |
+| Webhook API | Programmatic build triggers |
+| SSO / team accounts | For career coaches and recruiting firms |
 
 Full roadmap → [docs.resumelang.dev/roadmap](https://docs.resumelang.dev/roadmap)
 

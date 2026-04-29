@@ -1,0 +1,89 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: resumelang
+    main: .
+    binary: resumelang
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w -X github.com/ovsec/resumelang/cmd.Version={{.Version}}
+
+archives:
+  - id: resumelang
+    name_template: "resumelang_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: "resumelang_{{ .Version }}_checksums.txt"
+  algorithm: sha256
+
+release:
+  github:
+    owner: ovsec
+    name: resumelang
+  draft: false
+  prerelease: auto
+  name_template: "v{{ .Version }}"
+
+brews:
+  - name: resumelang
+    homepage: https://resumelang.dev
+    description: "Resume DSL compiler and live editor. One resume.yml → HTML, JSON, Markdown, ATS text."
+    license: MIT
+    repository:
+      owner: ovsec
+      name: homebrew-tap
+    install: |
+      bin.install "resumelang"
+    test: |
+      system "#{bin}/resumelang", "version"
+
+scoops:
+  - name: resumelang
+    homepage: https://resumelang.dev
+    description: "Resume DSL compiler and live editor."
+    license: MIT
+    repository:
+      owner: ovsec
+      name: scoop-resumelang
+
+winget:
+  - name: resumelang
+    publisher: ovsec
+    publisher_url: https://resumelang.dev
+    publisher_support_url: https://github.com/ovsec/resumelang/issues
+    short_description: "Resume DSL compiler and live editor."
+    license: MIT
+    license_url: https://github.com/ovsec/resumelang/blob/main/LICENSE
+    homepage: https://resumelang.dev
+    repository:
+      owner: microsoft
+      name: winget-pkgs
+      branch: "resumelang-{{.Version}}"
+      pull_request:
+        enabled: true
+        draft: false
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
