@@ -67,23 +67,4 @@ scoops:
       owner: ovsec
       name: scoop-resumelang
 
-winget:
-  - name: resumelang
-    publisher: ovsec
-    publisher_url: https://resumelang.dev
-    publisher_support_url: https://github.com/ovsec/resumelang/issues
-    short_description: "Resume DSL compiler and live editor."
-    license: MIT
-    license_url: https://github.com/ovsec/resumelang/blob/main/LICENSE
-    homepage: https://resumelang.dev
-    repository:
-      owner: microsoft
-      name: winget-pkgs
-      branch: "resumelang-{{.Version}}"
-      pull_request:
-        enabled: true
-        draft: false
-        base:
-          owner: microsoft
-          name: winget-pkgs
-          branch: master
+# winget: disabled — requires forking microsoft/winget-pkgs manually + separate PAT
