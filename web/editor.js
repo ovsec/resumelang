@@ -321,7 +321,7 @@ projects:
     theme:        'material-darker',
     indentUnit:   2,
     tabSize:      2,
-    lineWrapping: true,
+    lineWrapping: false,
     extraKeys: {
       Tab:           c => c.execCommand('insertSoftTab'),
       'Ctrl-Space':  c => showSchemaHint(c),
