@@ -48,6 +48,11 @@
           "type": "object",
           "description": "Override theme design tokens (colors, spacing, typography, radius, ...). Deep-merged onto the theme's own tokens at render time.",
           "additionalProperties": true
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Searchable tags rendered as pills at the bottom of the resume and injected as <meta name=\"keywords\">. Use without # prefix (e.g. open-to-work, golang, remote)."
         }
       }
     },

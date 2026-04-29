@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/ovsec/resumelang/internal/ats"
 	"github.com/ovsec/resumelang/internal/compiler"
 	"github.com/ovsec/resumelang/internal/parser"
 )
@@ -225,6 +226,32 @@ func apiExportTxt(c *fiber.Ctx) error {
 	c.Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s.txt"`, name))
 	c.Set("Content-Type", "text/plain; charset=utf-8")
 	return c.Send(txt)
+}
+
+// ── ATS ────────────────────────────────────────────────────────────
+
+func apiATS(c *fiber.Ctx) error {
+	var body struct {
+		YAML           string `json:"yaml"`
+		JobDescription string `json:"job_description"`
+	}
+	if err := c.BodyParser(&body); err != nil || body.YAML == "" {
+		return c.Status(400).JSON(fiber.Map{"error": "missing yaml"})
+	}
+	r, err := parser.ParseBytes([]byte(body.YAML))
+	if err != nil {
+		return c.Status(422).JSON(fiber.Map{"error": "YAML: " + err.Error()})
+	}
+	resumeText := string(compiler.ToATS(r))
+	result, err := ats.Analyze(ats.Request{
+		Resume:         r,
+		ResumeText:     resumeText,
+		JobDescription: body.JobDescription,
+	})
+	if err != nil {
+		return c.Status(502).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(result)
 }
 
 // ── User Resumes ───────────────────────────────────────────────────

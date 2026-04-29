@@ -845,4 +845,174 @@ projects:
       localStorage.setItem(SPLIT_KEY, workspace.style.getPropertyValue('--pane-split') || '50%');
     });
   })();
+
+  // ── ATS Overlay ────────────────────────────────────────────────
+  (function () {
+    const overlay      = document.getElementById('ats-overlay');
+    const closeBtn     = document.getElementById('ats-close');
+    const analyzeBtn   = document.getElementById('ats-analyze');
+    const scorePill    = document.getElementById('ats-score-pill');
+    const pillNum      = document.getElementById('ats-pill-num');
+    const jdArea       = document.getElementById('ats-jd');
+    const loading      = document.getElementById('ats-loading');
+    const errorBox     = document.getElementById('ats-error');
+    const results      = document.getElementById('ats-results');
+    const scoreNum     = document.getElementById('ats-score-num');
+    const scoreTag     = document.getElementById('ats-score-tag');
+    const modeBadge    = document.getElementById('ats-mode-badge');
+    const ringFill     = document.getElementById('ats-ring-fill');
+    const missing      = document.getElementById('ats-missing');
+    const weakList     = document.getElementById('ats-weak');
+    const strengths    = document.getElementById('ats-strengths');
+    const tipBox       = document.getElementById('ats-tip');
+
+    function openATS() {
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeATS() {
+      overlay.hidden = true;
+      document.body.style.overflow = '';
+    }
+
+    scorePill.addEventListener('click', openATS);
+    const mobileBtn = document.getElementById('btn-ats-mobile');
+    if (mobileBtn) mobileBtn.addEventListener('click', openATS);
+    closeBtn.addEventListener('click', closeATS);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeATS(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) closeATS(); });
+
+    function setScore(score) {
+      const circumference = 251.2;
+      const offset = circumference - (score / 100) * circumference;
+      ringFill.style.strokeDashoffset = offset;
+      let color, label;
+      if (score >= 90)      { color = '#22c55e'; label = 'Excellent'; }
+      else if (score >= 75) { color = '#4ade80'; label = 'Strong'; }
+      else if (score >= 60) { color = '#f59e0b'; label = 'Competitive'; }
+      else if (score >= 40) { color = '#fb923c'; label = 'Developing'; }
+      else                  { color = '#f87171'; label = 'Needs Work'; }
+      ringFill.style.stroke = color;
+      scoreNum.textContent = score;
+      scoreTag.textContent = label;
+      scoreTag.style.color = color;
+    }
+
+    function renderMissing(keywords) {
+      missing.innerHTML = '';
+      if (!keywords || !keywords.length) {
+        missing.innerHTML = '<span style="font-size:12px;color:var(--text-muted,#888)">None found — great coverage!</span>';
+        return;
+      }
+      keywords.forEach(kw => {
+        const pill = document.createElement('button');
+        pill.className = 'ats-pill';
+        pill.textContent = kw;
+        pill.title = 'Click to copy';
+        pill.addEventListener('click', () => {
+          navigator.clipboard.writeText(kw).catch(() => {});
+          pill.classList.add('ats-pill-copied');
+          pill.textContent = '✓ ' + kw;
+          setTimeout(() => { pill.classList.remove('ats-pill-copied'); pill.textContent = kw; }, 1500);
+        });
+        missing.appendChild(pill);
+      });
+    }
+
+    function renderWeak(bullets) {
+      weakList.innerHTML = '';
+      if (!bullets || !bullets.length) {
+        weakList.innerHTML = '<span style="font-size:12px;color:var(--text-muted,#888)">No weak bullets found — nice work!</span>';
+        return;
+      }
+      bullets.forEach(b => {
+        const item = document.createElement('div');
+        item.className = 'ats-weak-item';
+        item.innerHTML =
+          `<div class="ats-weak-orig"><span>⚠</span><span>${esc(b.original)}</span></div>` +
+          `<div class="ats-weak-arrow">→</div>` +
+          `<div class="ats-weak-sug">${esc(b.suggestion)}</div>`;
+        weakList.appendChild(item);
+      });
+    }
+
+    function renderStrengths(list) {
+      strengths.innerHTML = '';
+      (list || []).forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'ats-strength';
+        row.innerHTML = `<span class="ats-strength-icon">✓</span><span>${esc(s)}</span>`;
+        strengths.appendChild(row);
+      });
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function scoreColor(s) {
+      if (s >= 75) return '#4ade80';
+      if (s >= 60) return '#fbbf24';
+      if (s >= 40) return '#fb923c';
+      return '#f87171';
+    }
+
+    function updatePill(score) {
+      const color = scoreColor(score);
+      pillNum.textContent = score;
+      // match render-toggle pattern: tinted bg + border + text all from same color
+      scorePill.style.background = `rgba(${hexToRgb(color)},.1)`;
+      scorePill.style.borderColor = `rgba(${hexToRgb(color)},.22)`;
+      scorePill.style.color = color;
+    }
+
+    function hexToRgb(hex) {
+      const r = parseInt(hex.slice(1,3),16);
+      const g = parseInt(hex.slice(3,5),16);
+      const b = parseInt(hex.slice(5,7),16);
+      return `${r},${g},${b}`;
+    }
+
+    async function runAnalysis() {
+      const yaml = window.editorGetYAML ? window.editorGetYAML() : '';
+      if (!yaml) return;
+
+      loading.hidden = false;
+      errorBox.hidden = true;
+      results.hidden = true;
+      analyzeBtn.disabled = true;
+
+      try {
+        const res = await fetch('/api/ats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ yaml, job_description: jdArea.value.trim() }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Analysis failed');
+
+        setScore(data.score || 0);
+        renderMissing(data.missing_keywords);
+        renderWeak(data.weak_bullets);
+        renderStrengths(data.strengths);
+        if (data.tip) { tipBox.textContent = data.tip; tipBox.hidden = false; }
+        else { tipBox.hidden = true; }
+        modeBadge.className = 'ats-mode-badge ' + (data.offline ? 'offline' : 'ai');
+        modeBadge.innerHTML = data.offline
+          ? '◦ Basic check'
+          : '<svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1l1.5 4H13l-3.5 2.5 1.5 4L7 9 3 11.5l1.5-4L1 5h4.5z"/></svg> Grok AI';
+        modeBadge.hidden = false;
+        results.hidden = false;
+        updatePill(data.score || 0);
+      } catch (err) {
+        errorBox.textContent = 'Error: ' + err.message;
+        errorBox.hidden = false;
+      } finally {
+        loading.hidden = true;
+        analyzeBtn.disabled = false;
+      }
+    }
+
+    analyzeBtn.addEventListener('click', runAnalysis);
+  })();
 })();

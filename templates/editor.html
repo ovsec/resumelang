@@ -118,6 +118,10 @@
         <button class="pane-tab" data-view="yaml">YAML</button>
       </div>
       <div class="pane-bar-end">
+        <button id="ats-score-pill" class="ats-score-pill" title="ATS Analysis — click to open">
+          <span class="ats-pill-dot"></span>
+          <span class="ats-pill-label">ATS <span id="ats-pill-num">?</span></span>
+        </button>
         <button id="render-toggle" class="render-toggle" type="button" title="Live — click to switch to manual">
           <span class="render-toggle-dot"></span>
           <span class="render-toggle-label">live</span>
@@ -144,7 +148,83 @@
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 9C3.5 5 6 3 9 3s5.5 2 7.5 6c-2 4-4.5 6-7.5 6s-5.5-2-7.5-6z"/><circle cx="9" cy="9" r="2.5"/></svg>
     <span>Preview</span>
   </button>
+  <button class="mobile-tab" id="btn-ats-mobile" type="button">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="7"/><path d="M6 12 9 6l3 6"/><path d="M7 10h4"/></svg>
+    <span>ATS</span>
+  </button>
 </nav>
+
+<!-- ATS Analysis Overlay -->
+<div id="ats-overlay" class="ats-overlay" hidden aria-modal="true" role="dialog" aria-label="ATS Analysis">
+  <div class="ats-panel">
+    <div class="ats-header">
+      <span class="ats-title">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="6"/><path d="M4.5 9.5 7 4.5l2.5 5"/><path d="M5.5 7.5h3"/></svg>
+        ATS Analysis
+      </span>
+      <button id="ats-close" class="ats-close" aria-label="Close ATS panel">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 2l10 10M12 2 2 12"/></svg>
+      </button>
+    </div>
+
+    <div class="ats-body">
+      <div class="ats-top">
+        <div class="ats-score-wrap">
+          <svg class="ats-ring" viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="ats-ring-track" cx="50" cy="50" r="40" fill="none" stroke-width="8"/>
+            <circle id="ats-ring-fill" class="ats-ring-fill" cx="50" cy="50" r="40" fill="none" stroke-width="8"
+              stroke-dasharray="251.2" stroke-dashoffset="251.2"
+              stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="ats-score-inner">
+            <span id="ats-score-num" class="ats-score-num">—</span>
+            <span class="ats-score-label">ATS Score</span>
+            <span id="ats-score-tag" class="ats-score-tag"></span>
+          </div>
+        </div>
+
+        <div class="ats-jd-wrap">
+          <label class="ats-jd-label" for="ats-jd">
+            Job description
+            <span class="ats-jd-optional">(optional — leave blank for general check)</span>
+          </label>
+          <textarea id="ats-jd" class="ats-jd" rows="5"
+            placeholder="Paste job description here…&#10;e.g. Senior Go Engineer at Stripe&#10;Requirements: 3+ years Go, Kubernetes, CI/CD…"></textarea>
+          <button id="ats-analyze" class="ats-analyze-btn" type="button">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v6l3 3"/><circle cx="7" cy="7" r="6"/></svg>
+            Analyze
+          </button>
+        </div>
+      </div>
+
+      <div id="ats-tip" class="ats-tip" hidden></div>
+
+      <div id="ats-loading" class="ats-loading" hidden>
+        <div class="ats-spinner"></div>
+        <span>Analyzing your resume…</span>
+      </div>
+      <div id="ats-error" class="ats-error" hidden></div>
+
+      <div id="ats-results" class="ats-results" hidden>
+        <div class="ats-results-header">
+          <span id="ats-mode-badge" class="ats-mode-badge" hidden></span>
+        </div>
+        <div class="ats-card" id="ats-missing-card">
+          <div class="ats-card-title">Missing Keywords</div>
+          <div id="ats-missing" class="ats-pills"></div>
+        </div>
+        <div class="ats-card" id="ats-weak-card">
+          <div class="ats-card-title">Weak Bullets</div>
+          <div id="ats-weak" class="ats-weak-list"></div>
+        </div>
+        <div class="ats-card" id="ats-strengths-card">
+          <div class="ats-card-title">Strengths</div>
+          <div id="ats-strengths" class="ats-strengths-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="/web/vendor/codemirror.min.js"></script>
 <script src="/web/vendor/yaml.min.js"></script>

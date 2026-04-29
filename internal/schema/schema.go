@@ -28,6 +28,7 @@ type Meta struct {
 	PageSize string         `yaml:"page_size" json:"page_size,omitempty"`
 	Sections []string       `yaml:"sections"  json:"sections,omitempty"`
 	Tokens   map[string]any `yaml:"tokens"    json:"tokens,omitempty"`
+	Tags     []string       `yaml:"tags"      json:"tags,omitempty"`
 }
 
 type Person struct {

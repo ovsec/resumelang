@@ -10,6 +10,13 @@ meta:
   color: "#0070f2"        # accent color override (any hex) — shorthand for tokens.colors.accent
   font: inter             # inter | mono | serif
 
+  tags:                   # searchable tags shown as pills at the bottom of the resume
+    - open-to-work
+    - sap-consultant
+    - s4hana
+    - fiori
+    - remote
+
   sections:               # remove or reorder to hide / reorder sections
     - summary
     - experience

@@ -65,6 +65,7 @@ func Start(args []string) {
 	app.Get("/api/default-yaml", apiDefaultYAML)
 	app.Post("/api/export/html", apiExportHTML)
 	app.Post("/api/export/txt", apiExportTxt)
+	app.Post("/api/ats", apiATS)
 
 	// User resumes (requires auth)
 	app.Get("/api/resumes", requireAuth, apiListResumes)

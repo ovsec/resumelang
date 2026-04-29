@@ -61,6 +61,9 @@ func ToHTML(r *schema.Resume, themePath string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("exec hbs: %w", err)
 	}
+	if len(r.Meta.Tags) > 0 {
+		out = injectHashtags(out, r.Meta.Tags)
+	}
 	return []byte(out), nil
 }
 
@@ -185,6 +188,48 @@ func flattenTokens(tokens map[string]any) map[string]any {
 	}
 	walk("", tokens)
 	return flat
+}
+
+func injectHashtags(html string, tags []string) string {
+	clean := make([]string, 0, len(tags))
+	for _, t := range tags {
+		t = strings.TrimPrefix(t, "#")
+		t = strings.TrimSpace(t)
+		if t != "" {
+			clean = append(clean, t)
+		}
+	}
+	if len(clean) == 0 {
+		return html
+	}
+
+	// <meta name="keywords"> before </head>
+	csv := strings.Join(clean, ", ")
+	metaTag := `<meta name="keywords" content="` + csvEscape(csv) + `">`
+	html = strings.Replace(html, "</head>", metaTag+"\n</head>", 1)
+
+	// pill block before </body>
+	var pills strings.Builder
+	for _, t := range clean {
+		pills.WriteString(`<span class="rl-hashtag">#`)
+		pills.WriteString(htmlEscape(t))
+		pills.WriteString(`</span>`)
+	}
+	block := `<div class="rl-hashtags" style="display:flex;flex-wrap:wrap;gap:6px;padding:16px 0 8px;border-top:1px solid var(--rl-border,#e5e7eb);margin-top:16px">` +
+		`<style>.rl-hashtag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--rl-accent,#6366f1) 12%,transparent);color:var(--rl-accent,#6366f1);letter-spacing:.01em}</style>` +
+		pills.String() + `</div>`
+	return strings.Replace(html, "</body>", block+"\n</body>", 1)
+}
+
+func htmlEscape(s string) string {
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	return s
+}
+
+func csvEscape(s string) string {
+	return strings.ReplaceAll(s, `"`, `&quot;`)
 }
 
 func registerHelpers(tpl *raymond.Template) {
