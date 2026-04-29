@@ -69,10 +69,24 @@ func pageDashboard(c *fiber.Ctx) error {
 
 func partialShareModal(c *fiber.Ctx) error {
 	user, loggedIn := sessionUser(c)
-	return c.Render("partials/share_modal", fiber.Map{
+	data := fiber.Map{
 		"LoggedIn": loggedIn,
 		"User":     user,
-	}, "") // empty layout = no wrapping
+	}
+	if resumeID := c.Query("resume_id"); resumeID != "" && loggedIn {
+		uid := user.Provider + "-" + user.ID
+		list, err := globalStore.List(uid)
+		if err == nil {
+			for _, r := range list {
+				if r.ID == resumeID {
+					data["PreloadYAML"] = r.YAML
+					data["ResumeID"] = resumeID
+					break
+				}
+			}
+		}
+	}
+	return c.Render("partials/share_modal", data, "")
 }
 
 func partialGallery(c *fiber.Ctx) error {
@@ -214,6 +228,29 @@ func apiExportTxt(c *fiber.Ctx) error {
 }
 
 // ── User Resumes ───────────────────────────────────────────────────
+
+func apiPublicResume(c *fiber.Ctx) error {
+	id := c.Params("id")
+	entries, err := os.ReadDir(globalStore.root)
+	if err != nil {
+		return c.Status(404).JSON(fiber.Map{"error": "not found"})
+	}
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		list, err := globalStore.List(e.Name())
+		if err != nil {
+			continue
+		}
+		for _, r := range list {
+			if r.ID == id {
+				return c.JSON(fiber.Map{"yaml": r.YAML})
+			}
+		}
+	}
+	return c.Status(404).JSON(fiber.Map{"error": "not found"})
+}
 
 func apiListResumes(c *fiber.Ctx) error {
 	user, _ := sessionUser(c)

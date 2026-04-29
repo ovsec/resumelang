@@ -1,3 +1,5 @@
+{{if .PreloadYAML}}<textarea id="share-preload-yaml" hidden>{{.PreloadYAML}}</textarea>{{end}}
+{{if .ResumeID}}<input id="share-resume-id" type="hidden" value="{{.ResumeID}}">{{end}}
 <div class="share-modal" id="share-modal">
   <div class="share-backdrop" onclick="closeShareModal()"></div>
   <div class="share-panel">
@@ -58,6 +60,8 @@
   let currentFmt = 'link';
 
   function getEditorYAML() {
+    const preload = document.getElementById('share-preload-yaml');
+    if (preload) return preload.value;
     if (window.editorGetYAML) return window.editorGetYAML();
     const ta = document.getElementById('yaml-hidden');
     return ta ? ta.value : '';
@@ -150,14 +154,15 @@
         return;
       }
 
-      let encoded;
-      if (locked) {
-        encoded = await encryptYaml(yaml, pw);
-      } else {
-        encoded = await gzipEncode(yaml);
-      }
+      const resumeId = (document.getElementById('share-resume-id') || {}).value;
 
-      const url = location.origin + '/r#yml=' + encoded;
+      let url;
+      if (resumeId && !locked) {
+        url = location.origin + '/r#id=' + resumeId;
+      } else {
+        const encoded = locked ? await encryptYaml(yaml, pw) : await gzipEncode(yaml);
+        url = location.origin + '/r#yml=' + encoded;
+      }
       try {
         await navigator.clipboard.writeText(url);
         showResult('✓ Link copied to clipboard', false);

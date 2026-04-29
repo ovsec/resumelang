@@ -28,6 +28,15 @@
   // ── Decoding ───────────────────────────────────────────────────
 
   async function decodeShareYaml() {
+    // Short link for server-saved resumes
+    const idMatch = location.hash.match(/^#id=(.+)$/);
+    if (idMatch) {
+      const res = await fetch('/api/public/' + idMatch[1]);
+      if (!res.ok) throw new Error('resume not found');
+      const data = await res.json();
+      return data.yaml;
+    }
+
     const m = location.hash.match(/^#yml=(.+)$/);
     if (!m) return null;
     const raw = m[1];
@@ -204,8 +213,6 @@
 
   // ── Theme picker ───────────────────────────────────────────────
 
-  let currentViewTheme = '';
-
   function closeViewPicker() {
     const menu = $('theme-picker-menu');
     const btn  = $('theme-picker-btn');
@@ -229,7 +236,6 @@
     });
 
     function setViewTheme(name) {
-      currentViewTheme = name;
       const label = $('theme-picker-label');
       if (label) label.textContent = name;
       menu.querySelectorAll('.theme-picker-item').forEach(li => {
