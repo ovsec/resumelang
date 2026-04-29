@@ -53,6 +53,7 @@ brews:
     repository:
       owner: ovsec
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     install: |
       bin.install "resumelang"
     test: |
@@ -66,5 +67,6 @@ scoops:
     repository:
       owner: ovsec
       name: scoop-resumelang
+      token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
 
 # winget: disabled — requires forking microsoft/winget-pkgs manually + separate PAT
