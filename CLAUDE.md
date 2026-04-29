@@ -1,6 +1,7 @@
 # resumelang — Claude Code Context
 
 ## What this project is
+
 A universal resume DSL compiler + graphical editor written in Go. Users author a
 single `resume.yml` (or markdown), and resumelang compiles it to multiple formats.
 Git-native, offline-first. Ships as **one single binary** that doubles as a CLI
@@ -20,13 +21,15 @@ All three paths share **one codebase, one binary**.
 
 ## Project status
 
-**Phase 0 — fresh init in progress.** Scaffolding the single-binary CLI + web
-editor + GitHub Action template. No production builds yet.
+**Phase 1 — core editor shipped.** Web editor live with themes, share links,
+dashboard, OAuth, VSCode extension, and CLI. Working toward lint, imports, and
+publish flow.
 
 ---
 
 ## Module
-```
+
+```text
 module github.com/ovsec/resumelang
 go 1.22
 ```
@@ -37,7 +40,7 @@ GitHub username for canonical hosting: **ovsec** (`github.com/ovsec/resumelang`)
 
 ## Architecture
 
-```
+```text
                        ┌─────────────────────────────────────┐
                        │           resumelang (single binary) │
                        └─────────────────────────────────────┘
@@ -244,7 +247,7 @@ projects:
 | `resumelang diff [a] [b]`               | TODO       | diff two resumes                             |
 | `resumelang import linkedin <zip>`      | TODO       | LinkedIn export → resume.yml                 |
 | `resumelang import jsonresume <json>`   | TODO       | JSON Resume → resume.yml                     |
-| `resumelang pdf [file]`                 | TODO       | PDF via Puppeteer subprocess                 |
+| `resumelang pdf [file]`                 | dropped    | PDF via browser print (window.print)         |
 
 ### `build` flags
 
@@ -260,7 +263,7 @@ projects:
 | Format    | File          | Standard                          |
 |-----------|---------------|-----------------------------------|
 | HTML      | resume.html   | Themed, print-ready               |
-| PDF       | resume.pdf    | Via Puppeteer headless Chrome     |
+| PDF       | —             | Browser print on preview iframe   |
 | JSON      | resume.json   | jsonresume.org schema             |
 | Markdown  | resume.md     | GitHub-flavored                   |
 | ATS text  | resume.txt    | Plain text, ATS-safe              |
@@ -281,7 +284,7 @@ Themes are **strictly validated** against a versioned specification to ensure:
 
 ---
 
-# ThemeSpec (NEW)
+## ThemeSpec
 
 All themes MUST include a `theme.yml` that conforms to a versioned schema.
 
@@ -348,9 +351,9 @@ variants:
 
 ---
 
-## Validation rules (ENFORCED)
+## Validation rules (enforced)
 
-## 1. Required fields
+### 1. Required fields
 
 * `spec`
 * `name`
@@ -359,21 +362,21 @@ variants:
 
 ---
 
-## 2. Versioning
+### 2. Versioning
 
 * `spec` must match supported versions (`v1`)
 * unknown versions → hard error
 
 ---
 
-## 3. Unknown keys
+### 3. Unknown keys
 
 * top-level unknown keys → warning (future-proofing)
 * unknown keys inside strict sections (`supports`, `components`) → error
 
 ---
 
-## 4. Components
+### 4. Components
 
 All declared components MUST have corresponding templates:
 
@@ -386,14 +389,14 @@ Missing template → build error
 
 ---
 
-## 5. Blocks
+### 5. Blocks
 
 * Only blocks listed in `supports.blocks` are allowed
 * If DSL uses unsupported block → ignored (soft fail)
 
 ---
 
-## 6. UI hints
+### 6. UI hints
 
 ```yaml
 supports:
@@ -408,7 +411,7 @@ Rules:
 
 ---
 
-## 7. Tokens
+### 7. Tokens
 
 * must be primitive values (string, number, bool)
 * nested objects allowed
@@ -416,16 +419,16 @@ Rules:
 
 ---
 
-## 8. Layout keys
+### 8. Layout keys
 
 * must match known sections (`experience`, `skills`, etc.)
 * unknown section → warning
 
 ---
 
-# Compiler behavior (STRICT)
+## Compiler behavior (strict)
 
-## Load phase
+### Load phase
 
 ```text
 1. read theme.yml
@@ -436,7 +439,7 @@ Rules:
 
 ---
 
-## Runtime guarantees
+### Runtime guarantees
 
 * no missing templates at render time
 * deterministic output
@@ -444,7 +447,7 @@ Rules:
 
 ---
 
-# Error levels
+## Error levels
 
 | Level  | Behavior               |
 | ------ | ---------------------- |
@@ -454,7 +457,7 @@ Rules:
 
 ---
 
-# Token resolution
+## Token resolution
 
 Final tokens are merged in this order:
 
@@ -475,7 +478,7 @@ Then exposed as CSS variables:
 
 ---
 
-# Component resolution
+## Component resolution
 
 ```text
 DSL block → theme.yml mapping → template path
@@ -496,7 +499,7 @@ templates/blocks/stat_cards.html
 
 ---
 
-# Template contract
+## Template contract
 
 Templates receive a stable context:
 
@@ -511,7 +514,7 @@ type RenderContext struct {
 
 ---
 
-# Theme validation CLI (NEW)
+## Theme validation CLI
 
 ```bash
 resumelang theme validate ./themes/aurora
@@ -526,7 +529,7 @@ Checks:
 
 ---
 
-# Theme development workflow
+## Theme development workflow
 
 ```bash
 resumelang theme init my-theme
@@ -536,9 +539,9 @@ resumelang serve --theme ./my-theme
 
 ---
 
-# Forward compatibility
+## Forward compatibility
 
-## Spec evolution
+### Spec evolution
 
 ```yaml
 spec: v2
@@ -558,7 +561,7 @@ Rules:
 
 ---
 
-# Security model
+## Security model
 
 ## Safe themes (default)
 
@@ -573,7 +576,7 @@ Rules:
 
 ---
 
-# Design principles (final)
+## Design principles (theme system)
 
 1. **Strict contracts enable ecosystems**
 2. **Validation > flexibility**
@@ -583,7 +586,7 @@ Rules:
 
 ---
 
-# Key insight
+## Key insight
 
 A theme system without a schema becomes chaos.
 
@@ -620,6 +623,54 @@ jobs:
 
 ---
 
+## Distribution
+
+### Release process
+
+Tag a commit → GitHub Actions runs GoReleaser → binaries uploaded to GitHub Releases
+→ Homebrew tap + Scoop bucket manifests auto-updated by GoReleaser.
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+### Install methods
+
+| Method | Command |
+| ------ | ------- |
+| `go install` | `go install github.com/ovsec/resumelang@latest` |
+| `curl \| sh` | `curl -sSfL https://raw.githubusercontent.com/ovsec/resumelang/main/install.sh \| sh` |
+| Homebrew | `brew install ovsec/tap/resumelang` |
+| Scoop | `scoop bucket add ovsec https://github.com/ovsec/scoop-resumelang && scoop install resumelang` |
+| Winget | `winget install ovsec.resumelang` |
+| Manual | Download from GitHub Releases, extract, add to PATH |
+
+### Required GitHub secrets for release
+
+| Secret | Purpose |
+| ------ | ------- |
+| `GITHUB_TOKEN` | Auto-provided — uploads release assets |
+| `HOMEBREW_TAP_GITHUB_TOKEN` | PAT with `repo` scope on `ovsec/homebrew-tap` |
+| `SCOOP_BUCKET_GITHUB_TOKEN` | PAT with `repo` scope on `ovsec/scoop-resumelang` |
+
+### VSCode extension
+
+**Fully offline** — bundles Handlebars + js-yaml + themes inside the `.vsix`.
+No CLI binary needed. Renders in a WebviewPanel using only the bundled assets.
+
+```bash
+cd extension-vscode
+npm install
+npx vsce package          # → resumelang-x.y.z.vsix
+npx vsce publish          # requires VSCE_PAT env var
+```
+
+Future: if the extension gains a "build" / "validate" command it will shell out to
+the `resumelang` binary found in PATH, with a graceful prompt to install if missing.
+
+---
+
 ## Development commands
 
 ```bash
@@ -639,10 +690,10 @@ go install .
 
 ## File naming convention
 
-- Input: `*.yml` or `*.resume.yml` (both accepted)
-- Output base strips `.resume` suffix:
-  - `jane.resume.yml` → `jane.html`, `jane.pdf`, ...
-  - `resume.yml` → `resume.html`, `resume.pdf`, ...
+* Input: `*.yml` or `*.resume.yml` (both accepted)
+* Output base strips `.resume` suffix:
+  * `jane.resume.yml` → `jane.html`, `jane.pdf`, ...
+  * `resume.yml` → `resume.html`, `resume.pdf`, ...
 
 ---
 
@@ -661,13 +712,23 @@ go install .
 ## Build order (current)
 
 1. ✅ Module setup, schema IR, parser
-2. ✅ Compilers: HTML (3 themes), JSON, ATS, Markdown
+2. ✅ Compilers: HTML (multi-theme via theme.yml), JSON, ATS, Markdown
 3. ✅ CLI: `init`, `build`, `validate`, `themes`, `version`
 4. ✅ `mdsync` skeleton (md → schema, schema → md)
-5. ✅ `serve` web editor (Fiber + embedded assets, basic round-trip)
+5. ✅ `serve` web editor (Fiber + embedded assets, live preview)
 6. ✅ GitHub Action template
-7. ⏳ `lint` (ATS scoring, date overlap)
-8. ⏳ PDF compiler (Puppeteer subprocess)
-9. ⏳ `import linkedin` / `import jsonresume`
-10. ⏳ Publish flow (`/publish` real GitHub push)
-11. ⏳ Live reload via SSE in `serve`
+7. ✅ Auth (GitHub OAuth, session cookies)
+8. ✅ Dashboard + saved resumes (file-backed store)
+9. ✅ Share links — gzip URL hash, AES-GCM password encryption, short `#id=` for saved resumes
+10. ✅ Public `/r` view page (client-side Handlebars rendering)
+11. ✅ VSCode extension scaffold
+12. ✅ PDF via browser print (`window.print()` on preview iframe)
+13. ⏳ `lint` — ATS keyword density, date gaps, weak achievement verbs
+14. ⏳ `import linkedin` — parse LinkedIn export zip → YAML
+15. ⏳ `import jsonresume` — JSON Resume schema → YAML
+16. ⏳ Publish flow — one-click push to GitHub Pages from editor
+17. ⏳ Live reload SSE — `serve` watches `resume.yml` and pushes updates
+18. ⏳ Resume version history — diff view on dashboard
+19. ⏳ AI tailoring — job description → keyword gap overlay
+20. ⏳ Share link analytics — open counts per link
+21. ⏳ Community theme registry — `resumelang theme install user/repo`
