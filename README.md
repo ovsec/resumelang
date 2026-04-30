@@ -4,7 +4,7 @@
 
 Write your resume as structured YAML. Get themed HTML, ATS plain text, JSON Resume, and Markdown — from a single Go binary that doubles as a CLI, a live web editor, and a CI target.
 
-[![Go](https://img.shields.io/badge/go-1.22+-00ADD8?style=flat&logo=go)](https://golang.org)
+[![Go](https://img.shields.io/badge/go-1.25+-00ADD8?style=flat&logo=go)](https://golang.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-resumelang.dev-7c8cff?style=flat)](https://docs.resumelang.dev)
 
@@ -66,7 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-        with: { go-version: "1.22" }
+        with: { go-version: "1.25" }
       - run: go install github.com/ovsec/resumelang@latest
       - run: resumelang build resume.yml --out dist
       - uses: actions/upload-pages-artifact@v3
