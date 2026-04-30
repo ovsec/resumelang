@@ -2,7 +2,7 @@
 
 Project ID: `resumelang`  
 Project Number: `481781083907`  
-Region: `us-central1`  
+Region: `europe-west1`  
 Cloud Run service account: `481781083907-compute@developer.gserviceaccount.com`
 
 ---
@@ -131,7 +131,7 @@ gcloud builds triggers create github \
 # Create native-mode Firestore database (one-time)
 gcloud firestore databases create \
   --project=resumelang \
-  --location=us-central1
+  --location=europe-west1
 ```
 
 ---
@@ -148,7 +148,7 @@ No extra setup needed after enabling the API — Cloud Build has push access by 
 ```bash
 gcloud run deploy resumelang \
   --image gcr.io/resumelang/resumelang:latest \
-  --region us-central1 \
+  --region europe-west1 \
   --platform managed \
   --allow-unauthenticated \
   --port 8080 \
@@ -161,9 +161,9 @@ gcloud run deploy resumelang \
 
 ## 10. GitHub Actions — required repository secret
 
-| Secret | Value |
-|--------|-------|
-| `GCP_SA_KEY` | JSON key for a service account with `roles/cloudbuild.builds.editor` + `roles/storage.admin` (or use Workload Identity — see below) |
+| Secret       | Value                                                             |
+|--------------|-------------------------------------------------------------------|
+| `GCP_SA_KEY` | SA JSON key (`cloudbuild.builds.editor` + `storage.admin` roles)  |
 
 ### Workload Identity Federation (recommended over SA key)
 

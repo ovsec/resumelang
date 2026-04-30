@@ -24,7 +24,7 @@ steps:
       - --image
       - gcr.io/$PROJECT_ID/resumelang:latest
       - --region
-      - us-central1
+      - europe-west1
       - --platform
       - managed
       - --allow-unauthenticated
