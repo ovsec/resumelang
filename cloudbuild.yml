@@ -4,13 +4,8 @@ steps:
       - build
       - --pull
       - -t
-      - gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA
-      - -t
       - gcr.io/$PROJECT_ID/resumelang:latest
       - .
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA']
 
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/resumelang:latest']
