@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -11,6 +12,13 @@ import (
 )
 
 func Start(args []string) {
+	var err error
+	globalStore, err = NewStore(context.Background())
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "store init:", err)
+		os.Exit(1)
+	}
+
 	port := "3000"
 	addr := "0.0.0.0"
 	for i := 0; i < len(args); i++ {

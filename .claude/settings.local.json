@@ -13,7 +13,8 @@
       "Bash(npx --yes @vscode/vsce package)",
       "Bash(bash sync.sh)",
       "Bash(npx --yes @vscode/vsce package --out resumelang-0.2.0.vsix)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(npx playwright *)"
     ]
   }
 }

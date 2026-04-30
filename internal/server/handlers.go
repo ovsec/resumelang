@@ -12,6 +12,7 @@ import (
 	"github.com/ovsec/resumelang/internal/parser"
 )
 
+
 // ── Pages ──────────────────────────────────────────────────────────
 
 func pageLanding(c *fiber.Ctx) error {
@@ -258,25 +259,11 @@ func apiATS(c *fiber.Ctx) error {
 
 func apiPublicResume(c *fiber.Ctx) error {
 	id := c.Params("id")
-	entries, err := os.ReadDir(globalStore.root)
+	r, err := globalStore.GetByID(id)
 	if err != nil {
 		return c.Status(404).JSON(fiber.Map{"error": "not found"})
 	}
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
-		}
-		list, err := globalStore.List(e.Name())
-		if err != nil {
-			continue
-		}
-		for _, r := range list {
-			if r.ID == id {
-				return c.JSON(fiber.Map{"yaml": r.YAML})
-			}
-		}
-	}
-	return c.Status(404).JSON(fiber.Map{"error": "not found"})
+	return c.JSON(fiber.Map{"yaml": r.YAML})
 }
 
 func apiListResumes(c *fiber.Ctx) error {

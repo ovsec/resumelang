@@ -7,7 +7,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA']
 
-  # Deploy to Cloud Run
+  # Deploy to Cloud Run with secrets from Secret Manager
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -23,6 +23,14 @@ steps:
       - '--allow-unauthenticated'
       - '--port'
       - '8080'
+      - '--set-env-vars'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+      - '--set-secrets'
+      - >-
+        RL_GITHUB_CLIENT_ID=RL_GITHUB_CLIENT_ID:latest,
+        RL_GITHUB_CLIENT_SECRET=RL_GITHUB_CLIENT_SECRET:latest,
+        RL_AUTH_SECRET=RL_AUTH_SECRET:latest,
+        GROQ_API_KEY=GROQ_API_KEY:latest
 
 images:
   - 'gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA'

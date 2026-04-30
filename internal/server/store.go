@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
@@ -10,24 +11,43 @@ import (
 )
 
 type SavedResume struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	YAML      string    `json:"yaml"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        string    `json:"id" firestore:"id"`
+	Name      string    `json:"name" firestore:"name"`
+	YAML      string    `json:"yaml" firestore:"yaml"`
+	CreatedAt time.Time `json:"created_at" firestore:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" firestore:"updated_at"`
 }
 
-type userStore struct {
+// Store is the persistence backend for user resumes.
+type Store interface {
+	List(uid string) ([]SavedResume, error)
+	Save(uid, id, name, yaml string) (SavedResume, error)
+	Delete(uid, id string) error
+	GetByID(id string) (SavedResume, error)
+}
+
+var globalStore Store
+
+// NewStore returns a Firestore-backed store when GOOGLE_CLOUD_PROJECT is set,
+// otherwise falls back to the local file store.
+func NewStore(ctx context.Context) (Store, error) {
+	if proj := os.Getenv("GOOGLE_CLOUD_PROJECT"); proj != "" {
+		return newFirestoreStore(ctx, proj)
+	}
+	return &fileStore{root: "data"}, nil
+}
+
+// ── File store (local dev) ─────────────────────────────────────────
+
+type fileStore struct {
 	root string
 }
 
-var globalStore = &userStore{root: "data"}
-
-func (s *userStore) path(uid string) string {
+func (s *fileStore) path(uid string) string {
 	return filepath.Join(s.root, uid, "resumes.json")
 }
 
-func (s *userStore) load(uid string) ([]SavedResume, error) {
+func (s *fileStore) load(uid string) ([]SavedResume, error) {
 	data, err := os.ReadFile(s.path(uid))
 	if os.IsNotExist(err) {
 		return []SavedResume{}, nil
@@ -42,7 +62,7 @@ func (s *userStore) load(uid string) ([]SavedResume, error) {
 	return list, nil
 }
 
-func (s *userStore) write(uid string, list []SavedResume) error {
+func (s *fileStore) write(uid string, list []SavedResume) error {
 	p := s.path(uid)
 	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
 		return err
@@ -54,17 +74,16 @@ func (s *userStore) write(uid string, list []SavedResume) error {
 	return os.WriteFile(p, data, 0644)
 }
 
-func (s *userStore) List(uid string) ([]SavedResume, error) {
+func (s *fileStore) List(uid string) ([]SavedResume, error) {
 	return s.load(uid)
 }
 
-func (s *userStore) Save(uid, id, name, yaml string) (SavedResume, error) {
+func (s *fileStore) Save(uid, id, name, yaml string) (SavedResume, error) {
 	list, err := s.load(uid)
 	if err != nil {
 		return SavedResume{}, err
 	}
 	now := time.Now().UTC()
-	// Update existing
 	for i, r := range list {
 		if r.ID == id {
 			list[i].Name = name
@@ -76,7 +95,6 @@ func (s *userStore) Save(uid, id, name, yaml string) (SavedResume, error) {
 			return list[i], nil
 		}
 	}
-	// New entry
 	r := SavedResume{
 		ID:        newID(),
 		Name:      name,
@@ -94,7 +112,7 @@ func (s *userStore) Save(uid, id, name, yaml string) (SavedResume, error) {
 	return r, nil
 }
 
-func (s *userStore) Delete(uid, id string) error {
+func (s *fileStore) Delete(uid, id string) error {
 	list, err := s.load(uid)
 	if err != nil {
 		return err
@@ -106,6 +124,28 @@ func (s *userStore) Delete(uid, id string) error {
 		}
 	}
 	return s.write(uid, filtered)
+}
+
+func (s *fileStore) GetByID(id string) (SavedResume, error) {
+	entries, err := os.ReadDir(s.root)
+	if err != nil {
+		return SavedResume{}, os.ErrNotExist
+	}
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		list, err := s.load(e.Name())
+		if err != nil {
+			continue
+		}
+		for _, r := range list {
+			if r.ID == id {
+				return r, nil
+			}
+		}
+	}
+	return SavedResume{}, os.ErrNotExist
 }
 
 func newID() string {
