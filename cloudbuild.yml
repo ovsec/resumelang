@@ -1,35 +1,42 @@
 steps:
-  # Build the container (--pull forces a fresh base image, bypassing Cloud Build cache)
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '--pull', '-t', 'gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA', '.']
+    args:
+      - build
+      - --pull
+      - -t
+      - gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA
+      - -t
+      - gcr.io/$PROJECT_ID/resumelang:latest
+      - .
 
-  # Push to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA']
 
-  # Deploy to Cloud Run with secrets from Secret Manager
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/resumelang:latest']
+
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
-      - 'run'
-      - 'deploy'
-      - 'resumelang'
-      - '--image'
-      - 'gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
-      - '--allow-unauthenticated'
-      - '--port'
+      - run
+      - deploy
+      - resumelang
+      - --image
+      - gcr.io/$PROJECT_ID/resumelang:latest
+      - --region
+      - us-central1
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --port
       - '8080'
-      - '--set-env-vars'
-      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
-      - '--set-secrets'
-      - 'RL_GITHUB_CLIENT_ID=RL_GITHUB_CLIENT_ID:latest,RL_GITHUB_CLIENT_SECRET=RL_GITHUB_CLIENT_SECRET:latest,RL_AUTH_SECRET=RL_AUTH_SECRET:latest,GROQ_API_KEY=GROQ_API_KEY:latest'
+      - --set-env-vars
+      - GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+      - --set-secrets
+      - RL_GITHUB_CLIENT_ID=RL_GITHUB_CLIENT_ID:latest,RL_GITHUB_CLIENT_SECRET=RL_GITHUB_CLIENT_SECRET:latest,RL_AUTH_SECRET=RL_AUTH_SECRET:latest,GROQ_API_KEY=GROQ_API_KEY:latest
 
 images:
-  - 'gcr.io/$PROJECT_ID/resumelang:$COMMIT_SHA'
+  - gcr.io/$PROJECT_ID/resumelang:latest
 
 options:
   logging: CLOUD_LOGGING_ONLY
