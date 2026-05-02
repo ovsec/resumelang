@@ -23,13 +23,14 @@ func newFirestoreStore(ctx context.Context, projectID string) (*firestoreStore, 
 	return &firestoreStore{client: client}, nil
 }
 
-func (s *firestoreStore) col(uid string) *firestore.CollectionRef {
-	return s.client.Collection("users").Doc(uid).Collection("resumes")
+// resumesCol returns the top-level resumes collection reference.
+func (s *firestoreStore) resumesCol() *firestore.CollectionRef {
+	return s.client.Collection("resumes")
 }
 
 func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 	ctx := context.Background()
-	iter := s.col(uid).OrderBy("updated_at", firestore.Desc).Documents(ctx)
+	iter := s.resumesCol().Where("user_id", "==", uid).OrderBy("updated_at", firestore.Desc).Documents(ctx)
 	defer iter.Stop()
 
 	var list []SavedResume
@@ -58,7 +59,7 @@ func (s *firestoreStore) Save(uid, id, name, yaml, visibility, password string) 
 	now := time.Now().UTC()
 
 	if id != "" {
-		ref := s.col(uid).Doc(id)
+		ref := s.resumesCol().Doc(id)
 		doc, err := ref.Get(ctx)
 		if err == nil {
 			var r SavedResume
@@ -72,6 +73,7 @@ func (s *firestoreStore) Save(uid, id, name, yaml, visibility, password string) 
 				r.Password = ""
 			}
 			r.UpdatedAt = now
+			r.UserID = uid // ensure user_id is set
 			if _, err := ref.Set(ctx, r); err != nil {
 				return SavedResume{}, err
 			}
@@ -84,6 +86,7 @@ func (s *firestoreStore) Save(uid, id, name, yaml, visibility, password string) 
 		Name:      name,
 		YAML:      yaml,
 		Visibility: visibility,
+		UserID:    uid,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -93,7 +96,7 @@ func (s *firestoreStore) Save(uid, id, name, yaml, visibility, password string) 
 	if password != "" {
 		r.Password = hashPassword(password)
 	}
-	if _, err := s.col(uid).Doc(r.ID).Set(ctx, r); err != nil {
+	if _, err := s.resumesCol().Doc(r.ID).Set(ctx, r); err != nil {
 		return SavedResume{}, err
 	}
 	return r, nil
@@ -107,21 +110,28 @@ func hashPassword(pw string) string {
 
 func (s *firestoreStore) Delete(uid, id string) error {
 	ctx := context.Background()
-	_, err := s.col(uid).Doc(id).Delete(ctx)
+	// Verify the resume belongs to the user before deleting
+	ref := s.resumesCol().Doc(id)
+	doc, err := ref.Get(ctx)
+	if err != nil {
+		return err
+	}
+	var r SavedResume
+	if err := doc.DataTo(&r); err != nil {
+		return err
+	}
+	if r.UserID != uid {
+		return os.ErrPermission
+	}
+	_, err = ref.Delete(ctx)
 	return err
 }
 
 func (s *firestoreStore) GetByID(id string) (SavedResume, error) {
 	ctx := context.Background()
-	iter := s.client.CollectionGroup("resumes").Where("id", "==", id).Limit(1).Documents(ctx)
-	defer iter.Stop()
-
-	doc, err := iter.Next()
-	if err == iterator.Done {
-		return SavedResume{}, os.ErrNotExist
-	}
+	doc, err := s.resumesCol().Doc(id).Get(ctx)
 	if err != nil {
-		return SavedResume{}, err
+		return SavedResume{}, os.ErrNotExist
 	}
 	var r SavedResume
 	if err := doc.DataTo(&r); err != nil {
@@ -136,18 +146,21 @@ func (s *firestoreStore) GetByID(id string) (SavedResume, error) {
 
 func (s *firestoreStore) GetByIDAndUser(id, uid string) (SavedResume, error) {
 	ctx := context.Background()
-	ref := s.client.Collection("users").Doc(uid).Collection("resumes").Doc(id)
-	doc, err := ref.Get(ctx)
+	doc, err := s.resumesCol().Doc(id).Get(ctx)
 	if err != nil {
 		return SavedResume{}, os.ErrNotExist
 	}
-  var r SavedResume
-  if err := doc.DataTo(&r); err != nil {
-    return SavedResume{}, err
-  }
-  // Allow public resumes and legacy resumes with empty visibility
-  if r.Visibility != "public" && r.Visibility != "" {
-    return SavedResume{}, os.ErrNotExist
-  }
-  return r, nil
+	var r SavedResume
+	if err := doc.DataTo(&r); err != nil {
+		return SavedResume{}, err
+	}
+	// Must belong to the user
+	if r.UserID != uid {
+		return SavedResume{}, os.ErrNotExist
+	}
+	// Must be public (or legacy empty visibility)
+	if r.Visibility != "public" && r.Visibility != "" {
+		return SavedResume{}, os.ErrNotExist
+	}
+	return r, nil
 }

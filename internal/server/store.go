@@ -16,6 +16,7 @@ type SavedResume struct {
 	YAML       string    `json:"yaml" firestore:"yaml"`
 	Visibility string    `json:"visibility" firestore:"visibility"` // private | public | password
 	Password   string    `json:"-" firestore:"password"`   // SHA-256 hash, excluded from JSON
+	UserID     string    `json:"user_id" firestore:"user_id"` // owner
 	CreatedAt  time.Time `json:"created_at" firestore:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at" firestore:"updated_at"`
 }
@@ -92,6 +93,7 @@ func (s *fileStore) Save(uid, id, name, yaml, visibility, password string) (Save
 			list[i].Name = name
 			list[i].YAML = yaml
 			list[i].Visibility = visibility
+			list[i].UserID = uid
 			if password != "" {
 				list[i].Password = hashPassword(password)
 			} else {
@@ -109,6 +111,7 @@ func (s *fileStore) Save(uid, id, name, yaml, visibility, password string) (Save
 		Name:      name,
 		YAML:      yaml,
 		Visibility: visibility,
+		UserID:     uid,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -153,8 +156,11 @@ func (s *fileStore) GetByID(id string) (SavedResume, error) {
 			continue
 		}
 		for _, r := range list {
-			if r.ID == id && (r.Visibility == "public" || r.Visibility == "") {
-				return r, nil
+			if r.ID == id {
+				// Public resumes (or legacy with empty visibility) are accessible
+				if r.Visibility == "public" || r.Visibility == "" {
+					return r, nil
+				}
 			}
 		}
 	}
