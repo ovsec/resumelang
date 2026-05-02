@@ -304,5 +304,19 @@ func asStr(v any) string {
 	if s, ok := v.(string); ok {
 		return s
 	}
+	// Handle numeric types to avoid scientific notation (e.g., GitHub user ID)
+	switch n := v.(type) {
+	case int, int8, int16, int32, int64:
+		return fmt.Sprintf("%d", n)
+	case uint, uint8, uint16, uint32, uint64:
+		return fmt.Sprintf("%d", n)
+	case float32, float64:
+		// Format as integer if it's a whole number
+		f := v.(float64)
+		if f == float64(int64(f)) {
+			return fmt.Sprintf("%.0f", f)
+		}
+		return fmt.Sprintf("%g", v)
+	}
 	return fmt.Sprintf("%v", v)
 }
