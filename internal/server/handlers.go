@@ -99,6 +99,9 @@ func pageDashboard(c *fiber.Ctx) error {
 	}
 	if resumeID := c.Query("resume_id"); resumeID != "" && loggedIn {
 		uid := user.Provider + "-" + user.ID
+		// New share URL format: provider-uid-resumeID (e.g., github-17987428-14d386c54e43c088)
+		shareID := uid + "-" + resumeID
+		data["ShareID"] = shareID
 		data["UID"] = uid
 		list, err := globalStore.List(uid)
 		if err == nil {
@@ -281,18 +284,35 @@ func apiATS(c *fiber.Ctx) error {
 // ── User Resumes ───────────────────────────────────────────────────
 
 func apiPublicResume(c *fiber.Ctx) error {
-	fullID := c.Params("id") // may be "uid.rid" or just "rid"
-	// Support both "uid.rid" (new public links) and legacy "rid" formats
+	fullID := c.Params("id") // may be "provider-uid-resumeID", "uid.rid", or just "rid"
 	var r SavedResume
 	var err error
-	if strings.Contains(fullID, ".") {
-		parts := strings.SplitN(fullID, ".", 2)
-		uid, rid := parts[0], parts[1]
-		r, err = globalStore.GetByIDAndUser(rid, uid)
-	} else {
-		r, err = globalStore.GetByID(fullID)
+
+	// Try new format: "provider-uid-resumeID" (e.g., github-17987428-14d386c54e43c088)
+	// resumeID is always 16 hex chars (from newID()), so we extract from the end
+	if len(fullID) > 17 {
+		resumeID := fullID[len(fullID)-16:]
+		uidPart := fullID[:len(fullID)-17] // everything before "-{16-char-resumeID}"
+		// uidPart should be "provider-uid" (e.g., "github-17987428")
+		if strings.Contains(uidPart, "-") && len(resumeID) == 16 {
+			r, err = globalStore.GetByIDAndUser(resumeID, uidPart)
+		}
 	}
-	if err != nil {
+
+	// If new format didn't work, try legacy formats
+	if r.ID == "" {
+		if strings.Contains(fullID, ".") {
+			// Legacy dot format: "uid.rid"
+			parts := strings.SplitN(fullID, ".", 2)
+			uid, rid := parts[0], parts[1]
+			r, err = globalStore.GetByIDAndUser(rid, uid)
+		} else {
+			// Legacy format without user
+			r, err = globalStore.GetByID(fullID)
+		}
+	}
+
+	if err != nil || r.ID == "" {
 		return c.Status(404).JSON(fiber.Map{"error": "not found"})
 	}
 	// For password-protected shares, the client sends the password in the query.

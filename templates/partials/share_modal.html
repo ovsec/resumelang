@@ -78,9 +78,11 @@
     (function() {
       let currentFmt = 'link';
       let currentVis = 'private';
-      // Get uid from template data (set by partialShareModal handler)
+      // Get share ID from template data (new format: provider-uid-resumeID)
+      const shareId = {{if .ShareID}}"{{.ShareID}}"{{else}}""{{end}};
+      // Legacy uid (for backward compatibility)
       const uid = {{if .UID}}"{{.UID}}"{{else}}""{{end}};
- 
+  
       function getEditorYAML() {
         const preload = document.getElementById('share-preload-yaml');
         if (preload) return preload.value;
@@ -206,15 +208,14 @@
             btn.textContent = 'Copy Link';
             return;
           }
- 
-          const resumeId = (document.getElementById('share-resume-id') || {}).value;
+
+          // Use the new shareId format: provider-uid-resumeID
+          const shareId = {{if .ShareID}}"{{.ShareID}}"{{else}}""{{end}};
           let url;
- 
-          if (vis === 'public' && resumeId) {
-            // Public link: /r#id=<uid>.<rid>
-            url = location.origin + '/r#id=' + (uid ? uid + '.' : '') + resumeId;
-          } else if (resumeId && !locked) {
-            url = location.origin + '/r#id=' + resumeId;
+
+          if (shareId && (vis === 'public' || !locked)) {
+            // New format: /r#id=provider-uid-resumeID
+            url = location.origin + '/r#id=' + shareId;
           } else {
             const encoded = locked ? await encryptYaml(yaml, pw) : await gzipEncode(yaml);
             url = location.origin + '/r#yml=' + encoded;
