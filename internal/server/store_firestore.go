@@ -141,12 +141,13 @@ func (s *firestoreStore) GetByIDAndUser(id, uid string) (SavedResume, error) {
 	if err != nil {
 		return SavedResume{}, os.ErrNotExist
 	}
-	var r SavedResume
-	if err := doc.DataTo(&r); err != nil {
-		return SavedResume{}, err
-	}
-	if r.Visibility != "public" {
-		return SavedResume{}, os.ErrNotExist
-	}
-	return r, nil
+  var r SavedResume
+  if err := doc.DataTo(&r); err != nil {
+    return SavedResume{}, err
+  }
+  // Allow public resumes and legacy resumes with empty visibility
+  if r.Visibility != "public" && r.Visibility != "" {
+    return SavedResume{}, os.ErrNotExist
+  }
+  return r, nil
 }
