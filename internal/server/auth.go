@@ -64,7 +64,7 @@ func configuredProviders() map[string]*oauthProvider {
 			parseUser: func(m map[string]any) UserProfile {
 				return UserProfile{
 					Provider: "github",
-					ID:       fmt.Sprintf("%v", m["id"]),
+					ID:       asStr(m["id"]),
 					Login:    asStr(m["login"]),
 					Name:     asStr(m["name"]),
 					Email:    asStr(m["email"]),

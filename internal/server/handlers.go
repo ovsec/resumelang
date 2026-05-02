@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode"
+	"regexp"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/ovsec/resumelang/internal/ats"
@@ -726,37 +727,202 @@ func plainTextToImportYAML(text string) (string, error) {
 	}
 	r := &schema.Resume{Resumelang: schema.CurrentSpec}
 	parser.ApplyDefaults(r)
-	r.Person.Name = lines[0]
-	if len(lines) > 1 && !looksLikeContact(lines[1]) {
-		r.Person.Title = lines[1]
+
+	// Extract person info from first few lines
+	lineIdx := 0
+	if lineIdx < len(lines) {
+		r.Person.Name = lines[lineIdx]
+		lineIdx++
 	}
-	for _, line := range lines {
+	if lineIdx < len(lines) && !looksLikeContact(lines[lineIdx]) && !looksLikeSectionHeading(lines[lineIdx]) {
+		r.Person.Title = lines[lineIdx]
+		lineIdx++
+	}
+
+	// Parse remaining lines for contact info and sections
+	var currentSection string
+	var currentItem map[string]any
+	var sectionItems []map[string]any
+	inSummary := false
+	var summaryLines []string
+
+	for i := lineIdx; i < len(lines); i++ {
+		line := lines[i]
+		lowLine := strings.ToLower(line)
+
+		// Contact info
 		if strings.Contains(line, "@") && r.Person.Email == "" {
 			r.Person.Email = firstEmail(line)
 			continue
 		}
-		if r.Person.Phone == "" && looksLikePhone(line) {
+		if looksLikePhone(line) && r.Person.Phone == "" {
 			r.Person.Phone = line
-		}
-	}
-	start := 1
-	if r.Person.Title != "" {
-		start = 2
-	}
-	var summary []string
-	for _, line := range lines[start:] {
-		if looksLikeContact(line) || looksLikeSectionHeading(line) {
 			continue
 		}
-		summary = append(summary, line)
-		if len(strings.Join(summary, " ")) > 280 || len(summary) == 4 {
-			break
+		if strings.Contains(lowLine, "linkedin") && r.Person.LinkedIn == "" {
+			r.Person.LinkedIn = extractURL(line)
+			continue
+		}
+		if strings.Contains(lowLine, "github") && r.Person.GitHub == "" {
+			r.Person.GitHub = extractURL(line)
+			continue
+		}
+
+		// Section headings
+		if looksLikeSectionHeading(line) {
+			// Save previous section
+			if currentSection != "" && len(sectionItems) > 0 {
+				r = addSectionItems(r, currentSection, sectionItems)
+			}
+			currentSection = normalizeSectionName(line)
+			sectionItems = []map[string]any{}
+			currentItem = nil
+			inSummary = (currentSection == "summary")
+			if inSummary {
+				summaryLines = []string{}
+			}
+			continue
+		}
+
+		// Summary section
+		if inSummary {
+			if looksLikeSectionHeading(line) {
+				inSummary = false
+				i-- // Reprocess this line
+				continue
+			}
+			summaryLines = append(summaryLines, line)
+			if len(summaryLines) > 0 {
+				r.Summary = strings.Join(summaryLines, " ")
+			}
+			continue
+		}
+
+		// Section items (experience, education, projects, etc.)
+		if currentSection != "" {
+			// Check if this looks like a new item (has a date range or company name pattern)
+			if isNewItem(line, lowLine) {
+				if currentItem != nil {
+					sectionItems = append(sectionItems, currentItem)
+				}
+				currentItem = map[string]any{"name": line}
+			} else if currentItem != nil {
+				// Add as highlight/bullet point
+				if highlights, ok := currentItem["highlights"].([]string); ok {
+					currentItem["highlights"] = append(highlights, line)
+				} else {
+					currentItem["highlights"] = []string{line}
+				}
+			}
 		}
 	}
-	if len(summary) > 0 {
-		r.Summary = strings.Join(summary, " ")
+
+	// Save last section
+	if currentSection != "" && len(sectionItems) > 0 {
+		r = addSectionItems(r, currentSection, sectionItems)
 	}
+
 	return resumeToImportYAML(r)
+}
+
+// normalizeSectionName converts heading text to schema section name
+func normalizeSectionName(heading string) string {
+	low := strings.ToLower(strings.TrimSpace(heading))
+	switch {
+	case strings.Contains(low, "summary") || strings.Contains(low, "profile") || strings.Contains(low, "objective"):
+		return "summary"
+	case strings.Contains(low, "experience") || strings.Contains(low, "work") || strings.Contains(low, "employment"):
+		return "experience"
+	case strings.Contains(low, "education") || strings.Contains(low, "academic"):
+		return "education"
+	case strings.Contains(low, "skill") || strings.Contains(low, "technical"):
+		return "skills"
+	case strings.Contains(low, "project"):
+		return "projects"
+	case strings.Contains(low, "certification"):
+		return "certifications"
+	default:
+		return ""
+	}
+}
+
+// isNewItem checks if line looks like the start of a new section item
+func isNewItem(line, lowLine string) bool {
+	// Looks like a title/company name (not a bullet point)
+	if strings.HasPrefix(line, "•") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "*") {
+		return false
+	}
+	// Contains a year (likely a date range)
+	if matched, _ := regexp.MatchString(`(19|20)\d{2}`, line); matched {
+		return true
+	}
+	return false
+}
+
+// addSectionItems adds parsed items to the resume
+func addSectionItems(r *schema.Resume, section string, items []map[string]any) *schema.Resume {
+	switch section {
+	case "experience":
+		for _, item := range items {
+			exp := schema.Job{
+				Company:  toString(item["name"]),
+				Highlights: toStrSlice(item["highlights"]),
+			}
+			r.Experience = append(r.Experience, exp)
+		}
+	case "education":
+		for _, item := range items {
+			edu := schema.Education{
+				Institution: toString(item["name"]),
+			}
+			r.Education = append(r.Education, edu)
+		}
+	case "projects":
+		for _, item := range items {
+			proj := schema.Project{
+				Name:        toString(item["name"]),
+				Description: strings.Join(toStrSlice(item["highlights"]), " "),
+			}
+			r.Projects = append(r.Projects, proj)
+		}
+	case "skills":
+		allSkills := []string{}
+		for _, item := range items {
+			allSkills = append(allSkills, toStrSlice(item["highlights"])...)
+		}
+		if len(allSkills) > 0 {
+			r.Skills = append(r.Skills, schema.SkillGroup{Skills: allSkills})
+		}
+	}
+	return r
+}
+
+func toString(v any) string {
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
+}
+
+func toStrSlice(v any) []string {
+	if s, ok := v.([]string); ok {
+		return s
+	}
+	return []string{}
+}
+
+func extractURL(line string) string {
+	// Extract first URL from line
+	for _, prefix := range []string{"https://", "http://"} {
+		if idx := strings.Index(line, prefix); idx >= 0 {
+			url := line[idx:]
+			if end := strings.IndexAny(url, " \t\n\r"); end >= 0 {
+				url = url[:end]
+			}
+			return url
+		}
+	}
+	return ""
 }
 
 func cleanImportLines(text string) []string {
