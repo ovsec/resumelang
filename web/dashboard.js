@@ -71,6 +71,62 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  // Expose functions needed by share modal
+  window.getEditorYAML = function() {
+    const preload = document.getElementById('share-preload-yaml');
+    if (preload) return preload.value;
+    if (window.editorGetYAML) return window.editorGetYAML();
+    const ta = document.getElementById('yaml-hidden');
+    return ta ? ta.value : '';
+  };
+
+  window.getEditorTheme = function() {
+    const sel = document.getElementById('theme-select');
+    return sel ? sel.value : 'sap';
+  };
+
+  // Init on load
+  renderLocalResumes();
+})();
+  }
+
+  window.importLocalResume = async function(id) {
+    const resumes = getLocalResumes();
+    const r = resumes.find(x => x.id === id);
+    if (!r) return;
+    try {
+      const res = await fetch('/api/resumes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: r.name, yaml: r.yaml }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const saved = await res.json();
+      // Remove from localStorage after successful import
+      setLocalResumes(resumes.filter(x => x.id !== id));
+      renderLocalResumes();
+      // Redirect to editor with the imported resume
+      location.href = '/editor?id=' + saved.id;
+    } catch (e) {
+      alert('Import failed: ' + e.message);
+    }
+  };
+
+  window.deleteLocalResume = function(id) {
+    if (!confirm('Delete this local draft?')) return;
+    const resumes = getLocalResumes();
+    setLocalResumes(resumes.filter(x => x.id !== id));
+    renderLocalResumes();
+  };
+
+  function setLocalResumes(list) {
+    localStorage.setItem(LOCAL_RESUMES_KEY, JSON.stringify(list));
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
   // Init on load
   renderLocalResumes();
 })();

@@ -162,18 +162,18 @@
         result.hidden = true;
         btn.disabled = true;
         btn.textContent = '…';
- 
+
         try {
           const yaml = getEditorYAML();
           const theme = getEditorTheme();
- 
+
           if (currentFmt === 'pdf') {
             const iframe = document.getElementById('preview');
             if (iframe && iframe.contentWindow) iframe.contentWindow.print();
             closeShareModal();
             return;
           }
- 
+
           if (currentFmt === 'html') {
             const res = await fetch('/api/export/html', {
               method: 'POST',
@@ -186,7 +186,7 @@
             closeShareModal();
             return;
           }
- 
+
           if (currentFmt === 'txt') {
             const res = await fetch('/api/export/txt', {
               method: 'POST',
@@ -199,7 +199,7 @@
             closeShareModal();
             return;
           }
- 
+
           // Live link — handle visibility
           const vis      = currentVis; // private | public | password
           const locked   = vis === 'password';
@@ -211,6 +211,41 @@
             return;
           }
 
+          // Save visibility change if needed
+          const resumeId    = document.getElementById('share-resume-id')?.value;
+          const resumeName  = document.getElementById('share-resume-name')?.value || '';
+          const storedVis   = document.getElementById('share-resume-visibility')?.value || '';
+
+          if (resumeId && vis !== storedVis) {
+            try {
+              const body = { yaml, visibility: vis };
+              body.id = resumeId;
+              if (resumeName) body.name = resumeName;
+              if (locked && pw) body.password = pw; else body.password = '';
+              const saveRes = await fetch('/api/resumes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+              });
+              if (!saveRes.ok) throw new Error(await saveRes.text());
+              // Update stored visibility in the UI
+              const visInput = document.getElementById('share-resume-visibility');
+              if (visInput) visInput.value = vis;
+              // Update dashboard badge if present
+              const badge = document.querySelector('#card-' + resumeId + ' .dash-badge');
+              if (badge) {
+                badge.className = 'dash-badge dash-badge-' + vis;
+                badge.textContent = vis.charAt(0).toUpperCase() + vis.slice(1);
+              }
+            } catch(e) {
+              showResult('Error saving visibility: ' + e.message, true);
+              btn.disabled = false;
+              btn.textContent = 'Copy Link';
+              return;
+            }
+          }
+
+          // Generate the share URL
           const shareId = {{if .ShareID}}"{{.ShareID}}"{{else}}""{{end}};
           let url;
 
@@ -218,7 +253,6 @@
             // Public link: /r#id=provider-uid-resumeID
             url = location.origin + '/r#id=' + shareId;
           } else if (vis === 'private') {
-            // Private: no public link - just show a message
             showResult('Resume is private. Change to Public to get a shareable link.', true);
             btn.disabled = false;
             btn.textContent = 'Copy Link';
@@ -230,7 +264,7 @@
 
           try {
             await navigator.clipboard.writeText(url);
-            showResult('✓ Link copied to clipboard', false);
+            showResult(' Link copied to clipboard', false);
           } catch {
             prompt('Copy this link:', url);
           }
