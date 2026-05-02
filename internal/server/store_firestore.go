@@ -30,6 +30,7 @@ func (s *firestoreStore) resumesCol() *firestore.CollectionRef {
 
 func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 	ctx := context.Background()
+	// Query top-level resumes where user_id matches
 	iter := s.resumesCol().Where("user_id", "==", uid).OrderBy("updated_at", firestore.Desc).Documents(ctx)
 	defer iter.Stop()
 
@@ -48,6 +49,31 @@ func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 		}
 		list = append(list, r)
 	}
+
+	// If no results with user_id, try old nested path (migration helper)
+	if len(list) == 0 {
+		oldIter := s.client.Collection("users").Doc(uid).Collection("resumes").OrderBy("updated_at", firestore.Desc).Documents(ctx)
+		defer oldIter.Stop()
+
+		for {
+			doc, err := oldIter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				break // Don't fail if old path doesn't exist
+			}
+			var r SavedResume
+			if err := doc.DataTo(&r); err != nil {
+				continue
+			}
+			// Migrate: set user_id and save to top-level collection
+			r.UserID = uid
+			s.resumesCol().Doc(r.ID).Set(ctx, r)
+			list = append(list, r)
+		}
+	}
+
 	if list == nil {
 		list = []SavedResume{}
 	}
