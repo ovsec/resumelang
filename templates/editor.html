@@ -41,6 +41,7 @@
             hx-get="/partials/share-modal"
             hx-target="#modal-container"
             hx-swap="innerHTML">Share</button>
+    {{if .ResumeVisibility}}<span class="editor-visibility-badge {{.ResumeVisibility}}">{{if eq .ResumeVisibility "public"}}Public{{else if eq .ResumeVisibility "password"}}Password{{else}}Private{{end}}</span>{{end}}
     <button id="btn-print" class="nav-ghost">Print</button>
     <div class="dl-split" id="dl-split">
       <button id="btn-download" class="nav-primary dl-split-main" title="Download PDF">Download</button>

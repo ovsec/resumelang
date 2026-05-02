@@ -69,6 +69,9 @@
       <div class="dash-card-body">
         <span class="dash-card-name">{{.Name}}</span>
         <span class="dash-card-date">Updated {{.UpdatedAt.Format "Jan 2, 2006"}}</span>
+        {{if eq .Visibility "public"}}<span class="dash-badge dash-badge-public">Public</span>
+        {{else if eq .Visibility "password"}}<span class="dash-badge dash-badge-password">Password</span>
+        {{else}}<span class="dash-badge dash-badge-private">Private</span>{{end}}
       </div>
       <div class="dash-card-actions">
         <a class="dash-card-link" href="/editor?id={{.ID}}">

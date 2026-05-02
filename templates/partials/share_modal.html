@@ -211,43 +211,18 @@
             return;
           }
 
-          // If visibility changed, save the resume with new visibility
-          const resumeId = document.getElementById('share-resume-id')?.value;
-          const resumeName = document.getElementById('share-resume-name')?.value || '';
-          const storedVis = document.getElementById('share-resume-visibility')?.value || '';
-          const yaml = getEditorYAML();
-
-          // Save if visibility changed or password updated
-          if (resumeId && yaml && (vis !== storedVis || (locked && pw))) {
-            try {
-              const body = { yaml, visibility: vis };
-              body.id = resumeId;
-              if (resumeName) body.name = resumeName;
-              if (locked && pw) body.password = pw; else body.password = '';
-              const saveRes = await fetch('/api/resumes', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body)
-              });
-              if (!saveRes.ok) throw new Error(await saveRes.text());
-              // Update stored visibility
-              const visInput = document.getElementById('share-resume-visibility');
-              if (visInput) visInput.value = vis;
-            } catch(e) {
-              showResult('Error saving visibility: ' + e.message, true);
-              btn.disabled = false;
-              btn.textContent = 'Copy Link';
-              return;
-            }
-          }
-
-          // Use the new shareId format: provider-uid-resumeID
           const shareId = {{if .ShareID}}"{{.ShareID}}"{{else}}""{{end}};
           let url;
 
-          if (shareId && (vis === 'public' || !locked)) {
-            // New format: /r#id=provider-uid-resumeID
+          if (vis === 'public' && shareId) {
+            // Public link: /r#id=provider-uid-resumeID
             url = location.origin + '/r#id=' + shareId;
+          } else if (vis === 'private') {
+            // Private: no public link - just show a message
+            showResult('Resume is private. Change to Public to get a shareable link.', true);
+            btn.disabled = false;
+            btn.textContent = 'Copy Link';
+            return;
           } else {
             const encoded = locked ? await encryptYaml(yaml, pw) : await gzipEncode(yaml);
             url = location.origin + '/r#yml=' + encoded;

@@ -45,6 +45,21 @@ func pageEditor(c *fiber.Ctx) error {
 	}
 	if loggedIn {
 		data["User"] = user
+		// If editing an existing resume, fetch metadata for visibility badge
+		if resumeID := c.Query("id"); resumeID != "" {
+			uid := user.Provider + "-" + user.ID
+			list, err := globalStore.List(uid)
+			if err == nil {
+				for _, r := range list {
+					if r.ID == resumeID {
+						data["ResumeID"] = r.ID
+						data["ResumeName"] = r.Name
+						data["ResumeVisibility"] = r.Visibility
+						break
+					}
+				}
+			}
+		}
 	}
 	return c.Render("editor", data)
 }
