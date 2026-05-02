@@ -85,7 +85,7 @@ func pageDashboard(c *fiber.Ctx) error {
 
 // ── HTMX Partials ─────────────────────────────────────────────────
 
-func partialShareModal(c *fiber.Ctx) error {
+ func partialShareModal(c *fiber.Ctx) error {
 	user, loggedIn := sessionUser(c)
 	data := fiber.Map{
 		"LoggedIn": loggedIn,
@@ -93,6 +93,7 @@ func partialShareModal(c *fiber.Ctx) error {
 	}
 	if resumeID := c.Query("resume_id"); resumeID != "" && loggedIn {
 		uid := user.Provider + "-" + user.ID
+		data["UID"] = uid
 		list, err := globalStore.List(uid)
 		if err == nil {
 			for _, r := range list {
