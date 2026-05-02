@@ -11,19 +11,22 @@ import (
 )
 
 type SavedResume struct {
-	ID        string    `json:"id" firestore:"id"`
-	Name      string    `json:"name" firestore:"name"`
-	YAML      string    `json:"yaml" firestore:"yaml"`
-	CreatedAt time.Time `json:"created_at" firestore:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" firestore:"updated_at"`
+	ID         string    `json:"id" firestore:"id"`
+	Name       string    `json:"name" firestore:"name"`
+	YAML       string    `json:"yaml" firestore:"yaml"`
+	Visibility string    `json:"visibility" firestore:"visibility"` // private | public | password
+	Password   string    `json:"-" firestore:"password"`   // SHA-256 hash, excluded from JSON
+	CreatedAt  time.Time `json:"created_at" firestore:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at" firestore:"updated_at"`
 }
 
 // Store is the persistence backend for user resumes.
 type Store interface {
 	List(uid string) ([]SavedResume, error)
-	Save(uid, id, name, yaml string) (SavedResume, error)
+	Save(uid, id, name, yaml, visibility, password string) (SavedResume, error)
 	Delete(uid, id string) error
 	GetByID(id string) (SavedResume, error)
+	GetByIDAndUser(id, uid string) (SavedResume, error)
 }
 
 var globalStore Store
@@ -78,7 +81,7 @@ func (s *fileStore) List(uid string) ([]SavedResume, error) {
 	return s.load(uid)
 }
 
-func (s *fileStore) Save(uid, id, name, yaml string) (SavedResume, error) {
+func (s *fileStore) Save(uid, id, name, yaml, visibility, password string) (SavedResume, error) {
 	list, err := s.load(uid)
 	if err != nil {
 		return SavedResume{}, err
@@ -88,6 +91,12 @@ func (s *fileStore) Save(uid, id, name, yaml string) (SavedResume, error) {
 		if r.ID == id {
 			list[i].Name = name
 			list[i].YAML = yaml
+			list[i].Visibility = visibility
+			if password != "" {
+				list[i].Password = hashPassword(password)
+			} else {
+				list[i].Password = ""
+			}
 			list[i].UpdatedAt = now
 			if err := s.write(uid, list); err != nil {
 				return SavedResume{}, err
@@ -99,11 +108,15 @@ func (s *fileStore) Save(uid, id, name, yaml string) (SavedResume, error) {
 		ID:        newID(),
 		Name:      name,
 		YAML:      yaml,
+		Visibility: visibility,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 	if r.Name == "" {
 		r.Name = "Untitled resume"
+	}
+	if password != "" {
+		r.Password = hashPassword(password)
 	}
 	list = append(list, r)
 	if err := s.write(uid, list); err != nil {
@@ -140,9 +153,22 @@ func (s *fileStore) GetByID(id string) (SavedResume, error) {
 			continue
 		}
 		for _, r := range list {
-			if r.ID == id {
+			if r.ID == id && (r.Visibility == "public" || r.Visibility == "") {
 				return r, nil
 			}
+		}
+	}
+	return SavedResume{}, os.ErrNotExist
+}
+
+func (s *fileStore) GetByIDAndUser(id, uid string) (SavedResume, error) {
+	list, err := s.load(uid)
+	if err != nil {
+		return SavedResume{}, os.ErrNotExist
+	}
+	for _, r := range list {
+		if r.ID == id {
+			return r, nil
 		}
 	}
 	return SavedResume{}, os.ErrNotExist

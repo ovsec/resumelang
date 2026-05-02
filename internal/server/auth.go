@@ -92,6 +92,25 @@ func configuredProviders() map[string]*oauthProvider {
 			},
 		}
 	}
+	if id, sec := os.Getenv("RL_GOOGLE_CLIENT_ID"), os.Getenv("RL_GOOGLE_CLIENT_SECRET"); id != "" && sec != "" {
+		out["google"] = &oauthProvider{
+			name: "google", clientID: id, secret: sec,
+			authURL:  "https://accounts.google.com/o/oauth2/v2/auth",
+			tokenURL: "https://oauth2.googleapis.com/token",
+			userURL:  "https://openidconnect.googleapis.com/v1/userinfo",
+			scope:    "openid email profile",
+			parseUser: func(m map[string]any) UserProfile {
+				return UserProfile{
+					Provider: "google",
+					ID:       asStr(m["sub"]),
+					Login:    asStr(m["email"]),
+					Name:     asStr(m["name"]),
+					Email:    asStr(m["email"]),
+					Avatar:   asStr(m["picture"]),
+				}
+			},
+		}
+	}
 	return out
 }
 

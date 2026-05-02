@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -43,6 +45,7 @@ func Start(args []string) {
 		Views:          engine,
 		ViewsLayout:    "layout",
 		ReadBufferSize: 65536,
+		BodyLimit:      maxImportUploadBytes,
 	})
 
 	app.Use(recover.New())
@@ -58,7 +61,7 @@ func Start(args []string) {
 	app.Get("/editor", pageEditor)
 	app.Get("/r", pageView)
 	app.Get("/login", pageLogin)
-	app.Get("/dashboard", requireAuth, pageDashboard)
+	app.Get("/dashboard", pageDashboard)
 
 	// HTMX partials (no layout)
 	app.Get("/partials/share-modal", partialShareModal)
@@ -74,6 +77,7 @@ func Start(args []string) {
 	app.Post("/api/export/html", apiExportHTML)
 	app.Post("/api/export/txt", apiExportTxt)
 	app.Post("/api/ats", apiATS)
+	app.Post("/api/import", importRateLimit(12, time.Minute), apiImportResume)
 
 	// User resumes (requires auth)
 	app.Get("/api/resumes", requireAuth, apiListResumes)
@@ -99,4 +103,31 @@ func requireAuth(c *fiber.Ctx) error {
 		return c.Redirect("/login?next=" + c.Path())
 	}
 	return c.Next()
+}
+
+func importRateLimit(max int, window time.Duration) fiber.Handler {
+	type bucket struct {
+		count int
+		reset time.Time
+	}
+	var (
+		mu      sync.Mutex
+		buckets = map[string]bucket{}
+	)
+	return func(c *fiber.Ctx) error {
+		now := time.Now()
+		key := c.IP()
+		mu.Lock()
+		b := buckets[key]
+		if now.After(b.reset) {
+			b = bucket{reset: now.Add(window)}
+		}
+		b.count++
+		buckets[key] = b
+		mu.Unlock()
+		if b.count > max {
+			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{"error": "too many import attempts; try again later"})
+		}
+		return c.Next()
+	}
 }

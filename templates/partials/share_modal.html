@@ -33,8 +33,27 @@
       </div>
     </div>
 
-    <!-- Password lock (link format only) -->
-    <div class="share-section" id="share-lock-section">
+    <!-- Visibility picker -->
+    <div class="share-section">
+      <label class="share-label">Visibility</label>
+      <div class="share-vis-grid">
+        <button class="share-vis active" data-vis="private" onclick="selectVis(this,'private')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2.5"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Private
+        </button>
+        <button class="share-vis" data-vis="public" onclick="selectVis(this,'public')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M12 2v4m0 12v-4m10-6h-4M6 12H2"/></svg>
+          Public link
+        </button>
+        <button class="share-vis" data-vis="password" onclick="selectVis(this,'password')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2.5"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="1.5"/></svg>
+          Password
+        </button>
+      </div>
+    </div>
+
+    <!-- Password lock (password visibility only) -->
+    <div class="share-section" id="share-lock-section" hidden>
       <label class="share-label share-label-row">
         <input type="checkbox" id="share-lock-chk" onchange="togglePwRow(this.checked)">
         Password protect
@@ -55,40 +74,71 @@
   </div>
 </div>
 
-<script>
-(function() {
-  let currentFmt = 'link';
+  <script>
+    (function() {
+      let currentFmt = 'link';
+      let currentVis = 'private';
 
-  function getEditorYAML() {
-    const preload = document.getElementById('share-preload-yaml');
-    if (preload) return preload.value;
-    if (window.editorGetYAML) return window.editorGetYAML();
-    const ta = document.getElementById('yaml-hidden');
-    return ta ? ta.value : '';
-  }
-  function getEditorTheme() {
-    const sel = document.getElementById('theme-select');
-    return sel ? sel.value : 'sap';
-  }
+      function getEditorYAML() {
+        const preload = document.getElementById('share-preload-yaml');
+        if (preload) return preload.value;
+        if (window.editorGetYAML) return window.editorGetYAML();
+        const ta = document.getElementById('yaml-hidden');
+        return ta ? ta.value : '';
+      }
 
-  window.selectFmt = function(btn, fmt) {
-    document.querySelectorAll('.share-fmt').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFmt = fmt;
-    const lockSec = document.getElementById('share-lock-section');
-    const actionBtn = document.getElementById('share-action-btn');
-    if (fmt === 'link') {
-      lockSec.hidden = false;
-      actionBtn.textContent = 'Copy Link';
-    } else if (fmt === 'pdf') {
-      lockSec.hidden = true;
-      actionBtn.textContent = 'Print / Save PDF';
-    } else {
-      lockSec.hidden = true;
-      actionBtn.textContent = 'Download ' + (fmt === 'html' ? 'HTML' : 'Text');
-    }
-    document.getElementById('share-result').hidden = true;
-  };
+      function getEditorTheme() {
+        const sel = document.getElementById('theme-select');
+        return sel ? sel.value : 'sap';
+      }
+
+      window.selectFmt = function(btn, fmt) {
+        document.querySelectorAll('.share-fmt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFmt = fmt;
+        const lockSec = document.getElementById('share-lock-section');
+        const actionBtn = document.getElementById('share-action-btn');
+        if (fmt === 'link') {
+          lockSec.hidden = (currentVis !== 'password');
+          actionBtn.textContent = 'Copy Link';
+        } else if (fmt === 'pdf') {
+          lockSec.hidden = true;
+          actionBtn.textContent = 'Print / Save PDF';
+        } else {
+          lockSec.hidden = true;
+          actionBtn.textContent = 'Download ' + (fmt === 'html' ? 'HTML' : 'Text');
+        }
+        document.getElementById('share-result').hidden = true;
+      };
+
+      window.selectVis = function(btn, vis) {
+        document.querySelectorAll('.share-vis').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentVis = vis;
+        const lockSec = document.getElementById('share-lock-section');
+        const pwlRow   = document.getElementById('share-pw-row');
+        if (vis === 'password') {
+          lockSec.hidden = false;
+          pwlRow.hidden = false;
+          if (currentFmt === 'link') document.getElementById('share-pw').focus();
+        } else {
+          lockSec.hidden = true;
+          pwlRow.hidden = true;
+          document.getElementById('share-lock-chk').checked = false;
+        }
+        // Update share action for public: use /r#id= with public visibility
+        const actionBtn = document.getElementById('share-action-btn');
+        if (vis === 'public' && currentFmt === 'link') {
+          actionBtn.textContent = 'Copy Public Link';
+        } else if (currentFmt === 'link') {
+          actionBtn.textContent = 'Copy Link';
+        }
+      };
+
+      window.togglePwRow = function(on) {
+        document.getElementById('share-pw-row').hidden = !on;
+        if (on) document.getElementById('share-pw').focus();
+      };
 
   window.togglePwRow = function(on) {
     document.getElementById('share-pw-row').hidden = !on;
@@ -100,84 +150,90 @@
     if (el) el.remove();
   };
 
-  window.doShareAction = async function() {
-    const btn = document.getElementById('share-action-btn');
-    const result = document.getElementById('share-result');
-    result.hidden = true;
-    btn.disabled = true;
-    btn.textContent = '…';
+      window.doShareAction = async function() {
+        const btn = document.getElementById('share-action-btn');
+        const result = document.getElementById('share-result');
+        result.hidden = true;
+        btn.disabled = true;
+        btn.textContent = '…';
 
-    try {
-      const yaml = getEditorYAML();
-      const theme = getEditorTheme();
+        try {
+          const yaml = getEditorYAML();
+          const theme = getEditorTheme();
 
-      if (currentFmt === 'pdf') {
-        const iframe = document.getElementById('preview');
-        if (iframe && iframe.contentWindow) iframe.contentWindow.print();
-        closeShareModal();
-        return;
-      }
+          if (currentFmt === 'pdf') {
+            const iframe = document.getElementById('preview');
+            if (iframe && iframe.contentWindow) iframe.contentWindow.print();
+            closeShareModal();
+            return;
+          }
 
-      if (currentFmt === 'html') {
-        const res = await fetch('/api/export/html', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({yaml, theme}),
-        });
-        if (!res.ok) throw new Error(await res.text());
-        const blob = await res.blob();
-        triggerDownload(blob, 'resume.html');
-        closeShareModal();
-        return;
-      }
+          if (currentFmt === 'html') {
+            const res = await fetch('/api/export/html', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({yaml, theme}),
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const blob = await res.blob();
+            triggerDownload(blob, 'resume.html');
+            closeShareModal();
+            return;
+          }
 
-      if (currentFmt === 'txt') {
-        const res = await fetch('/api/export/txt', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({yaml}),
-        });
-        if (!res.ok) throw new Error(await res.text());
-        const blob = await res.blob();
-        triggerDownload(blob, 'resume.txt');
-        closeShareModal();
-        return;
-      }
+          if (currentFmt === 'txt') {
+            const res = await fetch('/api/export/txt', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({yaml}),
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const blob = await res.blob();
+            triggerDownload(blob, 'resume.txt');
+            closeShareModal();
+            return;
+          }
 
-      // Live link
-      const locked = document.getElementById('share-lock-chk').checked;
-      const pw = locked ? document.getElementById('share-pw').value : '';
-      if (locked && !pw) {
-        document.getElementById('share-pw').focus();
-        btn.disabled = false;
-        btn.textContent = 'Copy Link';
-        return;
-      }
+          // Live link — handle visibility
+          const vis      = currentVis; // private | public | password
+          const locked   = vis === 'password';
+          const pw       = locked ? document.getElementById('share-pw').value : '';
+          if (locked && !pw) {
+            document.getElementById('share-pw').focus();
+            btn.disabled = false;
+            btn.textContent = 'Copy Link';
+            return;
+          }
 
-      const resumeId = (document.getElementById('share-resume-id') || {}).value;
+          const resumeId = (document.getElementById('share-resume-id') || {}).value;
+          let url;
 
-      let url;
-      if (resumeId && !locked) {
-        url = location.origin + '/r#id=' + resumeId;
-      } else {
-        const encoded = locked ? await encryptYaml(yaml, pw) : await gzipEncode(yaml);
-        url = location.origin + '/r#yml=' + encoded;
-      }
-      try {
-        await navigator.clipboard.writeText(url);
-        showResult('✓ Link copied to clipboard', false);
-      } catch {
-        prompt('Copy this link:', url);
-      }
-    } catch(e) {
-      showResult('Error: ' + e.message, true);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = currentFmt === 'link' ? 'Copy Link'
-        : currentFmt === 'pdf' ? 'Print / Save PDF'
-        : 'Download ' + (currentFmt === 'html' ? 'HTML' : 'Text');
-    }
-  };
+          if (vis === 'public' && resumeId) {
+            // Public link: /r#id=<uid>.<rid>
+            const uid = (document.querySelector('.user-menu-trigger') || {}).dataset?.uid || '';
+            url = location.origin + '/r#id=' + (uid ? uid + '.' : '') + resumeId;
+          } else if (resumeId && !locked) {
+            url = location.origin + '/r#id=' + resumeId;
+          } else {
+            const encoded = locked ? await encryptYaml(yaml, pw) : await gzipEncode(yaml);
+            url = location.origin + '/r#yml=' + encoded;
+          }
+
+          try {
+            await navigator.clipboard.writeText(url);
+            showResult('✓ Link copied to clipboard', false);
+          } catch {
+            prompt('Copy this link:', url);
+          }
+        } catch(e) {
+          showResult('Error: ' + e.message, true);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = currentFmt === 'link' ? 'Copy Link'
+            : currentFmt === 'pdf' ? 'Print / Save PDF'
+            : 'Download ' + (currentFmt === 'html' ? 'HTML' : 'Text');
+        }
+      };
 
   function showResult(msg, isErr) {
     const el = document.getElementById('share-result');

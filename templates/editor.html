@@ -26,8 +26,12 @@
               hx-include="#yaml-hidden"
               hx-target="#modal-container"
               hx-swap="innerHTML">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>
       </button>
+      <button id="btn-import" class="nav-icon-btn" title="Import file" type="button" onclick="document.getElementById('import-file').click()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M4 4l3-3 3 3"/><path d="M4 10h6"/></svg>
+      </button>
+      <input type="file" id="import-file" accept=".pdf,.docx,.md,.markdown,.yml,.yaml" style="display:none">
     </div>
   </div>
 
@@ -76,6 +80,20 @@
   </div>
 </header>
 
+<div id="start-import" class="start-import" hidden>
+  <div class="start-import-panel">
+    <div class="start-import-kicker">Start a resume</div>
+    <h1 class="start-import-title">Import an existing resume or open the sample YAML.</h1>
+    <p class="start-import-desc">Upload PDF, DOCX, Markdown, or ResumeLang YAML. Imported content is converted to schema-backed ResumeLang YAML in the editor.</p>
+    <div class="start-import-actions">
+      <button id="start-import-file" class="nav-primary" type="button">Import file</button>
+      <button id="start-sample-yaml" class="nav-ghost" type="button">Use sample YAML</button>
+      <button id="start-blank-yaml" class="nav-ghost" type="button">Continue editor</button>
+    </div>
+    <div class="start-import-types">PDF · DOCX · Markdown · .yml · .yaml</div>
+  </div>
+</div>
+
 <div class="workspace" id="split">
   <div class="ws-pane editor-pane">
     <div class="pane-bar">
@@ -84,10 +102,19 @@
         <span id="pane-file-label">resume.yml</span>
       </span>
       <span class="pane-badge mobile-hide">YAML</span>
-      {{if .User}}
-      <button id="btn-save" class="nav-ghost" style="margin-left:auto;height:26px;font-size:12px">Save</button>
-      <button id="btn-rename" class="nav-ghost" style="height:26px;font-size:12px;padding:0 6px" title="Rename">✎</button>
-      {{end}}
+      <span class="pane-info" id="editor-info"></span>
+      <div id="local-drafts-cluster" {{if .User}}hidden{{end}} class="local-drafts-row">
+        <button id="btn-new-draft" class="nav-ghost" title="Save as new draft">+ Draft</button>
+        <div class="theme-picker" id="local-drafts-picker">
+          <button class="theme-picker-btn" id="local-drafts-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span id="local-draft-label">Local drafts</span>
+            <svg class="theme-picker-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="m2 4 3 3 3-3"/></svg>
+          </button>
+          <ul class="theme-picker-menu" id="local-drafts-menu" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <button id="btn-save" class="nav-ghost" {{if not .User}}style="display:none"{{end}}>Save</button>
+      <button id="btn-rename" class="nav-ghost" {{if not .User}}style="display:none"{{end}} title="Rename">✎</button>
       <button id="btn-keys" class="keys-help-btn mobile-hide" title="Keyboard shortcuts" aria-expanded="false">?</button>
       <button id="btn-mobile-render" class="btn-mobile-render" type="button">Render</button>
     </div>

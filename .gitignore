@@ -62,3 +62,9 @@ CLAUDE.md
 
 .claude/
 scripts/
+
+.playwright/
+.playwright-mcp/
+AGENTS.md
+.claude/
+.vscode/

@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
 	"os"
 	"time"
 
@@ -51,7 +53,7 @@ func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 	return list, nil
 }
 
-func (s *firestoreStore) Save(uid, id, name, yaml string) (SavedResume, error) {
+func (s *firestoreStore) Save(uid, id, name, yaml, visibility, password string) (SavedResume, error) {
 	ctx := context.Background()
 	now := time.Now().UTC()
 
@@ -63,6 +65,12 @@ func (s *firestoreStore) Save(uid, id, name, yaml string) (SavedResume, error) {
 			doc.DataTo(&r)
 			r.Name = name
 			r.YAML = yaml
+			r.Visibility = visibility
+			if password != "" {
+				r.Password = hashPassword(password)
+			} else {
+				r.Password = ""
+			}
 			r.UpdatedAt = now
 			if _, err := ref.Set(ctx, r); err != nil {
 				return SavedResume{}, err
@@ -75,16 +83,26 @@ func (s *firestoreStore) Save(uid, id, name, yaml string) (SavedResume, error) {
 		ID:        newID(),
 		Name:      name,
 		YAML:      yaml,
+		Visibility: visibility,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 	if r.Name == "" {
 		r.Name = "Untitled resume"
 	}
+	if password != "" {
+		r.Password = hashPassword(password)
+	}
 	if _, err := s.col(uid).Doc(r.ID).Set(ctx, r); err != nil {
 		return SavedResume{}, err
 	}
 	return r, nil
+}
+
+// hashPassword creates a SHA-256 hash of the password for storage.
+func hashPassword(pw string) string {
+	h := sha256.Sum256([]byte(pw))
+	return fmt.Sprintf("%x", h)
 }
 
 func (s *firestoreStore) Delete(uid, id string) error {
@@ -108,6 +126,27 @@ func (s *firestoreStore) GetByID(id string) (SavedResume, error) {
 	var r SavedResume
 	if err := doc.DataTo(&r); err != nil {
 		return SavedResume{}, err
+	}
+	// Public resumes (no password) are accessible; password-protected need validation elsewhere.
+	if r.Visibility == "public" || r.Visibility == "" {
+		return r, nil
+	}
+	return SavedResume{}, os.ErrNotExist
+}
+
+func (s *firestoreStore) GetByIDAndUser(id, uid string) (SavedResume, error) {
+	ctx := context.Background()
+	ref := s.client.Collection("users").Doc(uid).Collection("resumes").Doc(id)
+	doc, err := ref.Get(ctx)
+	if err != nil {
+		return SavedResume{}, os.ErrNotExist
+	}
+	var r SavedResume
+	if err := doc.DataTo(&r); err != nil {
+		return SavedResume{}, err
+	}
+	if r.Visibility != "public" {
+		return SavedResume{}, os.ErrNotExist
 	}
 	return r, nil
 }

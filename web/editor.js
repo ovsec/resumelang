@@ -518,6 +518,25 @@ projects:
 
   cm.on('change', scheduleRender);
 
+  // Update editor info (lines/chars)
+  cm.on('change', () => {
+    const info = document.getElementById('editor-info');
+    if (!info) return;
+    const content = cm.getValue();
+    const lines = content.split('\n').length;
+    const chars = content.length;
+    info.textContent = lines + ' lines · ' + chars + ' chars';
+  });
+  // Initial update
+  setTimeout(() => {
+    const info = document.getElementById('editor-info');
+    if (!info) return;
+    const content = cm.getValue();
+    const lines = content.split('\n').length;
+    const chars = content.length;
+    info.textContent = lines + ' lines · ' + chars + ' chars';
+  }, 100);
+
   // Auto-trigger hint while typing keys/values — disabled on touch devices
   cm.on('inputRead', (editor, change) => {
     if (IS_TOUCH || hintWidget) return;
@@ -647,7 +666,45 @@ projects:
     }
   });
 
-  // Save (logged-in users)
+  // ── LocalStorage resume list (for unlogged users) ──────────────────────
+
+  const LOCAL_RESUMES_KEY = 'resumelang.local_resumes';
+
+  function getLocalResumes() {
+    try {
+      return JSON.parse(localStorage.getItem(LOCAL_RESUMES_KEY)) || [];
+    } catch { return []; }
+  }
+
+  function setLocalResumes(list) {
+    localStorage.setItem(LOCAL_RESUMES_KEY, JSON.stringify(list));
+  }
+
+  function addLocalResume(name, yaml) {
+    const list = getLocalResumes();
+    const id   = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    list.push({ id, name, yaml, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    setLocalResumes(list);
+    return id;
+  }
+
+  function updateLocalResume(id, name, yaml) {
+    const list = getLocalResumes();
+    const idx  = list.findIndex(r => r.id === id);
+    if (idx >= 0) {
+      list[idx].name      = name;
+      list[idx].yaml      = yaml;
+      list[idx].updatedAt = new Date().toISOString();
+      setLocalResumes(list);
+    }
+  }
+
+  function deleteLocalResume(id) {
+    setLocalResumes(getLocalResumes().filter(r => r.id !== id));
+  }
+
+  // ── Save (logged-in users → server, unlogged → localStorage) ─────────
+
   function suggestName() {
     try {
       const r = jsyaml.load(cm.getValue()) || {};
@@ -662,7 +719,7 @@ projects:
       overlay.innerHTML = `
         <div class="save-dialog">
           <p class="save-dialog-title">Name this resume</p>
-          <input id="save-dialog-input" class="save-dialog-input" type="text" value="${defaultName.replace(/"/g, '&quot;')}" autocomplete="off">
+          <input id="save-dialog-input" class="save-dialog-input" type="text" value="${defaultName.replace(/"/g, '&quot;')}">
           <div class="save-dialog-actions">
             <button id="save-dialog-cancel" class="nav-ghost">Cancel</button>
             <button id="save-dialog-ok" class="nav-primary">Save</button>
@@ -685,11 +742,36 @@ projects:
 
   async function doSave(rename) {
     const yaml = cm.getValue();
+    const isLoggedIn = !!(document.querySelector('.user-menu'));
     let name = currentResumeName;
     if (!name || rename) {
       name = await promptResumeName(currentResumeName || suggestName());
       if (!name) return;
     }
+    if (!isLoggedIn) {
+      // Save to localStorage
+      if (currentResumeId) {
+        updateLocalResume(currentResumeId, name, yaml);
+        status('saved locally ✓', 'ok');
+      } else {
+        currentResumeId   = addLocalResume(name, yaml);
+        currentResumeName = name;
+        status('saved locally ✓', 'ok');
+      }
+      const label = document.getElementById('pane-file-label');
+      if (label) label.textContent = name;
+      // Refresh local drafts menu if visible
+      const draftLabel = document.getElementById('local-draft-label');
+      if (draftLabel) draftLabel.textContent = name;
+      const menu = document.getElementById('local-drafts-menu');
+      if (menu) {
+        menu.querySelectorAll('.theme-picker-item').forEach(el => {
+          el.classList.toggle('active', el.dataset.id === currentResumeId);
+        });
+      }
+      return;
+    }
+    // Logged-in → save to server
     try {
       const res = await fetch('/api/resumes', {
         method:  'POST',
@@ -706,8 +788,91 @@ projects:
     } catch (e) { status('save: ' + e.message, 'err'); }
   }
 
-  document.getElementById('btn-save')?.addEventListener('click', () => doSave(false));
-  document.getElementById('btn-rename')?.addEventListener('click', () => doSave(true));
+  // Show Save button always (not just when logged in)
+  (function initSaveButton() {
+    const saveBtn   = document.getElementById('btn-save');
+    const renameBtn = document.getElementById('btn-rename');
+    const isLoggedIn = !!document.querySelector('.user-menu');
+    if (!saveBtn) return;
+    saveBtn.style.display = isLoggedIn ? '' : 'none';
+    renameBtn.style.display = isLoggedIn ? '' : 'none';
+    saveBtn.addEventListener('click', () => doSave(false));
+    renameBtn?.addEventListener('click', () => doSave(true));
+
+    // Local drafts UI for unlogged users
+    const cluster = document.getElementById('local-drafts-cluster');
+    if (isLoggedIn || !cluster) return;
+    cluster.hidden = false;
+
+    const newDraftBtn  = document.getElementById('btn-new-draft');
+    const draftsBtn    = document.getElementById('local-drafts-btn');
+    const draftsMenu   = document.getElementById('local-drafts-menu');
+    const draftLabel   = document.getElementById('local-draft-label');
+
+    function refreshDraftsMenu() {
+      if (!draftsMenu) return;
+      const resumes = getLocalResumes();
+      draftsMenu.innerHTML = '';
+      resumes.forEach(r => {
+        const li = document.createElement('li');
+        li.className = 'theme-picker-item' + (r.id === currentResumeId ? ' active' : '');
+        li.role = 'option';
+        li.textContent = r.name || 'Untitled';
+        li.tabIndex = -1;
+        li.dataset.id = r.id;
+        li.addEventListener('click', () => loadLocalDraft(r.id));
+        draftsMenu.appendChild(li);
+      });
+      if (draftsBtn) draftsBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    window.loadLocalDraft = function(id) {
+      if (typeof window.importLocalResume === 'undefined') {
+        window.importLocalResume = importLocalResume;
+      }
+      const r = getLocalResumes().find(x => x.id === id);
+      if (!r) return;
+      cm.setValue(r.yaml);
+      currentResumeId   = r.id;
+      currentResumeName = r.name;
+      const label = document.getElementById('pane-file-label');
+      if (label) label.textContent = r.name;
+      draftsMenu?.querySelectorAll('.theme-picker-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.id === id);
+      });
+    };
+
+    newDraftBtn?.addEventListener('click', async () => {
+      const yaml = cm.getValue();
+      const name = await promptResumeName(suggestName());
+      if (!name) return;
+      currentResumeId   = addLocalResume(name, yaml);
+      currentResumeName = name;
+      const label = document.getElementById('pane-file-label');
+      if (label) label.textContent = name;
+      refreshDraftsMenu();
+      status('new draft saved ✓', 'ok');
+    });
+
+    draftsBtn?.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = draftsMenu.hidden;
+      refreshDraftsMenu();
+      draftsMenu.hidden = !open;
+      draftsBtn.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', () => {
+      if (draftsMenu) { draftsMenu.hidden = true; draftsBtn?.setAttribute('aria-expanded', 'false'); }
+    });
+    draftsMenu?.addEventListener('click', e => e.stopPropagation());
+
+    // Show current draft name if any
+    if (currentResumeId && draftLabel) {
+      const r = getLocalResumes().find(x => x.id === currentResumeId);
+      if (r) draftLabel.textContent = r.name || 'Untitled';
+    }
+    refreshDraftsMenu();
+  })();
 
   // ── Keys help panel ──────────────────────────────────────────────────────────
   (function() {
@@ -736,6 +901,65 @@ projects:
       .replace(/(:\s*)("[^"]*"|'[^']*')/g, '$1<span class="hl-str">$2</span>');
   }
 
+  function setEditorYAML(yaml, label) {
+    cm.setValue(yaml);
+    if (yamlHidden) yamlHidden.value = yaml;
+    localStorage.setItem(STORAGE_KEY, yaml);
+    currentResumeId = null;
+    currentResumeName = null;
+    const fileLabel = document.getElementById('pane-file-label');
+    if (fileLabel) fileLabel.textContent = label || 'resume.yml';
+    clearTimeout(renderTimer);
+    render();
+  }
+
+  function hideStartImport() {
+    const overlay = document.getElementById('start-import');
+    if (overlay) overlay.hidden = true;
+  }
+
+  async function loadSampleYAML() {
+    try {
+      const res = await fetch('/api/default-yaml');
+      const yaml = res.ok && res.status !== 204 ? await res.text() : DEFAULT_YAML;
+      setEditorYAML(yaml, 'sample.resume.yml');
+      hideStartImport();
+      status('sample YAML loaded', 'ok');
+    } catch (e) {
+      setEditorYAML(DEFAULT_YAML, 'sample.resume.yml');
+      hideStartImport();
+      status('sample YAML loaded', 'ok');
+    }
+  }
+
+  async function importFile(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    status('importing ' + file.name + '...');
+    try {
+      const res = await fetch('/api/import', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Import failed');
+      setEditorYAML(data.yaml, file.name.replace(/\.(pdf|docx|md|markdown|ya?ml)$/i, '.yml'));
+      hideStartImport();
+      status('imported ' + file.name, 'ok');
+    } catch (err) {
+      status('import: ' + err.message, 'err');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  (function initImportUI() {
+    const fileInput = document.getElementById('import-file');
+    fileInput?.addEventListener('change', () => importFile(fileInput));
+    document.getElementById('start-import-file')?.addEventListener('click', () => fileInput?.click());
+    document.getElementById('start-sample-yaml')?.addEventListener('click', loadSampleYAML);
+    document.getElementById('start-blank-yaml')?.addEventListener('click', hideStartImport);
+  })();
+
   // Share link decoding on load (for /editor#yml=... deep links)
   (async function init() {
     // Load themes (fetch if not server-rendered into <select>)
@@ -757,6 +981,8 @@ projects:
 
     // Load from saved resume if ?id= present (coming from dashboard)
     const urlId = new URLSearchParams(location.search).get('id');
+    const hasSharedYAML = /^#yml=/.test(location.hash);
+    const shouldShowStartImport = !urlId && !hasSharedYAML;
     let yaml = null;
     if (urlId) {
       try {
@@ -780,6 +1006,11 @@ projects:
     }
     cm.setValue(yaml);
     if (yamlHidden) yamlHidden.value = yaml;
+
+    if (shouldShowStartImport) {
+      const overlay = document.getElementById('start-import');
+      if (overlay) overlay.hidden = false;
+    }
 
     render();
   })();
