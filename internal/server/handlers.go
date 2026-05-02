@@ -72,12 +72,17 @@ func pageLogin(c *fiber.Ctx) error {
 func pageDashboard(c *fiber.Ctx) error {
 	user, loggedIn := sessionUser(c)
 	data := fiber.Map{
-		"Title": "My Resumes - resumelang",
+		"Title":     "My Resumes - resumelang",
 		"Providers": providerList(),
 	}
 	if loggedIn {
 		uid := user.Provider + "-" + user.ID
-		resumes, _ := globalStore.List(uid)
+		resumes, err := globalStore.List(uid)
+		if err != nil {
+			// Log error but don't fail the page
+			fmt.Fprintf(os.Stderr, "dashboard: failed to list resumes for %s: %v\n", uid, err)
+			resumes = []SavedResume{}
+		}
 		data["User"] = user
 		data["Resumes"] = resumes
 	}
@@ -730,13 +735,23 @@ func plainTextToImportYAML(text string) (string, error) {
 
 	// Extract person info from first few lines
 	lineIdx := 0
+	
+	// Name is typically the first non-empty line
 	if lineIdx < len(lines) {
-		r.Person.Name = lines[lineIdx]
-		lineIdx++
+		line := strings.TrimSpace(lines[lineIdx])
+		if len(line) > 0 && len(line) < 80 && !strings.Contains(line, "@") && !looksLikeSectionHeading(line) {
+			r.Person.Name = line
+			lineIdx++
+		}
 	}
-	if lineIdx < len(lines) && !looksLikeContact(lines[lineIdx]) && !looksLikeSectionHeading(lines[lineIdx]) {
-		r.Person.Title = lines[lineIdx]
-		lineIdx++
+	
+	// Title/role often follows name
+	if lineIdx < len(lines) {
+		line := strings.TrimSpace(lines[lineIdx])
+		if len(line) > 0 && len(line) < 100 && !strings.Contains(line, "@") && !looksLikeContact(line) && !looksLikeSectionHeading(line) {
+			r.Person.Title = line
+			lineIdx++
+		}
 	}
 
 	// Parse remaining lines for contact info and sections
@@ -745,9 +760,14 @@ func plainTextToImportYAML(text string) (string, error) {
 	var sectionItems []map[string]any
 	inSummary := false
 	var summaryLines []string
+	dateRangeRegex := regexp.MustCompile(`(?i)((?:19|20)\d{2})\s*[-–—]\s*((?:19|20)\d{2}|present|current|now)`)
 
 	for i := lineIdx; i < len(lines); i++ {
-		line := lines[i]
+		line := strings.TrimSpace(lines[i])
+		if len(line) == 0 {
+			continue
+		}
+		
 		lowLine := strings.ToLower(line)
 
 		// Contact info
@@ -765,6 +785,10 @@ func plainTextToImportYAML(text string) (string, error) {
 		}
 		if strings.Contains(lowLine, "github") && r.Person.GitHub == "" {
 			r.Person.GitHub = extractURL(line)
+			continue
+		}
+		if (strings.Contains(lowLine, "http") || strings.Contains(lowLine, "www")) && r.Person.Website == "" && !strings.Contains(lowLine, "linkedin") && !strings.Contains(lowLine, "github") {
+			r.Person.Website = extractURL(line)
 			continue
 		}
 
@@ -801,11 +825,20 @@ func plainTextToImportYAML(text string) (string, error) {
 		// Section items (experience, education, projects, etc.)
 		if currentSection != "" {
 			// Check if this looks like a new item (has a date range or company name pattern)
-			if isNewItem(line, lowLine) {
+			if isNewItem(line, lowLine, dateRangeRegex) {
 				if currentItem != nil {
 					sectionItems = append(sectionItems, currentItem)
 				}
 				currentItem = map[string]any{"name": line}
+				
+				// Try to extract company/role from the line
+				if currentSection == "experience" {
+					parts := strings.SplitN(line, " ", 2)
+					if len(parts) > 1 {
+						currentItem["company"] = parts[0]
+						currentItem["role"] = parts[1]
+					}
+				}
 			} else if currentItem != nil {
 				// Add as highlight/bullet point
 				if highlights, ok := currentItem["highlights"].([]string); ok {
@@ -847,13 +880,17 @@ func normalizeSectionName(heading string) string {
 }
 
 // isNewItem checks if line looks like the start of a new section item
-func isNewItem(line, lowLine string) bool {
+func isNewItem(line, lowLine string, dateRangeRegex *regexp.Regexp) bool {
 	// Looks like a title/company name (not a bullet point)
-	if strings.HasPrefix(line, "•") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "*") {
+	if strings.HasPrefix(line, "•") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "*") || strings.HasPrefix(line, "○") {
 		return false
 	}
 	// Contains a year (likely a date range)
-	if matched, _ := regexp.MatchString(`(19|20)\d{2}`, line); matched {
+	if dateRangeRegex != nil && dateRangeRegex.MatchString(line) {
+		return true
+	}
+	// Starts with a year (e.g., "2020 - Present")
+	if matched, _ := regexp.MatchString(`^(?:19|20)\d{2}`, line); matched {
 		return true
 	}
 	return false

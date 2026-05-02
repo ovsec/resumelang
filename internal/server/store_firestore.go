@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"os"
+	"sort"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -30,8 +31,9 @@ func (s *firestoreStore) resumesCol() *firestore.CollectionRef {
 
 func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 	ctx := context.Background()
-	// Query top-level resumes where user_id matches
-	iter := s.resumesCol().Where("user_id", "==", uid).OrderBy("updated_at", firestore.Desc).Documents(ctx)
+	
+	// Try new format: query by user_id field
+	iter := s.resumesCol().Where("user_id", "==", uid).Documents(ctx)
 	defer iter.Stop()
 
 	var list []SavedResume
@@ -41,7 +43,9 @@ func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 			break
 		}
 		if err != nil {
-			return nil, err
+			// Query failed (e.g., missing index) - log and try old path
+			fmt.Fprintf(os.Stderr, "List: new format query failed for %s: %v\n", uid, err)
+			return s.listFromOldPath(uid)
 		}
 		var r SavedResume
 		if err := doc.DataTo(&r); err != nil {
@@ -50,29 +54,54 @@ func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 		list = append(list, r)
 	}
 
-	// If no results with user_id, try old nested path (migration helper)
+	// If no results from new format, try old nested path
 	if len(list) == 0 {
-		oldIter := s.client.Collection("users").Doc(uid).Collection("resumes").OrderBy("updated_at", firestore.Desc).Documents(ctx)
-		defer oldIter.Stop()
-
-		for {
-			doc, err := oldIter.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				break // Don't fail if old path doesn't exist
-			}
-			var r SavedResume
-			if err := doc.DataTo(&r); err != nil {
-				continue
-			}
-			// Migrate: set user_id and save to top-level collection
-			r.UserID = uid
-			s.resumesCol().Doc(r.ID).Set(ctx, r)
-			list = append(list, r)
+		fmt.Fprintf(os.Stderr, "List: no results in new format for %s, trying old path\n", uid)
+		oldList, err := s.listFromOldPath(uid)
+		if err == nil && len(oldList) > 0 {
+			return oldList, nil
 		}
 	}
+
+	// Sort by updated_at descending in memory
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].UpdatedAt.After(list[j].UpdatedAt)
+	})
+
+	fmt.Fprintf(os.Stderr, "List: returning %d resumes for %s\n", len(list), uid)
+	return list, nil
+}
+
+func (s *firestoreStore) listFromOldPath(uid string) ([]SavedResume, error) {
+	ctx := context.Background()
+	
+	// Try old nested path
+	oldIter := s.client.Collection("users").Doc(uid).Collection("resumes").Documents(ctx)
+	defer oldIter.Stop()
+
+	var list []SavedResume
+	for {
+		doc, err := oldIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			break // Don't fail if old path doesn't exist
+		}
+		var r SavedResume
+		if err := doc.DataTo(&r); err != nil {
+			continue
+		}
+		// Migrate: set user_id and save to top-level collection
+		r.UserID = uid
+		s.resumesCol().Doc(r.ID).Set(ctx, r)
+		list = append(list, r)
+	}
+
+	// Sort by updated_at descending
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].UpdatedAt.After(list[j].UpdatedAt)
+	})
 
 	if list == nil {
 		list = []SavedResume{}
