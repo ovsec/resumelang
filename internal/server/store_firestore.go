@@ -24,16 +24,22 @@ func newFirestoreStore(ctx context.Context, projectID string) (*firestoreStore, 
 	return &firestoreStore{client: client}, nil
 }
 
-// resumesCol returns the top-level resumes collection reference.
+// userResumesCol returns the nested resumes collection for a specific user.
+// Path: users/{uid}/resumes
+func (s *firestoreStore) userResumesCol(uid string) *firestore.CollectionRef {
+	return s.client.Collection("users").Doc(uid).Collection("resumes")
+}
+
+// resumesCol returns the top-level resumes collection (used for legacy data).
 func (s *firestoreStore) resumesCol() *firestore.CollectionRef {
 	return s.client.Collection("resumes")
 }
 
 func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 	ctx := context.Background()
-	
-	// Try new format: query by user_id field
-	iter := s.resumesCol().Where("user_id", "==", uid).Documents(ctx)
+
+	// Primary: query nested path users/{uid}/resumes
+	iter := s.userResumesCol(uid).Documents(ctx)
 	defer iter.Stop()
 
 	var list []SavedResume
@@ -43,9 +49,8 @@ func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 			break
 		}
 		if err != nil {
-			// Query failed (e.g., missing index) - log and try old path
-			fmt.Fprintf(os.Stderr, "List: new format query failed for %s: %v\n", uid, err)
-			return s.listFromOldPath(uid)
+			fmt.Fprintf(os.Stderr, "List: nested path query failed for %s: %v\n", uid, err)
+			break
 		}
 		var r SavedResume
 		if err := doc.DataTo(&r); err != nil {
@@ -54,13 +59,10 @@ func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 		list = append(list, r)
 	}
 
-	// If no results from new format, try old nested path
+	// If no results in nested path, try migrating from top-level collection
 	if len(list) == 0 {
-		fmt.Fprintf(os.Stderr, "List: no results in new format for %s, trying old path\n", uid)
-		oldList, err := s.listFromOldPath(uid)
-		if err == nil && len(oldList) > 0 {
-			return oldList, nil
-		}
+		fmt.Fprintf(os.Stderr, "List: no results in nested path for %s, trying top-level migration\n", uid)
+		return s.migrateFromTopLevel(uid)
 	}
 
 	// Sort by updated_at descending in memory
@@ -72,30 +74,39 @@ func (s *firestoreStore) List(uid string) ([]SavedResume, error) {
 	return list, nil
 }
 
-func (s *firestoreStore) listFromOldPath(uid string) ([]SavedResume, error) {
+// migrateFromTopLevel migrates resumes from top-level collection to nested path.
+// Handles legacy data stored in top-level "resumes" collection with user_id field.
+func (s *firestoreStore) migrateFromTopLevel(uid string) ([]SavedResume, error) {
 	ctx := context.Background()
-	
-	// Try old nested path
-	oldIter := s.client.Collection("users").Doc(uid).Collection("resumes").Documents(ctx)
-	defer oldIter.Stop()
+
+	iter := s.resumesCol().Where("user_id", "==", uid).Documents(ctx)
+	defer iter.Stop()
 
 	var list []SavedResume
 	for {
-		doc, err := oldIter.Next()
+		doc, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			break // Don't fail if old path doesn't exist
+			fmt.Fprintf(os.Stderr, "migrateFromTopLevel: query failed for %s: %v\n", uid, err)
+			return list, nil // Return what we have
 		}
 		var r SavedResume
 		if err := doc.DataTo(&r); err != nil {
 			continue
 		}
-		// Migrate: set user_id and save to top-level collection
-		r.UserID = uid
-		s.resumesCol().Doc(r.ID).Set(ctx, r)
+		// Migrate to nested path
+		_, err = s.userResumesCol(uid).Doc(r.ID).Set(ctx, r)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "migrateFromTopLevel: failed to migrate %s for %s: %v\n", r.ID, uid, err)
+			continue
+		}
 		list = append(list, r)
+	}
+
+	if list == nil {
+		list = []SavedResume{}
 	}
 
 	// Sort by updated_at descending
@@ -103,9 +114,7 @@ func (s *firestoreStore) listFromOldPath(uid string) ([]SavedResume, error) {
 		return list[i].UpdatedAt.After(list[j].UpdatedAt)
 	})
 
-	if list == nil {
-		list = []SavedResume{}
-	}
+	fmt.Fprintf(os.Stderr, "migrateFromTopLevel: migrated %d resumes for %s\n", len(list), uid)
 	return list, nil
 }
 
@@ -113,8 +122,11 @@ func (s *firestoreStore) Save(uid, id, name, yaml, visibility, password string) 
 	ctx := context.Background()
 	now := time.Now().UTC()
 
+	// Primary: use nested path users/{uid}/resumes/{id}
+	col := s.userResumesCol(uid)
+
 	if id != "" {
-		ref := s.resumesCol().Doc(id)
+		ref := col.Doc(id)
 		doc, err := ref.Get(ctx)
 		if err == nil {
 			var r SavedResume
@@ -128,7 +140,7 @@ func (s *firestoreStore) Save(uid, id, name, yaml, visibility, password string) 
 				r.Password = ""
 			}
 			r.UpdatedAt = now
-			r.UserID = uid // ensure user_id is set
+			r.UserID = uid // keep field for reference
 			if _, err := ref.Set(ctx, r); err != nil {
 				return SavedResume{}, err
 			}
@@ -151,7 +163,7 @@ func (s *firestoreStore) Save(uid, id, name, yaml, visibility, password string) 
 	if password != "" {
 		r.Password = hashPassword(password)
 	}
-	if _, err := s.resumesCol().Doc(r.ID).Set(ctx, r); err != nil {
+	if _, err := col.Doc(r.ID).Set(ctx, r); err != nil {
 		return SavedResume{}, err
 	}
 	return r, nil
@@ -165,8 +177,8 @@ func hashPassword(pw string) string {
 
 func (s *firestoreStore) Delete(uid, id string) error {
 	ctx := context.Background()
+	ref := s.userResumesCol(uid).Doc(id)
 	// Verify the resume belongs to the user before deleting
-	ref := s.resumesCol().Doc(id)
 	doc, err := ref.Get(ctx)
 	if err != nil {
 		return err
@@ -182,6 +194,34 @@ func (s *firestoreStore) Delete(uid, id string) error {
 	return err
 }
 
+func (s *firestoreStore) GetByIDAndUser(id, uid string) (SavedResume, error) {
+	ctx := context.Background()
+	// Primary: read from nested path
+	doc, err := s.userResumesCol(uid).Doc(id).Get(ctx)
+	if err != nil {
+		// Fallback: try top-level collection (legacy data)
+		doc, err = s.resumesCol().Doc(id).Get(ctx)
+		if err != nil {
+			return SavedResume{}, os.ErrNotExist
+		}
+	}
+	var r SavedResume
+	if err := doc.DataTo(&r); err != nil {
+		return SavedResume{}, err
+	}
+	// Must belong to the user
+	if r.UserID != uid {
+		return SavedResume{}, os.ErrNotExist
+	}
+	// Must be public (or legacy empty visibility)
+	if r.Visibility != "public" && r.Visibility != "" {
+		return SavedResume{}, os.ErrNotExist
+	}
+	return r, nil
+}
+
+// GetByID retrieves a resume by ID from the top-level collection (legacy public links).
+// New public links use GetByIDAndUser with the full provider-uid-resumeID format.
 func (s *firestoreStore) GetByID(id string) (SavedResume, error) {
 	ctx := context.Background()
 	doc, err := s.resumesCol().Doc(id).Get(ctx)
@@ -197,25 +237,4 @@ func (s *firestoreStore) GetByID(id string) (SavedResume, error) {
 		return r, nil
 	}
 	return SavedResume{}, os.ErrNotExist
-}
-
-func (s *firestoreStore) GetByIDAndUser(id, uid string) (SavedResume, error) {
-	ctx := context.Background()
-	doc, err := s.resumesCol().Doc(id).Get(ctx)
-	if err != nil {
-		return SavedResume{}, os.ErrNotExist
-	}
-	var r SavedResume
-	if err := doc.DataTo(&r); err != nil {
-		return SavedResume{}, err
-	}
-	// Must belong to the user
-	if r.UserID != uid {
-		return SavedResume{}, os.ErrNotExist
-	}
-	// Must be public (or legacy empty visibility)
-	if r.Visibility != "public" && r.Visibility != "" {
-		return SavedResume{}, os.ErrNotExist
-	}
-	return r, nil
 }

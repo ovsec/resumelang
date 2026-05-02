@@ -96,15 +96,17 @@
   </div>
   {{end}}
 
-  {{if not .User}}
   <section class="dash-local-drafts" id="local-drafts-section">
     <div class="dash-section-head">
       <h2 class="dash-section-title">Local drafts</h2>
+      {{if .User}}
+      <p class="dash-section-sub">Saved in this browser. Import them to sync to your account.</p>
+      {{else}}
       <p class="dash-section-sub">Saved in this browser. Sign in to sync them to your account.</p>
+      {{end}}
     </div>
     <div class="dash-grid" id="local-resume-list"></div>
   </section>
-  {{end}}
 
   <script src="/web/dashboard.js"></script>
 </main>
