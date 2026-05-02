@@ -109,6 +109,8 @@ func pageDashboard(c *fiber.Ctx) error {
 				if r.ID == resumeID {
 					data["PreloadYAML"] = r.YAML
 					data["ResumeID"] = resumeID
+					data["ResumeName"] = r.Name
+					data["ResumeVisibility"] = r.Visibility
 					break
 				}
 			}

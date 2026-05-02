@@ -1,5 +1,7 @@
 {{if .PreloadYAML}}<textarea id="share-preload-yaml" hidden>{{.PreloadYAML}}</textarea>{{end}}
 {{if .ResumeID}}<input id="share-resume-id" type="hidden" value="{{.ResumeID}}">{{end}}
+{{if .ResumeName}}<input id="share-resume-name" type="hidden" value="{{.ResumeName}}">{{end}}
+{{if .ResumeVisibility}}<input id="share-resume-visibility" type="hidden" value="{{.ResumeVisibility}}">{{end}}
 <div class="share-modal" id="share-modal">
   <div class="share-backdrop" onclick="closeShareModal()"></div>
   <div class="share-panel">
@@ -207,6 +209,36 @@
             btn.disabled = false;
             btn.textContent = 'Copy Link';
             return;
+          }
+
+          // If visibility changed, save the resume with new visibility
+          const resumeId = document.getElementById('share-resume-id')?.value;
+          const resumeName = document.getElementById('share-resume-name')?.value || '';
+          const storedVis = document.getElementById('share-resume-visibility')?.value || '';
+          const yaml = getEditorYAML();
+
+          // Save if visibility changed or password updated
+          if (resumeId && yaml && (vis !== storedVis || (locked && pw))) {
+            try {
+              const body = { yaml, visibility: vis };
+              body.id = resumeId;
+              if (resumeName) body.name = resumeName;
+              if (locked && pw) body.password = pw; else body.password = '';
+              const saveRes = await fetch('/api/resumes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+              });
+              if (!saveRes.ok) throw new Error(await saveRes.text());
+              // Update stored visibility
+              const visInput = document.getElementById('share-resume-visibility');
+              if (visInput) visInput.value = vis;
+            } catch(e) {
+              showResult('Error saving visibility: ' + e.message, true);
+              btn.disabled = false;
+              btn.textContent = 'Copy Link';
+              return;
+            }
           }
 
           // Use the new shareId format: provider-uid-resumeID
