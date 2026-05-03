@@ -982,7 +982,8 @@ projects:
     // Load from saved resume if ?id= present (coming from dashboard)
     const urlId = new URLSearchParams(location.search).get('id');
     const hasSharedYAML = /^#yml=/.test(location.hash);
-    const shouldShowStartImport = !urlId && !hasSharedYAML;
+    const hasLocalYAML = !!localStorage.getItem(STORAGE_KEY);
+    const shouldShowStartImport = !urlId && !hasSharedYAML && !hasLocalYAML;
     let yaml = null;
     if (urlId) {
       try {
