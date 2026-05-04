@@ -150,7 +150,7 @@
       <h2 class="section-title">Awards</h2>
       <ul class="plain">
         {{#each awards}}
-        <li><strong>{{title}}</strong>{{#if awarder}} — {{awarder}}{{/if}}{{#if date}} ({{date}}){{/if}}</li>
+        <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}"><strong>{{title}}</strong>{{#if awarder}} — {{awarder}}{{/if}}{{#if date}} ({{date}}){{/if}}</li>
         {{/each}}
       </ul>
     </section>

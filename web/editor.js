@@ -1153,21 +1153,23 @@ projects:
       } catch { /* fall through */ }
     }
     if (!yaml) yaml = await decodeShareYaml() || localStorage.getItem(STORAGE_KEY);
-    if (!yaml) {
+    // Don't pre-fetch default YAML when the start screen will be shown —
+    // let the "Use sample YAML" button trigger the fetch on demand.
+    if (!yaml && !shouldShowStartImport) {
       try {
         const res = await fetch('/api/default-yaml');
         yaml = res.ok && res.status !== 204 ? await res.text() : DEFAULT_YAML;
       } catch { yaml = DEFAULT_YAML; }
     }
-    cm.setValue(yaml);
-    if (yamlHidden) yamlHidden.value = yaml;
+    cm.setValue(yaml || '');
+    if (yamlHidden) yamlHidden.value = yaml || '';
 
     if (shouldShowStartImport) {
       const overlay = document.getElementById('start-import');
       if (overlay) overlay.hidden = false;
     }
 
-    render();
+    if (yaml) render();
   })();
 
   async function decodeShareYaml() {

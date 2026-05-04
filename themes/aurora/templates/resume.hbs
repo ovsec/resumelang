@@ -180,7 +180,7 @@
         <section class="section" id="awards">
           <div class="section-header"><h2>Awards</h2></div>
           {{#each awards}}
-          <div class="award-card">
+          <div class="award-card" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div>
               <div class="award-title">{{title}}</div>
               {{#if awarder}}<div class="award-meta">{{awarder}}{{#if date}} · {{date}}{{/if}}</div>{{/if}}

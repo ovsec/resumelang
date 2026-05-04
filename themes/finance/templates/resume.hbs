@@ -146,7 +146,7 @@
           <h3>Awards</h3>
           <ul class="aside-list">
           {{#each awards}}
-            <li><span class="aside-title">{{title}}</span>{{#if awarder}}<span class="aside-meta">{{awarder}}{{#if date}}, {{date}}{{/if}}</span>{{/if}}</li>
+            <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}"><span class="aside-title">{{title}}</span>{{#if awarder}}<span class="aside-meta">{{awarder}}{{#if date}}, {{date}}{{/if}}</span>{{/if}}</li>
           {{/each}}
           </ul>
         </section>
