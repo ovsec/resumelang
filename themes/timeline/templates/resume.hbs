@@ -51,7 +51,7 @@
       <h2 class="section-title">Experience</h2>
       <div class="timeline">
         {{#each experience}}
-        <div class="tl-row">
+        <div class="tl-row" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
           <div class="tl-date">
             <span class="tl-end">{{#if end}}{{end}}{{else}}Now{{/if}}</span>
             <span class="tl-start">{{start}}</span>
@@ -83,7 +83,7 @@
       <h2 class="section-title">Education</h2>
       <div class="timeline">
         {{#each education}}
-        <div class="tl-row">
+        <div class="tl-row" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
           <div class="tl-date">
             <span class="tl-end">{{end}}</span>
             <span class="tl-start">{{start}}</span>
@@ -105,7 +105,7 @@
       <h2 class="section-title">Projects</h2>
       <div class="grid-cards">
         {{#each projects}}
-        <div class="project-item">
+        <div class="project-item" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
           <div class="project-name">
             {{#if url}}<a href="{{url}}">{{name}}</a>{{else}}{{name}}{{/if}}
           </div>
@@ -131,7 +131,7 @@
       <h2 class="section-title">Skills</h2>
       <div class="skills-grid">
         {{#each skills}}
-        <div class="skill-group">
+        <div class="skill-group" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
           <div class="skill-category">{{category}}</div>
           <div class="skills-list">{{join skills " · "}}</div>
         </div>
@@ -145,7 +145,7 @@
       <h2 class="section-title">Certifications</h2>
       <ul class="plain">
         {{#each certifications}}
-        <li><strong>{{name}}</strong>{{#if issuer}} — {{issuer}}{{/if}}{{#if date}} ({{date}}){{/if}}</li>
+        <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}"><strong>{{name}}</strong>{{#if issuer}} — {{issuer}}{{/if}}{{#if date}} ({{date}}){{/if}}</li>
         {{/each}}
       </ul>
     </section>
@@ -156,7 +156,7 @@
       <h2 class="section-title">Languages</h2>
       <ul class="plain inline">
         {{#each languages}}
-        <li><strong>{{name}}</strong>{{#if proficiency}} — {{proficiency}}{{/if}}</li>
+        <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}"><strong>{{name}}</strong>{{#if proficiency}} — {{proficiency}}{{/if}}</li>
         {{/each}}
       </ul>
     </section>

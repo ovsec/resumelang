@@ -63,36 +63,35 @@
   <div class="dash-grid" id="resume-list">
     {{range .Resumes}}
     <div class="dash-card" id="card-{{.ID}}">
-      <div class="dash-card-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </div>
-      <div class="dash-card-body">
-        <span class="dash-card-name">{{.Name}}</span>
-        <span class="dash-card-date">Updated {{.UpdatedAt.Format "Jan 2, 2006"}}</span>
+      <div class="dash-card-head">
+        <div class="dash-card-meta">
+          <span class="dash-card-name">{{.Name}}</span>
+          <span class="dash-card-date">{{.UpdatedAt.Format "Jan 2, 2006"}}</span>
+        </div>
         {{if eq .Visibility "public"}}<span class="dash-badge dash-badge-public">Public</span>
         {{else if eq .Visibility "password"}}<span class="dash-badge dash-badge-password">Password</span>
         {{else}}<span class="dash-badge dash-badge-private">Private</span>{{end}}
       </div>
       <div class="dash-card-actions">
-        <a class="dash-card-link" href="/editor?id={{.ID}}">
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1H3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4z"/><path d="M6 8h2M6 10.5h3"/></svg>
+        <a class="dash-card-edit" href="/editor?id={{.ID}}">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9.5 1.5 12 4 5 11H2v-3z"/><path d="M7.5 3.5l3 3"/></svg>
           Edit
         </a>
-        <button class="dash-card-link dash-card-link-share"
-                hx-get="/partials/share-modal?resume_id={{.ID}}"
-                hx-target="#modal-container"
-                hx-swap="innerHTML">
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"/><circle cx="4" cy="6" r="1"/><circle cx="10" cy="6" r="1"/></svg>
-          Share
-        </button>
-        <button class="dash-card-link dash-card-link-danger"
-                hx-delete="/api/resumes/{{.ID}}"
-                hx-target="#card-{{.ID}}"
-                hx-swap="outerHTML swap:0.2s"
-                hx-confirm='Delete "{{.Name}}"?'>
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4h8l-.75 8.5a1 1 0 0 1-1 .5h-4.5a1 1 0 0 1-1-.5L3 4z"/><path d="M5 2h4a1 1 0 0 1 1 1H4a1 1 0 0 1 1-1z"/></svg>
-          Delete
-        </button>
+        <div class="dash-card-sec-actions">
+          <button class="dash-card-icon-btn" title="Share"
+                  hx-get="/partials/share-modal?resume_id={{.ID}}"
+                  hx-target="#modal-container"
+                  hx-swap="innerHTML">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="3" r="1.5"/><circle cx="3" cy="7" r="1.5"/><circle cx="11" cy="11" r="1.5"/><path d="M4.5 6.2 9.5 3.8M4.5 7.8l5 2.4"/></svg>
+          </button>
+          <button class="dash-card-icon-btn dash-card-icon-btn-danger" title="Delete"
+                  hx-delete="/api/resumes/{{.ID}}"
+                  hx-target="#card-{{.ID}}"
+                  hx-swap="outerHTML swap:0.2s"
+                  hx-confirm='Delete "{{.Name}}"?'>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h10M5 4V2h4v2M11 4l-.75 8.5a1 1 0 0 1-1 .5h-4.5a1 1 0 0 1-1-.5L3 4"/></svg>
+          </button>
+        </div>
       </div>
     </div>
     {{end}}

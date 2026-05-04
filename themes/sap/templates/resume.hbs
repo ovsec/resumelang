@@ -59,7 +59,7 @@
         <section class="block">
           <h2>SAP Project Experience</h2>
           {{#each experience}}
-          <article class="job">
+          <article class="job" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div class="job-head">
               <div>
                 <h3>{{role}}</h3>
@@ -85,7 +85,7 @@
         <section class="block">
           <h2>Implementation Projects</h2>
           {{#each projects}}
-          <article class="proj">
+          <article class="proj" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <h3>{{#if url}}<a href="{{url}}" target="_blank">{{name}}</a>{{else}}{{name}}{{/if}}</h3>
             {{#if description}}<p>{{description}}</p>{{/if}}
             {{#if highlights}}
@@ -103,7 +103,7 @@
         <section class="block">
           <h2>Education</h2>
           {{#each education}}
-          <article class="edu">
+          <article class="edu" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <h3>{{degree}}{{#if field}} in {{field}}{{/if}}</h3>
             <p class="org">{{institution}} · {{start}}–{{end}}{{#if gpa}} · GPA {{gpa}}{{/if}}</p>
           </article>
@@ -118,7 +118,7 @@
           <h2>SAP Certifications</h2>
           <ul class="certs">
             {{#each certifications}}
-            <li>
+            <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
               <span class="cert-name">{{name}}</span>
               {{#if issuer}}<span class="cert-meta">{{issuer}}{{#if date}} · {{date}}{{/if}}</span>{{else if date}}<span class="cert-meta">{{date}}</span>{{/if}}
               {{#if id}}<span class="cert-id">ID: {{id}}</span>{{/if}}
@@ -132,7 +132,7 @@
         <section class="block side">
           <h2>Skills &amp; Modules</h2>
           {{#each skills}}
-          <div class="sk">
+          <div class="sk" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div class="sk-cat">{{category}}</div>
             <div class="sk-pills">
               {{#each skills}}<span class="pill">{{this}}</span>{{/each}}
@@ -147,7 +147,7 @@
           <h2>Languages</h2>
           <ul class="langs">
             {{#each languages}}
-            <li><span class="lang-name">{{name}}</span>{{#if proficiency}}<span class="lang-prof">{{proficiency}}</span>{{/if}}</li>
+            <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}"><span class="lang-name">{{name}}</span>{{#if proficiency}}<span class="lang-prof">{{proficiency}}</span>{{/if}}</li>
             {{/each}}
           </ul>
         </section>

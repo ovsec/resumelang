@@ -79,11 +79,22 @@
       <script>
     (function() {
       let currentFmt = 'link';
-      let currentVis = 'private';
+      // Initialize from stored visibility (set by server via hidden input)
+      let currentVis = document.getElementById('share-resume-visibility')?.value || 'private';
       // Get share ID from template data (new format: provider-uid-resumeID)
       const shareId = {{if .ShareID}}"{{.ShareID}}"{{else}}""{{end}};
       // Legacy uid (for backward compatibility)
       const uid = {{if .UID}}"{{.UID}}"{{else}}""{{end}};
+      // Pre-select the stored visibility button
+      (function() {
+        document.querySelectorAll('.share-vis').forEach(b => b.classList.remove('active'));
+        const stored = document.querySelector('.share-vis[data-vis="' + currentVis + '"]');
+        if (stored) stored.classList.add('active');
+        if (currentVis === 'password') {
+          document.getElementById('share-lock-section').hidden = false;
+          document.getElementById('share-pw-row').hidden = false;
+        }
+      })();
   
       function getEditorYAML() {
         const preload = document.getElementById('share-preload-yaml');
@@ -145,12 +156,7 @@
         document.getElementById('share-pw-row').hidden = !on;
         if (on) document.getElementById('share-pw').focus();
       };
- 
-  window.togglePwRow = function(on) {
-    document.getElementById('share-pw-row').hidden = !on;
-    if (on) document.getElementById('share-pw').focus();
-  };
- 
+
   window.closeShareModal = function() {
     const el = document.getElementById('share-modal');
     if (el) el.remove();
@@ -216,27 +222,19 @@
           const resumeName  = document.getElementById('share-resume-name')?.value || '';
           const storedVis   = document.getElementById('share-resume-visibility')?.value || '';
 
-          if (resumeId && vis !== storedVis) {
+          if (resumeId && (vis !== storedVis || (locked && pw))) {
             try {
-              const body = { yaml, visibility: vis };
-              body.id = resumeId;
-              if (resumeName) body.name = resumeName;
-              if (locked && pw) body.password = pw; else body.password = '';
-              const saveRes = await fetch('/api/resumes', {
-                method: 'POST',
+              const patchRes = await fetch('/api/resumes/' + resumeId, {
+                method: 'PATCH',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body)
+                body: JSON.stringify({ visibility: vis, password: locked ? pw : '' })
               });
-              if (!saveRes.ok) throw new Error(await saveRes.text());
+              if (!patchRes.ok) throw new Error(await patchRes.text());
               // Update stored visibility in the UI
               const visInput = document.getElementById('share-resume-visibility');
               if (visInput) visInput.value = vis;
-              // Update dashboard badge if present
-              const badge = document.querySelector('#card-' + resumeId + ' .dash-badge');
-              if (badge) {
-                badge.className = 'dash-badge dash-badge-' + vis;
-                badge.textContent = vis.charAt(0).toUpperCase() + vis.slice(1);
-              }
+              // Sync the vis-ctrl badge in the editor nav
+              document.dispatchEvent(new CustomEvent('rl-vis-changed', { detail: { vis } }));
             } catch(e) {
               showResult('Error saving visibility: ' + e.message, true);
               btn.disabled = false;
@@ -246,20 +244,22 @@
           }
 
           // Generate the share URL
-          const shareId = {{if .ShareID}}"{{.ShareID}}"{{else}}""{{end}};
           let url;
 
-          if (vis === 'public' && shareId) {
-            // Public link: /r#id=provider-uid-resumeID
-            url = location.origin + '/r#id=' + shareId;
-          } else if (vis === 'private') {
+          if (vis === 'private') {
             showResult('Resume is private. Change to Public to get a shareable link.', true);
             btn.disabled = false;
             btn.textContent = 'Copy Link';
             return;
+          } else if (shareId) {
+            // Server-saved resume: always use /r#id= (server handles password check)
+            url = location.origin + '/r#id=' + shareId;
+          } else if (locked) {
+            // Anonymous + password: client-side encrypt
+            url = location.origin + '/r#yml=' + (await encryptYaml(yaml, pw));
           } else {
-            const encoded = locked ? await encryptYaml(yaml, pw) : await gzipEncode(yaml);
-            url = location.origin + '/r#yml=' + encoded;
+            // Anonymous + public: gzip
+            url = location.origin + '/r#yml=' + (await gzipEncode(yaml));
           }
 
           try {

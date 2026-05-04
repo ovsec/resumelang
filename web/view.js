@@ -27,11 +27,54 @@
 
   // ── Decoding ───────────────────────────────────────────────────
 
+  async function fetchPublicWithPassword(shareId) {
+    const overlay = $('pw-overlay');
+    const input   = $('pw-input');
+    const submit  = $('pw-submit');
+    const errMsg  = $('pw-error');
+    overlay.hidden = false;
+    input.focus();
+    return new Promise(resolve => {
+      async function attempt() {
+        const pw = input.value.trim();
+        if (!pw) { input.focus(); return; }
+        submit.disabled = true;
+        submit.textContent = '…';
+        errMsg.hidden = true;
+        try {
+          const res = await fetch('/api/public/' + shareId + '?pw=' + encodeURIComponent(pw));
+          if (res.status === 403) {
+            errMsg.hidden = false;
+            input.value = '';
+            input.focus();
+            submit.disabled = false;
+            submit.textContent = 'Unlock';
+            return;
+          }
+          if (!res.ok) throw new Error('server error');
+          const data = await res.json();
+          overlay.hidden = true;
+          resolve(data.yaml);
+        } catch {
+          errMsg.hidden = false;
+          input.value = '';
+          input.focus();
+          submit.disabled = false;
+          submit.textContent = 'Unlock';
+        }
+      }
+      submit.addEventListener('click', attempt);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+    });
+  }
+
   async function decodeShareYaml() {
     // Short link for server-saved resumes
     const idMatch = location.hash.match(/^#id=(.+)$/);
     if (idMatch) {
       const res = await fetch('/api/public/' + idMatch[1]);
+      if (res.status === 401) return fetchPublicWithPassword(idMatch[1]);
+      if (res.status === 403) throw new Error('This resume is private.');
       if (!res.ok) throw new Error('resume not found');
       const data = await res.json();
       return data.yaml;

@@ -50,7 +50,7 @@
         <section>
           <h2>Professional Experience</h2>
           {{#each experience}}
-          <article class="job">
+          <article class="job" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div class="job-head">
               <div>
                 <span class="job-role">{{role}}</span>
@@ -73,7 +73,7 @@
         <section>
           <h2>Selected Engagements</h2>
           {{#each projects}}
-          <article class="job">
+          <article class="job" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div class="job-head">
               <span class="job-role">{{name}}</span>
               {{#if start}}<span class="job-dates">{{start}}{{#if end}} – {{end}}{{/if}}</span>{{/if}}
@@ -89,7 +89,7 @@
         <section>
           <h2>Education</h2>
           {{#each education}}
-          <article class="edu">
+          <article class="edu" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div class="job-head">
               <span class="job-role">{{institution}}</span>
               <span class="job-dates">{{start}}{{#if end}} – {{end}}{{/if}}</span>
@@ -107,7 +107,7 @@
         <section>
           <h3>Core Competencies</h3>
           {{#each skills}}
-          <div class="skill-grp">
+          <div class="skill-grp" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div class="skill-cat">{{category}}</div>
             <div class="skill-list">{{join skills " · "}}</div>
           </div>
@@ -120,7 +120,7 @@
           <h3>Certifications</h3>
           <ul class="aside-list">
           {{#each certifications}}
-            <li>
+            <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
               <span class="aside-title">{{name}}</span>
               {{#if issuer}}<span class="aside-meta">{{issuer}}{{#if date}}, {{date}}{{/if}}</span>{{/if}}
               {{#if id}}<span class="mono">{{id}}</span>{{/if}}
@@ -135,7 +135,7 @@
           <h3>Languages</h3>
           <ul class="aside-list">
           {{#each languages}}
-            <li><span class="aside-title">{{name}}</span>{{#if proficiency}}<span class="aside-meta">{{proficiency}}</span>{{/if}}</li>
+            <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}"><span class="aside-title">{{name}}</span>{{#if proficiency}}<span class="aside-meta">{{proficiency}}</span>{{/if}}</li>
           {{/each}}
           </ul>
         </section>

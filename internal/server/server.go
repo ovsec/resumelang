@@ -83,6 +83,7 @@ func Start(args []string) {
 	app.Get("/api/resumes", requireAuth, apiListResumes)
 	app.Get("/api/resumes/:id", requireAuth, apiGetResume)
 	app.Post("/api/resumes", requireAuth, apiSaveResume)
+	app.Patch("/api/resumes/:id", requireAuth, apiPatchResume)
 	app.Delete("/api/resumes/:id", requireAuth, apiDeleteResume)
 
 	// Auth — logout must be before :provider wildcard

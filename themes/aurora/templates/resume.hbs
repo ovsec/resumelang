@@ -63,7 +63,7 @@
         <div class="sidebar-section">
           <div class="sidebar-header"><h3>Skills</h3></div>
           {{#each skills}}
-          <div class="skill-group">
+          <div class="skill-group" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div class="skill-category">{{category}}</div>
             <div class="skill-pills">
               {{#each skills}}<span class="skill-pill">{{this}}</span>{{/each}}
@@ -77,7 +77,7 @@
         <div class="sidebar-section">
           <div class="sidebar-header"><h3>Languages</h3></div>
           {{#each languages}}
-          <div class="lang-item">
+          <div class="lang-item" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <span class="lang-name">{{name}}</span>
             {{#if proficiency}}<span class="lang-level">{{proficiency}}</span>{{/if}}
           </div>
@@ -90,7 +90,7 @@
           <div class="sidebar-header"><h3>Certifications</h3></div>
           <div class="cert-mini">
             {{#each certifications}}
-            <div class="cert-chip">{{name}}</div>
+            <div class="cert-chip" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">{{name}}</div>
             {{/each}}
           </div>
         </div>
@@ -111,7 +111,7 @@
           <div class="section-header"><h2>Experience</h2></div>
           <div class="timeline">
             {{#each experience}}
-            <article class="timeline-item">
+            <article class="timeline-item" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
               <div class="job-header">
                 <div class="job-main">
                   <span class="role-company">{{role}}</span>
@@ -142,7 +142,7 @@
           <div class="section-header"><h2>Projects</h2></div>
           <div class="projects-grid">
             {{#each projects}}
-            <article class="project-card">
+            <article class="project-card" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
               {{#if url}}<a href="{{url}}" target="_blank" class="project-name">{{name}}</a>{{else}}<span class="project-name">{{name}}</span>{{/if}}
               {{#if description}}<p class="project-description">{{description}}</p>{{/if}}
               {{#if highlights}}
@@ -165,7 +165,7 @@
         <section class="section" id="education">
           <div class="section-header"><h2>Education</h2></div>
           {{#each education}}
-          <div class="edu-card">
+          <div class="edu-card" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
             <div class="edu-header">
               <span class="edu-institution">{{institution}}</span>
               <span class="edu-dates">{{start}}{{#if end}} — {{end}}{{/if}}</span>

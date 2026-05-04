@@ -14,7 +14,8 @@
       "Bash(bash sync.sh)",
       "Bash(npx --yes @vscode/vsce package --out resumelang-0.2.0.vsix)",
       "Bash(git rm *)",
-      "Bash(npx playwright *)"
+      "Bash(npx playwright *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\ABSA0014\\\\Github\\\\resumelang\" -Recurse -Name)"
     ]
   }
 }

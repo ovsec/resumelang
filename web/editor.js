@@ -61,6 +61,148 @@ projects:
     tags: [Go, P2P, CLI]
 `;
 
+  // Handlebars helpers (mirrors view.js)
+  Handlebars.registerHelper('join',    (a, s) => Array.isArray(a) ? a.join(s) : '');
+  Handlebars.registerHelper('eq',      (a, b) => String(a) === String(b));
+  Handlebars.registerHelper('default', (v, fb) => (v === undefined || v === null || v === '') ? fb : v);
+  Handlebars.registerHelper('upper',   s => String(s || '').toUpperCase());
+  Handlebars.registerHelper('lower',   s => String(s || '').toLowerCase());
+
+  // ── Preview ↔ Editor bridge ──────────────────────────────────────────────────
+
+  const RL_SECTIONS = ['experience','education','skills','projects','certifications',
+                       'languages','awards','publications','volunteer','custom'];
+
+  // Inject _rl_id into every array item before passing to Handlebars
+  function injectRlIds(resume) {
+    const out = Object.assign({}, resume);
+    for (const s of RL_SECTIONS) {
+      if (Array.isArray(out[s])) {
+        out[s] = out[s].map((item, i) => Object.assign({}, item, { _rl_id: s + '-' + i }));
+      }
+    }
+    return out;
+  }
+
+  // Script injected into every iframe — forwards clicks up and handles highlights
+  const BRIDGE_SCRIPT = `<script>(function(){
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('[data-rl-id]');
+    if(!el)return;
+    parent.postMessage({type:'rl-click',id:el.dataset.rlId},'*');
+  });
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='rl-highlight')return;
+    var prev=document.querySelector('.rl-active');
+    if(prev)prev.classList.remove('rl-active');
+    if(!e.data.id)return;
+    var el=document.getElementById(e.data.id);
+    if(el){el.classList.add('rl-active');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  });
+})()\x3c/script>
+<style>.rl-active{outline:2px solid #6366f1!important;outline-offset:3px;border-radius:3px;}</style>`;
+
+  // Given a section name + 0-based index, find the line in YAML and move cursor there
+  function jumpToYamlItem(section, idx) {
+    const lines = cm.getValue().split('\n');
+    let inSection = false;
+    let itemCount = -1;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const topKey = line.match(/^([a-zA-Z_]+)\s*:/)?.[1];
+      if (topKey) {
+        inSection = topKey === section;
+        if (inSection) itemCount = -1;
+        else continue;
+      }
+      if (inSection && /^\s{0,6}-\s/.test(line) && !/^\s{8,}/.test(line)) {
+        itemCount++;
+        if (itemCount === idx) {
+          cm.setCursor({ line: i, ch: 0 });
+          cm.scrollIntoView({ line: i, ch: 0 }, 80);
+          cm.focus();
+          return;
+        }
+      }
+    }
+  }
+
+  // From current cursor position, find which section+index we're inside
+  function getYamlItemAtCursor() {
+    const cursor = cm.getCursor();
+    const lines  = cm.getValue().split('\n');
+    const SSET   = new Set(RL_SECTIONS);
+    let curSection = null;
+    let curIndex   = -1;
+    for (let i = 0; i <= cursor.line; i++) {
+      const line = lines[i];
+      const topKey = line.match(/^([a-zA-Z_]+)\s*:/)?.[1];
+      if (topKey) {
+        if (SSET.has(topKey)) { curSection = topKey; curIndex = -1; }
+        else curSection = null;
+        continue;
+      }
+      if (curSection && /^\s{0,6}-\s/.test(line) && !/^\s{8,}/.test(line)) {
+        curIndex++;
+      }
+    }
+    if (curSection && curIndex >= 0) return { section: curSection, index: curIndex };
+    return null;
+  }
+
+  // Listen for click events forwarded from the iframe
+  window.addEventListener('message', function(e) {
+    if (!e.data || e.data.type !== 'rl-click') return;
+    const parts = e.data.id.split('-');
+    const idx   = parseInt(parts.pop(), 10);
+    const section = parts.join('-');
+    jumpToYamlItem(section, idx);
+  });
+
+  // ── Client-side theme loading ────────────────────────────────────────────────
+
+  function mergeTokens(base, override) {
+    const out = Object.assign({}, base || {});
+    if (!override || typeof override !== 'object') return out;
+    for (const k of Object.keys(override)) {
+      const bv = out[k], ov = override[k];
+      const both = bv && typeof bv === 'object' && !Array.isArray(bv)
+                && ov && typeof ov === 'object' && !Array.isArray(ov);
+      out[k] = both ? mergeTokens(bv, ov) : ov;
+    }
+    return out;
+  }
+
+  function flattenTokens(tokens, prefix, out) {
+    out = out || {};
+    if (!tokens || typeof tokens !== 'object') return out;
+    for (const k of Object.keys(tokens)) {
+      const key = prefix ? prefix + '_' + k : k;
+      const v   = tokens[k];
+      if (v && typeof v === 'object' && !Array.isArray(v)) flattenTokens(v, key, out);
+      else out[key] = v;
+    }
+    return out;
+  }
+
+  const themeCache = new Map();
+  async function loadTheme(name) {
+    if (themeCache.has(name)) return themeCache.get(name);
+    const [tplRes, cssRes, ymlRes] = await Promise.all([
+      fetch(`/themes/${name}/templates/resume.hbs`),
+      fetch(`/themes/${name}/assets/style.css`),
+      fetch(`/themes/${name}/theme.yml`),
+    ]);
+    if (!tplRes.ok) throw new Error(`template missing for theme "${name}"`);
+    const tpl     = await tplRes.text();
+    const css     = cssRes.ok ? await cssRes.text() : '';
+    const ymlText = ymlRes.ok  ? await ymlRes.text() : '';
+    const themeYml = ymlText ? jsyaml.load(ymlText) || {} : {};
+    const data = { compiled: Handlebars.compile(tpl), css, themeYml };
+    themeCache.set(name, data);
+    return data;
+  }
+
   const STORAGE_KEY      = 'resumelang.yaml';
   const THEME_KEY        = 'resumelang.theme';
   const RENDER_MODE_KEY  = 'resumelang.renderMode';
@@ -322,12 +464,17 @@ projects:
     indentUnit:   2,
     tabSize:      2,
     lineWrapping: false,
+    foldGutter:   true,
+    gutters:      ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+    foldOptions:  { rangeFinder: CodeMirror.fold.indent },
     extraKeys: {
       Tab:           c => c.execCommand('insertSoftTab'),
       'Ctrl-Space':  c => showSchemaHint(c),
       'Ctrl-Enter':  () => { clearTimeout(renderTimer); render(); },
       'Ctrl-/':      c => toggleComment(c),
       'Cmd-/':       c => toggleComment(c),
+      'Ctrl-Q':      c => c.foldCode(c.getCursor()),
+      'Cmd-Q':       c => c.foldCode(c.getCursor()),
     },
   });
 
@@ -357,39 +504,31 @@ projects:
     const theme = currentTheme || lastGoodTheme;
 
     try {
-      const res = await fetch('/api/render', {
-        method:  'POST',
-        headers: {'Content-Type': 'application/json'},
-        body:    JSON.stringify({yaml, theme}),
-      });
-      if (!res.ok) {
-        const msg = await res.text();
-        status(msg, 'err');
-        if (theme !== lastGoodTheme && msg.includes('render')) {
-          reRenderWithTheme(yaml, lastGoodTheme);
-        }
-        return;
-      }
-      const html = await res.text();
-      document.getElementById('preview').srcdoc = html;
+      const { compiled, css, themeYml } = await loadTheme(theme);
+      const enriched = injectRlIds(resume);
+      const merged   = mergeTokens(themeYml.tokens || {}, (enriched.meta && enriched.meta.tokens) || {});
+      const tokens   = flattenTokens(merged);
+      const html     = compiled(Object.assign({}, enriched, { tokens, themeCSS: css }));
+      document.getElementById('preview').srcdoc = html.replace('</body>', BRIDGE_SCRIPT + '</body>');
       lastGoodTheme = theme;
       setTheme(theme, false);
-      status('rendered ' + new Date().toLocaleTimeString(), 'ok');
     } catch (e) {
       status('render: ' + e.message, 'err');
+      if (theme !== lastGoodTheme) {
+        reRenderWithTheme(yaml, lastGoodTheme);
+      }
     }
   }
 
   async function reRenderWithTheme(yaml, theme) {
     try {
-      const res = await fetch('/api/render', {
-        method:  'POST',
-        headers: {'Content-Type': 'application/json'},
-        body:    JSON.stringify({yaml, theme}),
-      });
-      if (!res.ok) return;
-      const html = await res.text();
-      document.getElementById('preview').srcdoc = html;
+      let resume = {};
+      try { resume = jsyaml.load(yaml) || {}; } catch { /* ignore */ }
+      const { compiled, css, themeYml } = await loadTheme(theme);
+      const enriched = injectRlIds(resume);
+      const tokens   = flattenTokens(mergeTokens(themeYml.tokens || {}, {}));
+      const html     = compiled(Object.assign({}, enriched, { tokens, themeCSS: css }));
+      document.getElementById('preview').srcdoc = html.replace('</body>', BRIDGE_SCRIPT + '</body>');
       setTheme(theme, false);
       status(`theme not found — using "${theme}"`, 'err');
     } catch { /* ignore */ }
@@ -518,6 +657,18 @@ projects:
 
   cm.on('change', scheduleRender);
 
+  // Cursor in editor → highlight corresponding preview element
+  let hlTimer;
+  cm.on('cursorActivity', function() {
+    clearTimeout(hlTimer);
+    hlTimer = setTimeout(function() {
+      const pos = getYamlItemAtCursor();
+      if (!pos) return;
+      const iframe = document.getElementById('preview');
+      iframe.contentWindow?.postMessage({ type: 'rl-highlight', id: pos.section + '-' + pos.index }, '*');
+    }, 120);
+  });
+
   // Update editor info (lines/chars)
   cm.on('change', () => {
     const info = document.getElementById('editor-info');
@@ -642,6 +793,7 @@ projects:
     } catch (e) { status('download: ' + e.message, 'err'); }
   }
 
+  document.getElementById('btn-print')?.addEventListener('click', printPDF);
   document.getElementById('btn-download')?.addEventListener('click', () => doDownload('pdf'));
 
   dlToggle?.addEventListener('click', e => {
@@ -656,7 +808,9 @@ projects:
     if (!item) return;
     dlMenu.hidden = true;
     dlToggle.setAttribute('aria-expanded', 'false');
-    doDownload(item.dataset.fmt);
+    const fmt = item.dataset.fmt;
+    if (fmt === 'print') { printPDF(); return; }
+    doDownload(fmt);
   });
 
   document.addEventListener('click', e => {
@@ -1246,5 +1400,93 @@ projects:
     }
 
     analyzeBtn.addEventListener('click', runAnalysis);
+  })();
+
+  // ── Visibility control (nav badge) ────────────────────────────────
+  (function() {
+    const ctrl    = document.getElementById('vis-ctrl');
+    const btn     = document.getElementById('vis-btn');
+    const popover = document.getElementById('vis-popover');
+    const label   = document.getElementById('vis-label');
+    const pwWrap  = document.getElementById('vis-pw-wrap');
+    const pwInput = document.getElementById('vis-pw');
+    const saveBtn = document.getElementById('vis-save-btn');
+    if (!ctrl || !btn || !popover) return;
+
+    const LABELS = { private: 'Private', public: 'Public', password: 'Password' };
+
+    function closePopover() {
+      popover.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = !popover.hidden;
+      popover.hidden = open;
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+
+    document.addEventListener('click', closePopover);
+    popover.addEventListener('click', e => e.stopPropagation());
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !popover.hidden) closePopover();
+    });
+
+    let pendingVis = btn.className.replace(/.*vis-btn-/, '').trim() || 'private';
+
+    popover.querySelectorAll('.vis-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        popover.querySelectorAll('.vis-opt').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        pendingVis = opt.dataset.vis;
+        if (pwWrap) pwWrap.hidden = (pendingVis !== 'password');
+        if (pendingVis === 'password' && pwInput) pwInput.focus();
+      });
+    });
+
+    async function saveVisibility() {
+      const resumeId = ctrl.dataset.resumeId;
+      if (!resumeId) return;
+      const pw = (pendingVis === 'password' && pwInput) ? pwInput.value.trim() : '';
+      if (pendingVis === 'password' && !pw) { if (pwInput) pwInput.focus(); return; }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = '…';
+      try {
+        const res = await fetch('/api/resumes/' + resumeId, {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ visibility: pendingVis, password: pw })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        // Update badge
+        btn.className = 'vis-btn vis-btn-' + pendingVis;
+        label.textContent = LABELS[pendingVis] || pendingVis;
+        if (pwInput) pwInput.value = '';
+        closePopover();
+      } catch (e) {
+        saveBtn.textContent = 'Error';
+        setTimeout(() => { saveBtn.textContent = 'Save'; saveBtn.disabled = false; }, 1500);
+        return;
+      }
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+
+    saveBtn.addEventListener('click', saveVisibility);
+
+    // Sync when share modal changes visibility
+    document.addEventListener('rl-vis-changed', e => {
+      const vis = e.detail && e.detail.vis;
+      if (!vis) return;
+      pendingVis = vis;
+      btn.className = 'vis-btn vis-btn-' + vis;
+      label.textContent = LABELS[vis] || vis;
+      popover.querySelectorAll('.vis-opt').forEach(o => {
+        o.classList.toggle('active', o.dataset.vis === vis);
+      });
+    });
   })();
 })();

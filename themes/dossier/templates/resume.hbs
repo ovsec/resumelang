@@ -50,7 +50,7 @@
       <section class="side-section">
         <h2 class="side-title">Skills</h2>
         {{#each skills}}
-        <div class="skill-group">
+        <div class="skill-group" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
           <div class="skill-category">{{category}}</div>
           <div class="skills-list">{{join skills " · "}}</div>
         </div>
@@ -62,7 +62,7 @@
       <section class="side-section">
         <h2 class="side-title">Education</h2>
         {{#each education}}
-        <div class="edu-item">
+        <div class="edu-item" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
           <div class="edu-institution">{{institution}}</div>
           <p class="edu-degree">{{degree}}{{#if field}} in {{field}}{{/if}}</p>
           <span class="edu-dates">{{start}} — {{end}}</span>
@@ -77,7 +77,7 @@
         <h2 class="side-title">Languages</h2>
         <ul class="plain">
           {{#each languages}}
-          <li><strong>{{name}}</strong>{{#if proficiency}} — {{proficiency}}{{/if}}</li>
+          <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}"><strong>{{name}}</strong>{{#if proficiency}} — {{proficiency}}{{/if}}</li>
           {{/each}}
         </ul>
       </section>
@@ -88,7 +88,7 @@
         <h2 class="side-title">Certifications</h2>
         <ul class="plain">
           {{#each certifications}}
-          <li><strong>{{name}}</strong>{{#if issuer}}<br>{{issuer}}{{/if}}{{#if date}} ({{date}}){{/if}}</li>
+          <li id="{{_rl_id}}" data-rl-id="{{_rl_id}}"><strong>{{name}}</strong>{{#if issuer}}<br>{{issuer}}{{/if}}{{#if date}} ({{date}}){{/if}}</li>
           {{/each}}
         </ul>
       </section>
@@ -107,7 +107,7 @@
       <section class="main-section">
         <h2 class="main-title">Experience</h2>
         {{#each experience}}
-        <div class="job">
+        <div class="job" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
           <div class="job-header">
             <div>
               <span class="job-role">{{role}}</span>
@@ -136,7 +136,7 @@
       <section class="main-section">
         <h2 class="main-title">Projects</h2>
         {{#each projects}}
-        <div class="project-item">
+        <div class="project-item" id="{{_rl_id}}" data-rl-id="{{_rl_id}}">
           <div class="project-name">
             {{#if url}}<a href="{{url}}">{{name}}</a>{{else}}{{name}}{{/if}}
           </div>

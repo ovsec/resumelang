@@ -332,6 +332,10 @@ func apiPublicResume(c *fiber.Ctx) error {
 	if err != nil || r.ID == "" {
 		return c.Status(404).JSON(fiber.Map{"error": "not found"})
 	}
+	// Block private resumes — only public and password-protected can be fetched.
+	if r.Visibility == "private" {
+		return c.Status(403).JSON(fiber.Map{"error": "private"})
+	}
 	// For password-protected shares, the client sends the password in the query.
 	pw := c.Query("pw", "")
 	if r.Password != "" {
@@ -399,6 +403,42 @@ func apiDeleteResume(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.SendStatus(204)
+}
+
+func apiPatchResume(c *fiber.Ctx) error {
+	var body struct {
+		Visibility string `json:"visibility"`
+		Password   string `json:"password"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
+	}
+	user, _ := sessionUser(c)
+	uid := user.Provider + "-" + user.ID
+	id := c.Params("id")
+	list, err := globalStore.List(uid)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	var cur SavedResume
+	for _, r := range list {
+		if r.ID == id {
+			cur = r
+			break
+		}
+	}
+	if cur.ID == "" {
+		return c.Status(404).JSON(fiber.Map{"error": "not found"})
+	}
+	vis := body.Visibility
+	if vis == "" {
+		vis = cur.Visibility
+	}
+	r, err := globalStore.Save(uid, cur.ID, cur.Name, cur.YAML, vis, body.Password)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(r)
 }
 
 // ── Helpers ────────────────────────────────────────────────────────
